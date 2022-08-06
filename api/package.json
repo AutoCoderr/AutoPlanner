@@ -1,0 +1,30 @@
+{
+  "name": "auto_planner_api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "serv.js",
+  "scripts": {
+    "start": "tsc && node --trace-deprecation --trace-warnings serv.js",
+    "watch": "tsc -w",
+    "build": "tsc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AutoCoderr/AutoPlanner.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/AutoCoderr/AutoPlanner/issues"
+  },
+  "homepage": "https://github.com/AutoCoderr/AutoPlanner#readme",
+  "dependencies": {
+    "express": "^4.18.1",
+    "sequelize": "^6.21.3",
+    "pg": "^8.7.3"
+  },
+  "devDependencies": {
+    "@types/node": "^16.11.41",
+    "typescript": "^4.7.4"
+  }
+}
