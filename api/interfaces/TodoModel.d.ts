@@ -7,9 +7,7 @@ import {
 import Node from "../models/Node";
 import Todo from "../models/Todo";
 import User from "../models/User";
-import {INode} from "./Node";
-import {ITodo} from "./Todo";
-import {IUser} from "./User";
+import TodoModel from "../models/TodoModel";
 
 export interface ITodoModel {
     id: number;
@@ -19,19 +17,19 @@ export interface ITodoModel {
     firstnode_id?: number;
     user_id: number;
 
-    setFirstNode: BelongsToSetAssociationMixin<INode|Node, any>;
-    setTodos: HasManySetAssociationsMixin<ITodo|Todo, any>;
-    addTodo: HasManyAddAssociationMixin<ITodo|Todo, any>;
-    setUser: BelongsToSetAssociationMixin<IUser|User, any>;
+    setFirstNode: BelongsToSetAssociationMixin<Node, any>;
+    setTodos: HasManySetAssociationsMixin<Todo, any>;
+    addTodo: HasManyAddAssociationMixin<Todo, any>;
+    setUser: BelongsToSetAssociationMixin<User, any>;
 }
 export type ITodoModelCreation = Optional<ITodoModel, 'id' | 'description' | 'published' | 'firstnode_id' | 'setFirstNode' | 'setTodos' | 'addTodo' | 'setUser'>;
 
-export interface ITodoModelWithFirstNode extends ITodoModel {
-    firstNode: null|INode
+export interface TodoModelWithFirstNode extends TodoModel {
+    firstNode: null|Node
 }
-export interface ITodoModelWithTodos extends ITodoModel {
-    todos: ITodo[]
+export interface TodoModelWithTodos extends TodoModel {
+    todos: Todo[]
 }
-export interface ITodoModelWithUser extends ITodoModel {
-    user: IUser
+export interface TodoModelWithUser extends TodoModel {
+    user: User
 }

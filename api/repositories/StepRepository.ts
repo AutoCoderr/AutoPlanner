@@ -2,10 +2,10 @@ import Step from "../models/Step";
 import Todo from "../models/Todo";
 import Folder from "../models/Folder";
 import compileDataValues from "../libs/compileDatavalues";
-import {IStepWithAssociatedFolders, IStepWithAssociatedTodos} from "../interfaces/Step";
+import {StepWithAssociatedFolders, StepWithAssociatedTodos} from "../interfaces/Step";
 
-export function findOneStepByIdWithAssociatedTodosAndFolders(id: number): Promise<null|IStepWithAssociatedTodos&IStepWithAssociatedFolders> {
-    return <Promise<null|IStepWithAssociatedTodos&IStepWithAssociatedFolders>>Step.findOne({
+export function findOneStepByIdWithAssociatedTodosAndFolders(id: number): Promise<null|StepWithAssociatedTodos&StepWithAssociatedFolders> {
+    return <Promise<null|StepWithAssociatedTodos&StepWithAssociatedFolders>>Step.findOne({
         where: { id },
         include: [
             {

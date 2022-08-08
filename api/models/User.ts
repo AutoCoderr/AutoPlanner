@@ -4,9 +4,6 @@ import TodoModel from "./TodoModel";
 import Todo from "./Todo";
 import Folder from "./Folder";
 import {IUser, IUserCreation} from "../interfaces/User";
-import { ITodoModel } from "../interfaces/TodoModel";
-import {ITodo} from "../interfaces/Todo";
-import {IFolder} from "../interfaces/Folder";
 
 class User extends Model<InferAttributes<User>,IUserCreation> implements IUser {
     declare id: number;
@@ -14,14 +11,14 @@ class User extends Model<InferAttributes<User>,IUserCreation> implements IUser {
     declare password: string;
     declare username: string;
 
-    declare setModels: HasManySetAssociationsMixin<ITodoModel|TodoModel, any>;
-    declare addModel: HasManyAddAssociationMixin<ITodoModel|TodoModel, any>;
+    declare setModels: HasManySetAssociationsMixin<TodoModel, any>;
+    declare addModel: HasManyAddAssociationMixin<TodoModel, any>;
 
-    declare setTodos: HasManySetAssociationsMixin<ITodo|Todo, any>;
-    declare addTodo: HasManyAddAssociationMixin<ITodo|Todo, any>;
+    declare setTodos: HasManySetAssociationsMixin<Todo, any>;
+    declare addTodo: HasManyAddAssociationMixin<Todo, any>;
 
-    declare setFolders: HasManySetAssociationsMixin<IFolder|Folder, any>;
-    declare addFolder: HasManyAddAssociationMixin<IFolder|Folder, any>;
+    declare setFolders: HasManySetAssociationsMixin<Folder, any>;
+    declare addFolder: HasManyAddAssociationMixin<Folder, any>;
 }
 
 User.init(

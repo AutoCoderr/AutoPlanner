@@ -11,9 +11,6 @@ import Todo from "./Todo";
 import Step from "./Step";
 import User from "./User";
 import {IFolder, IFolderCreation} from "../interfaces/Folder";
-import {ITodo} from "../interfaces/Todo";
-import {IStep} from "../interfaces/Step";
-import {IUser} from "../interfaces/User";
 
 class Folder extends Model<InferAttributes<Folder>, IFolderCreation> implements IFolder {
     declare id: number;
@@ -25,12 +22,12 @@ class Folder extends Model<InferAttributes<Folder>, IFolderCreation> implements 
     declare parent_id?: number;
     declare user_id: number;
 
-    declare setParent: BelongsToSetAssociationMixin<IFolder|Folder, any>;
-    declare addFolder: HasManyAddAssociationMixin<IFolder|Folder, any>;
-    declare addTodo: HasManyAddAssociationMixin<ITodo|Todo, any>;
-    declare setAssociatedSteps: BelongsToManySetAssociationsMixin<IStep|Step, any>;
-    declare addAssociatedStep: BelongsToManyAddAssociationMixin<IStep|Step, any>;
-    declare setUser: BelongsToSetAssociationMixin<IUser|User, any>;
+    declare setParent: BelongsToSetAssociationMixin<Folder, any>;
+    declare addFolder: HasManyAddAssociationMixin<Folder, any>;
+    declare addTodo: HasManyAddAssociationMixin<Todo, any>;
+    declare setAssociatedSteps: BelongsToManySetAssociationsMixin<Step, any>;
+    declare addAssociatedStep: BelongsToManyAddAssociationMixin<Step, any>;
+    declare setUser: BelongsToSetAssociationMixin<User, any>;
 }
 
 Folder.init(
