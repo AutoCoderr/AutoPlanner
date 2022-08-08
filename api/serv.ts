@@ -1,7 +1,9 @@
 import app from "./app";
-import DB from "./DB";
+import migrate from "./libs/migrate";
 
-console.log(typeof DB);
+migrate().then(async () => {
+    console.log("Database synchronized");
+})
 
 app.listen(process.env.PORT ?? 3000, () => {
     console.log("Server started");
