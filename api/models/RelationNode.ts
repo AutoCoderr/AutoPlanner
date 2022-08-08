@@ -9,6 +9,7 @@ RelationNode.init(
     { //@ts-ignore
         sequelize,
         modelName: "RelationNode",
+        timestamps: false
     }
 );
 

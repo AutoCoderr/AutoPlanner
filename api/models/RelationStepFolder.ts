@@ -9,6 +9,7 @@ RelationStepFolder.init(
     { //@ts-ignore
         sequelize,
         modelName: "RelationStepFolder",
+        timestamps: false
     }
 );
 

@@ -1,10 +1,28 @@
-import { Model, DataTypes } from "sequelize";
+import {Model, DataTypes, InferAttributes, HasManySetAssociationsMixin, HasManyAddAssociationMixin} from "sequelize";
 import sequelize from "../sequelize";
 import TodoModel from "./TodoModel";
 import Todo from "./Todo";
 import Folder from "./Folder";
+import {IUser, IUserCreation} from "../interfaces/User";
+import { ITodoModel } from "../interfaces/TodoModel";
+import {ITodo} from "../interfaces/Todo";
+import {IFolder} from "../interfaces/Folder";
 
-class User extends Model {}
+class User extends Model<InferAttributes<User>,IUserCreation> implements IUser {
+    declare id: number;
+    declare email: string;
+    declare password: string;
+    declare username: string;
+
+    declare setModels: HasManySetAssociationsMixin<ITodoModel|TodoModel, any>;
+    declare addModel: HasManyAddAssociationMixin<ITodoModel|TodoModel, any>;
+
+    declare setTodos: HasManySetAssociationsMixin<ITodo|Todo, any>;
+    declare addTodo: HasManyAddAssociationMixin<ITodo|Todo, any>;
+
+    declare setFolders: HasManySetAssociationsMixin<IFolder|Folder, any>;
+    declare addFolder: HasManyAddAssociationMixin<IFolder|Folder, any>;
+}
 
 User.init(
     {

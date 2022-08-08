@@ -9,6 +9,7 @@ RelationStepTodo.init(
     { //@ts-ignore
         sequelize,
         modelName: "RelationStepTodo",
+        timestamps: false
     }
 );
 
