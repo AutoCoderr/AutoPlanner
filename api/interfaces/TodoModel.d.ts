@@ -17,12 +17,15 @@ export interface ITodoModel {
     firstnode_id?: number;
     user_id: number;
 
+    createdAt: Date;
+    updatedAt: Date;
+
     setFirstNode: BelongsToSetAssociationMixin<Node, any>;
     setTodos: HasManySetAssociationsMixin<Todo, any>;
     addTodo: HasManyAddAssociationMixin<Todo, any>;
     setUser: BelongsToSetAssociationMixin<User, any>;
 }
-export type ITodoModelCreation = Optional<ITodoModel, 'id' | 'description' | 'published' | 'firstnode_id' | 'setFirstNode' | 'setTodos' | 'addTodo' | 'setUser'>;
+export type ITodoModelCreation = Optional<ITodoModel, 'id' | 'description' | 'published' | 'firstnode_id' | 'createdAt' | 'updatedAt' | 'setFirstNode' | 'setTodos' | 'addTodo' | 'setUser'>;
 
 export interface TodoModelWithFirstNode extends TodoModel {
     firstNode: null|Node

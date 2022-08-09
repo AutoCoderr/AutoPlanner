@@ -18,9 +18,13 @@ class Folder extends Model<InferAttributes<Folder>, IFolderCreation> implements 
     declare description?: string;
     declare percent: number;
     declare percentSynchronized: boolean;
+    declare deadLine?: Date;
     declare priority: number;
     declare parent_id?: number;
     declare user_id: number;
+
+    declare createdAt: Date;
+    declare updatedAt: Date;
 
     declare setParent: BelongsToSetAssociationMixin<Folder, any>;
     declare addFolder: HasManyAddAssociationMixin<Folder, any>;
@@ -59,6 +63,18 @@ Folder.init(
             type: DataTypes.INTEGER,
             allowNull: false,
             defaultValue: 1
+        },
+        deadLine: {
+            type: DataTypes.DATE,
+            allowNull: true
+        },
+        createdAt: {
+            type: DataTypes.DATE,
+            allowNull: false
+        },
+        updatedAt: {
+            type: DataTypes.DATE,
+            allowNull: false
         },
         user_id: {
             type: DataTypes.INTEGER,

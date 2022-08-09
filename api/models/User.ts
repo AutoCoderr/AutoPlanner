@@ -11,6 +11,9 @@ class User extends Model<InferAttributes<User>,IUserCreation> implements IUser {
     declare password: string;
     declare username: string;
 
+    declare createdAt: Date;
+    declare updatedAt: Date;
+
     declare setModels: HasManySetAssociationsMixin<TodoModel, any>;
     declare addModel: HasManyAddAssociationMixin<TodoModel, any>;
 
@@ -19,6 +22,7 @@ class User extends Model<InferAttributes<User>,IUserCreation> implements IUser {
 
     declare setFolders: HasManySetAssociationsMixin<Folder, any>;
     declare addFolder: HasManyAddAssociationMixin<Folder, any>;
+
 }
 
 User.init(
@@ -40,6 +44,14 @@ User.init(
         },
         username: {
             type: DataTypes.STRING(50),
+            allowNull: false
+        },
+        createdAt: {
+            type: DataTypes.DATE,
+            allowNull: false
+        },
+        updatedAt: {
+            type: DataTypes.DATE,
             allowNull: false
         },
     },

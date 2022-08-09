@@ -22,9 +22,13 @@ class Todo extends Model<InferAttributes<Todo>, ITodoCreation> implements ITodo 
     declare name: string;
     declare percent: number;
     declare priority: number;
+    declare deadLine?: Date;
     declare user_id: number;
     declare model_id?: number;
     declare parent_id?: number;
+
+    declare createdAt: Date;
+    declare updatedAt: Date;
 
     declare setAssociatedSteps: BelongsToManySetAssociationsMixin<Step, any>;
     declare addAssociatedStep: BelongsToManyAddAssociationMixin<Step, any>;
@@ -60,6 +64,18 @@ Todo.init(
             type: DataTypes.INTEGER,
             allowNull: false,
             defaultValue: 1
+        },
+        deadLine: {
+            type: DataTypes.DATE,
+            allowNull: true
+        },
+        createdAt: {
+            type: DataTypes.DATE,
+            allowNull: false
+        },
+        updatedAt: {
+            type: DataTypes.DATE,
+            allowNull: false
         },
         user_id: {
             type: DataTypes.INTEGER,

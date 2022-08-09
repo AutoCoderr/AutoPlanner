@@ -20,6 +20,9 @@ class TodoModel extends Model<InferAttributes<TodoModel>, ITodoModelCreation> im
     declare published: boolean;
     declare user_id: number;
 
+    declare createdAt: Date;
+    declare updatedAt: Date;
+
     declare setFirstNode: BelongsToSetAssociationMixin<Node, any>;
     declare setTodos: HasManySetAssociationsMixin<Todo, any>;
     declare addTodo: HasManyAddAssociationMixin<Todo, any>;
@@ -46,6 +49,14 @@ TodoModel.init(
             type: DataTypes.BOOLEAN,
             allowNull: false,
             defaultValue: false
+        },
+        createdAt: {
+            type: DataTypes.DATE,
+            allowNull: false
+        },
+        updatedAt: {
+            type: DataTypes.DATE,
+            allowNull: false
         },
         user_id: {
             type: DataTypes.INTEGER,

@@ -18,8 +18,12 @@ class Step extends Model <InferAttributes<Step>, IStepCreation> implements IStep
     declare nb: number;
     declare percent: number;
     declare percentSynchronized: boolean;
+    declare deadLine: Date;
     declare todo_id: number;
     declare node_id: number;
+
+    declare createdAt: Date;
+    declare updatedAt: Date;
 
     declare setNode: BelongsToSetAssociationMixin<Node, any>;
     declare setTodo: BelongsToSetAssociationMixin<Todo, any>;
@@ -59,7 +63,19 @@ Step.init(
         todo_id: {
             type: DataTypes.INTEGER,
             allowNull: false
-        }
+        },
+        deadLine: {
+            type: DataTypes.DATE,
+            allowNull: true
+        },
+        createdAt: {
+            type: DataTypes.DATE,
+            allowNull: false
+        },
+        updatedAt: {
+            type: DataTypes.DATE,
+            allowNull: false
+        },
     },
     { //@ts-ignore
         sequelize,

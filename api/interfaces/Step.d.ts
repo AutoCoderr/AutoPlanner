@@ -13,8 +13,12 @@ export interface IStep {
     percent: number;
     percentSynchronized: boolean;
     nb: number;
+    deadLine?: Date;
     node_id: number;
     todo_id: number;
+
+    createdAt: Date;
+    updatedAt: Date;
 
     setNode: BelongsToSetAssociationMixin<Node, any>;
     setTodo: BelongsToSetAssociationMixin<Todo, any>;
@@ -23,7 +27,7 @@ export interface IStep {
     setAssociatedFolders: BelongsToManySetAssociationsMixin<Folder, any>;
     addAssociatedFolder: BelongsToManyAddAssociationMixin<Folder, any>;
 }
-export type IStepCreation = Optional<IStep, 'id' | 'percent' | 'percentSynchronized' | 'nb' | 'setNode' | 'setTodo' | 'setAssociatedTodos' | 'addAssociatedTodo' | 'setAssociatedFolders' | 'addAssociatedFolder'>;
+export type IStepCreation = Optional<IStep, 'id' | 'percent' | 'percentSynchronized' | 'nb' | 'deadLine' | 'createdAt' | 'updatedAt' | 'setNode' | 'setTodo' | 'setAssociatedTodos' | 'addAssociatedTodo' | 'setAssociatedFolders' | 'addAssociatedFolder'>;
 
 export interface StepWithNode extends Step {
     node: Node

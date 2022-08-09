@@ -13,6 +13,9 @@ export interface IUser {
     password: string;
     username: string;
 
+    createdAt: Date;
+    updatedAt: Date;
+
     setModels: HasManySetAssociationsMixin<TodoModel, any>;
     addModel: HasManyAddAssociationMixin<TodoModel, any>;
 
@@ -22,7 +25,7 @@ export interface IUser {
     setFolders: HasManySetAssociationsMixin<Folder, any>;
     addFolder: HasManyAddAssociationMixin<Folder, any>;
 }
-export type IUserCreation = Optional<IUser, 'id' | 'setModels' | 'addModel' | 'setTodos' | 'addTodo' | 'setFolders' | 'addFolder'>;
+export type IUserCreation = Optional<IUser, 'id' | 'createdAt' | 'updatedAt' | 'setModels' | 'addModel' | 'setTodos' | 'addTodo' | 'setFolders' | 'addFolder'>;
 
 export interface UserWithModels extends User {
     models: TodoModel[]

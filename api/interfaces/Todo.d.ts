@@ -10,14 +10,18 @@ import User from "../models/User";
 import Todo from "../models/Todo";
 
 export interface ITodo {
-    id: number,
-    name: string,
-    description: string,
-    percent: number,
-    priority: number,
-    model_id?: number,
-    parent_id?: number,
-    user_id: number
+    id: number;
+    name: string;
+    description: string;
+    percent: number;
+    priority: number;
+    deadLine?: Date;
+    model_id?: number;
+    parent_id?: number;
+    user_id: number;
+
+    createdAt: Date;
+    updatedAt: Date;
 
     setAssociatedSteps: BelongsToManySetAssociationsMixin<Step, any>;
     addAssociatedStep: BelongsToManyAddAssociationMixin<Step, any>;
@@ -27,7 +31,7 @@ export interface ITodo {
     setModel: BelongsToSetAssociationMixin<TodoModel, any>;
     setUser: BelongsToSetAssociationMixin<User, any>;
 }
-export type ITodoCreation = Optional<ITodo, 'id' | 'description' | 'percent' | 'priority' | 'setAssociatedSteps' | 'addAssociatedStep' | 'setSteps' | 'addStep' | 'setParent' | 'setModel' | 'setUser'>;
+export type ITodoCreation = Optional<ITodo, 'id' | 'description' | 'percent' | 'priority' | 'deadLine' | 'createdAt' | 'updatedAt' | 'setAssociatedSteps' | 'addAssociatedStep' | 'setSteps' | 'addStep' | 'setParent' | 'setModel' | 'setUser'>;
 
 export interface TodoWithAssociatedSteps extends Todo {
     associatedSteps: Step[]

@@ -24,7 +24,10 @@ import {IUser} from "../interfaces/User";
 let user: IUser;
 let t;
 
-beforeEach(async () => {
+
+beforeAll(async () => {
+    await migrate()
+
     t = await sequelize.transaction();
     sequelize.constructor['_cls'] = new Map();
     sequelize.constructor['_cls'].set('transaction', t);
@@ -36,12 +39,10 @@ beforeEach(async () => {
     })
 })
 
-afterEach(() => t.rollback())
-
-
-beforeAll(() => migrate())
-
-afterAll(() => sequelize.close())
+afterAll(async () => {
+    await t.rollback();
+    return sequelize.close();
+})
 
 describe("Test models to check database coherence", () => {
     test("Test creating folders and show then, to check oneToMany relation on one model", async () => {
@@ -52,7 +53,8 @@ describe("Test models to check database coherence", () => {
 
         const child1 = await Folder.create({
             name: "Enfant 1",
-            user_id: user.id
+            user_id: user.id,
+            deadLine: new Date()
         })
         child1.parent_id = parent.id;
         await child1.save();
@@ -82,7 +84,8 @@ describe("Test models to check database coherence", () => {
                 "percentSynchronized": false,
                 "priority": 1,
                 "createdAt": expect.any(Date),
-                "updatedAt": expect.any(Date), 
+                "updatedAt": expect.any(Date),
+                "deadLine": child1.deadLine,
                 "parent_id": parent.id,
                 "user_id": user.id
             },
@@ -95,6 +98,7 @@ describe("Test models to check database coherence", () => {
                 "priority": 1,
                 "createdAt": expect.any(Date),
                 "updatedAt": expect.any(Date),
+                "deadLine": null,
                 "parent_id": parent.id,
                 "user_id": user.id
             },
@@ -107,6 +111,7 @@ describe("Test models to check database coherence", () => {
                 "priority": 1,
                 "createdAt": expect.any(Date),
                 "updatedAt": expect.any(Date),
+                "deadLine": null,
                 "parent_id": parent.id,
                 "user_id": user.id
             }
@@ -121,6 +126,7 @@ describe("Test models to check database coherence", () => {
             "priority": 1,
             "createdAt": expect.any(Date),
             "updatedAt": expect.any(Date),
+            "deadLine": null,
             "parent_id": null,
             "user_id": user.id
         })
@@ -316,6 +322,7 @@ describe("Test models to check database coherence", () => {
         const todo = await Todo.create({
             name: "Todo test", 
             parent_id: folder.id,
+            deadLine: new Date(),
             user_id: user.id
         })
 
@@ -330,6 +337,7 @@ describe("Test models to check database coherence", () => {
             priority: 1,
             createdAt: expect.any(Date),
             updatedAt: expect.any(Date),
+            deadLine: null,
             parent_id: null,
             user_id: user.id
         })
@@ -345,6 +353,7 @@ describe("Test models to check database coherence", () => {
                 priority: 1,
                 createdAt: expect.any(Date),
                 updatedAt: expect.any(Date),
+                deadLine: todo.deadLine,
                 model_id: null, 
                 parent_id: folder.id,
                 user_id: user.id
@@ -374,7 +383,8 @@ describe("Test models to check database coherence", () => {
 
         const step = await Step.create({ 
             node_id: node.id, 
-            todo_id: todo.id
+            todo_id: todo.id,
+            deadLine: new Date()
         });
 
 
@@ -405,6 +415,7 @@ describe("Test models to check database coherence", () => {
             nb: 1,
             createdAt: expect.any(Date),
             updatedAt: expect.any(Date),
+            deadLine: step.deadLine,
             node_id: node.id,
             todo_id: todo.id,
             associatedTodos: [
@@ -416,6 +427,7 @@ describe("Test models to check database coherence", () => {
                     priority: 1,
                     createdAt: expect.any(Date),
                     updatedAt: expect.any(Date),
+                    deadLine: null,
                     model_id: null,
                     parent_id: null,
                     user_id: user.id,
@@ -432,6 +444,7 @@ describe("Test models to check database coherence", () => {
                     priority: 1,
                     createdAt: expect.any(Date),
                     updatedAt: expect.any(Date),
+                    deadLine: null,
                     model_id: null,
                     parent_id: null,
                     user_id: user.id,
@@ -451,6 +464,7 @@ describe("Test models to check database coherence", () => {
                     priority: 1,
                     createdAt: expect.any(Date),
                     updatedAt: expect.any(Date),
+                    deadLine: null,
                     parent_id: null,
                     user_id: user.id,
                     RelationStepFolder: { 

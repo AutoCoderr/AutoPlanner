@@ -15,9 +15,13 @@ export interface IFolder {
     description?: string;
     percent: number;
     percentSynchronized: boolean;
+    deadLine?: Date;
     priority: number;
     parent_id?: number;
     user_id: number;
+
+    createdAt: Date;
+    updatedAt: Date;
 
     setParent: BelongsToSetAssociationMixin<Folder, any>;
     addFolder: HasManyAddAssociationMixin<Folder, any>;
@@ -26,7 +30,7 @@ export interface IFolder {
     addAssociatedStep: BelongsToManyAddAssociationMixin<Step, any>;
     setUser: BelongsToSetAssociationMixin<User, any>;
 }
-export type IFolderCreation = Optional<IFolder, 'id' | 'description' | 'percent' | 'percentSynchronized' | 'priority' | 'parent_id' | 'setParent' | 'addFolder' | 'addTodo' | 'setAssociatedSteps' | 'addAssociatedStep' | 'setUser'>;
+export type IFolderCreation = Optional<IFolder, 'id' | 'description' | 'percent' | 'percentSynchronized' | 'priority' | 'parent_id' | 'deadLine' | 'createdAt' | 'updatedAt' | 'setParent' | 'addFolder' | 'addTodo' | 'setAssociatedSteps' | 'addAssociatedStep' | 'setUser'>;
 
 export interface FolderWithParent extends Folder {
     parent: null|IFolder
