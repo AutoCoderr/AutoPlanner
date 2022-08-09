@@ -1,10 +1,10 @@
 import Folder from "../models/Folder";
 import compileDataValues from "../libs/compileDatavalues";
 import Todo from "../models/Todo";
-import {IFolderWithFolders, IFolderWithParent, IFolderWithTodos} from "../interfaces/Folder";
+import {FolderWithFolders, FolderWithParent, FolderWithTodos} from "../interfaces/Folder";
 
-export function findOneFolderByIdWithFolders(id: number): Promise<null|IFolderWithFolders> {
-    return <Promise<null|IFolderWithFolders>>Folder.findOne({
+export function findOneFolderByIdWithFolders(id: number): Promise<null|FolderWithFolders> {
+    return <Promise<null|FolderWithFolders>>Folder.findOne({
         where: { id },
         include: {
             model: Folder,
@@ -13,8 +13,8 @@ export function findOneFolderByIdWithFolders(id: number): Promise<null|IFolderWi
     }).then(res => compileDataValues(res))
 }
 
-export function findOneFolderByIdWithParent(id: number): Promise<null|IFolderWithParent> {
-    return <Promise<null|IFolderWithParent>>Folder.findOne({
+export function findOneFolderByIdWithParent(id: number): Promise<null|FolderWithParent> {
+    return <Promise<null|FolderWithParent>>Folder.findOne({
         where: { id },
         include: {
             model: Folder,
@@ -23,8 +23,8 @@ export function findOneFolderByIdWithParent(id: number): Promise<null|IFolderWit
     }).then(res => compileDataValues(res))
 }
 
-export function findOneFolderByIdWithTodos(id: number): Promise<null|IFolderWithTodos> {
-    return <Promise<null|IFolderWithTodos>>Folder.findOne({
+export function findOneFolderByIdWithTodos(id: number): Promise<null|FolderWithTodos> {
+    return <Promise<null|FolderWithTodos>>Folder.findOne({
         where: { id },
         include: {
             model: Todo,

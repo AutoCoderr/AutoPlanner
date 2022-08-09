@@ -2,7 +2,6 @@ import {Model, DataTypes, InferAttributes, BelongsToSetAssociationMixin} from "s
 import sequelize from "../sequelize";
 import Node from "./Node";
 import {IResponse, IResponseCreation} from "../interfaces/Response";
-import {INode} from "../interfaces/Node";
 
 class Response extends Model<InferAttributes<Response>, IResponseCreation> implements IResponse {
     declare id: number;
@@ -10,8 +9,8 @@ class Response extends Model<InferAttributes<Response>, IResponseCreation> imple
     declare question_id: number;
     declare action_id: number;
 
-    declare setQuestion: BelongsToSetAssociationMixin<INode|Node, any>;
-    declare setAction: BelongsToSetAssociationMixin<INode|Node, any>;
+    declare setQuestion: BelongsToSetAssociationMixin<Node, any>;
+    declare setAction: BelongsToSetAssociationMixin<Node, any>;
 }
 
 Response.init(

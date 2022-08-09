@@ -12,24 +12,25 @@ import Folder from "./Folder";
 import RelationStepTodo from "./RelationStepTodo";
 import RelationStepFolder from "./RelationStepFolder";
 import {IStep, IStepCreation} from "../interfaces/Step";
-import {INode} from "../interfaces/Node";
-import {ITodo} from "../interfaces/Todo";
-import {IFolder} from "../interfaces/Folder";
 
 class Step extends Model <InferAttributes<Step>, IStepCreation> implements IStep {
     declare id: number;
     declare nb: number;
     declare percent: number;
     declare percentSynchronized: boolean;
+    declare deadLine: Date;
     declare todo_id: number;
     declare node_id: number;
 
-    declare setNode: BelongsToSetAssociationMixin<INode|Node, any>;
-    declare setTodo: BelongsToSetAssociationMixin<ITodo|Todo, any>;
-    declare setAssociatedTodos: BelongsToManySetAssociationsMixin<ITodo|Todo, any>;
-    declare addAssociatedTodo: BelongsToManyAddAssociationMixin<ITodo|Todo, any>;
-    declare setAssociatedFolders: BelongsToManySetAssociationsMixin<IFolder|Folder, any>;
-    declare addAssociatedFolder: BelongsToManyAddAssociationMixin<IFolder|Folder, any>;
+    declare createdAt: Date;
+    declare updatedAt: Date;
+
+    declare setNode: BelongsToSetAssociationMixin<Node, any>;
+    declare setTodo: BelongsToSetAssociationMixin<Todo, any>;
+    declare setAssociatedTodos: BelongsToManySetAssociationsMixin<Todo, any>;
+    declare addAssociatedTodo: BelongsToManyAddAssociationMixin<Todo, any>;
+    declare setAssociatedFolders: BelongsToManySetAssociationsMixin<Folder, any>;
+    declare addAssociatedFolder: BelongsToManyAddAssociationMixin<Folder, any>;
 }
 
 Step.init(
@@ -62,7 +63,19 @@ Step.init(
         todo_id: {
             type: DataTypes.INTEGER,
             allowNull: false
-        }
+        },
+        deadLine: {
+            type: DataTypes.DATE,
+            allowNull: true
+        },
+        createdAt: {
+            type: DataTypes.DATE,
+            allowNull: false
+        },
+        updatedAt: {
+            type: DataTypes.DATE,
+            allowNull: false
+        },
     },
     { //@ts-ignore
         sequelize,

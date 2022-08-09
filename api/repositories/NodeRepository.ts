@@ -2,10 +2,10 @@ import Node from "../models/Node";
 import TodoModel from "../models/TodoModel";
 import compileDataValues from "../libs/compileDatavalues";
 import Response from "../models/Response";
-import {INodeWithChildren, INodeWithModel, INodeWithParents, INodeWithResponses} from "../interfaces/Node";
+import {NodeWithChildren, NodeWithModel, NodeWithParents, NodeWithResponses} from "../interfaces/Node";
 
-export function findOneNodeByIdWithModel(id: number): Promise<null|INodeWithModel> {
-    return <Promise<null|INodeWithModel>>Node.findOne({
+export function findOneNodeByIdWithModel(id: number): Promise<null|NodeWithModel> {
+    return <Promise<null|NodeWithModel>>Node.findOne({
         where: { id },
         include: {
             model: TodoModel,
@@ -14,8 +14,8 @@ export function findOneNodeByIdWithModel(id: number): Promise<null|INodeWithMode
     }).then(res => compileDataValues(res))
 }
 
-export function findOneNodeByIdWithChildren(id: number): Promise<null|INodeWithChildren> {
-    return <Promise<null|INodeWithChildren>>Node.findOne({
+export function findOneNodeByIdWithChildren(id: number): Promise<null|NodeWithChildren> {
+    return <Promise<null|NodeWithChildren>>Node.findOne({
         where: { id },
         include: {
             model: Node,
@@ -24,8 +24,8 @@ export function findOneNodeByIdWithChildren(id: number): Promise<null|INodeWithC
     }).then(res => compileDataValues(res))
 }
 
-export function findOneNodeByIdWithChildrenAndResponses(id: number): Promise< null | INodeWithChildren&INodeWithResponses > {
-    return <Promise< null | INodeWithChildren&INodeWithResponses >>Node.findOne({
+export function findOneNodeByIdWithChildrenAndResponses(id: number): Promise< null | NodeWithChildren&NodeWithResponses > {
+    return <Promise< null | NodeWithChildren&NodeWithResponses >>Node.findOne({
         where: { id },
         include: [
             {
@@ -40,8 +40,8 @@ export function findOneNodeByIdWithChildrenAndResponses(id: number): Promise< nu
     }).then(res => compileDataValues(res))
 }
 
-export function findOneNodeByIdWithParents(id: number): Promise<null|INodeWithParents> {
-    return <Promise<null|INodeWithParents>>Node.findOne({
+export function findOneNodeByIdWithParents(id: number): Promise<null|NodeWithParents> {
+    return <Promise<null|NodeWithParents>>Node.findOne({
         where: { id },
         include: {
             model: Node,

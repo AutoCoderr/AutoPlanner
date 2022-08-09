@@ -13,8 +13,6 @@ import TodoModel from "./TodoModel";
 import RelationNode from "./RelationNode";
 import Response from "./Response";
 import {INode, INodeCreation} from "../interfaces/Node";
-import {ITodoModel} from "../interfaces/TodoModel";
-import {IResponse} from "../interfaces/Response";
 
 class Node extends Model<InferAttributes<Node>, INodeCreation> implements INode {
     declare id: number;
@@ -22,13 +20,13 @@ class Node extends Model<InferAttributes<Node>, INodeCreation> implements INode 
     declare text: string;
     declare type: "action" | "question";
 
-    declare setParents: BelongsToManySetAssociationsMixin<INode|Node, any>;
-    declare addParent: BelongsToManyAddAssociationMixin<INode|Node, any>;
-    declare setChildren: BelongsToManySetAssociationsMixin<INode|Node, any>;
-    declare addChild: BelongsToManyAddAssociationMixin<INode|Node, any>;
-    declare setModel: BelongsToSetAssociationMixin<ITodoModel|TodoModel, any>;
-    declare setResponses: HasManySetAssociationsMixin<IResponse|Response, any>;
-    declare addResponse: HasManyAddAssociationMixin<IResponse|Response, any>
+    declare setParents: BelongsToManySetAssociationsMixin<Node, any>;
+    declare addParent: BelongsToManyAddAssociationMixin<Node, any>;
+    declare setChildren: BelongsToManySetAssociationsMixin<Node, any>;
+    declare addChild: BelongsToManyAddAssociationMixin<Node, any>;
+    declare setModel: BelongsToSetAssociationMixin<TodoModel, any>;
+    declare setResponses: HasManySetAssociationsMixin<Response, any>;
+    declare addResponse: HasManyAddAssociationMixin<Response, any>
 }
 
 Node.init(

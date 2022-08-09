@@ -14,10 +14,6 @@ import Folder from "./Folder";
 import Step from "./Step";
 import User from "./User";
 import {ITodo, ITodoCreation} from "../interfaces/Todo";
-import {IStep} from "../interfaces/Step";
-import {IFolder} from "../interfaces/Folder";
-import {ITodoModel} from "../interfaces/TodoModel";
-import {IUser} from "../interfaces/User";
 
 
 class Todo extends Model<InferAttributes<Todo>, ITodoCreation> implements ITodo {
@@ -26,17 +22,21 @@ class Todo extends Model<InferAttributes<Todo>, ITodoCreation> implements ITodo 
     declare name: string;
     declare percent: number;
     declare priority: number;
+    declare deadLine?: Date;
     declare user_id: number;
     declare model_id?: number;
     declare parent_id?: number;
 
-    declare setAssociatedSteps: BelongsToManySetAssociationsMixin<IStep|Step, any>;
-    declare addAssociatedStep: BelongsToManyAddAssociationMixin<IStep|Step, any>;
-    declare setSteps: HasManySetAssociationsMixin<IStep|Step, any>;
-    declare addStep: HasManyAddAssociationMixin<IStep|Step, any>;
-    declare setParent: BelongsToSetAssociationMixin<IFolder|Folder, any>;
-    declare setModel: BelongsToSetAssociationMixin<ITodoModel|TodoModel, any>;
-    declare setUser: BelongsToSetAssociationMixin<IUser|User, any>;
+    declare createdAt: Date;
+    declare updatedAt: Date;
+
+    declare setAssociatedSteps: BelongsToManySetAssociationsMixin<Step, any>;
+    declare addAssociatedStep: BelongsToManyAddAssociationMixin<Step, any>;
+    declare setSteps: HasManySetAssociationsMixin<Step, any>;
+    declare addStep: HasManyAddAssociationMixin<Step, any>;
+    declare setParent: BelongsToSetAssociationMixin<Folder, any>;
+    declare setModel: BelongsToSetAssociationMixin<TodoModel, any>;
+    declare setUser: BelongsToSetAssociationMixin<User, any>;
 }
 
 Todo.init(
@@ -64,6 +64,18 @@ Todo.init(
             type: DataTypes.INTEGER,
             allowNull: false,
             defaultValue: 1
+        },
+        deadLine: {
+            type: DataTypes.DATE,
+            allowNull: true
+        },
+        createdAt: {
+            type: DataTypes.DATE,
+            allowNull: false
+        },
+        updatedAt: {
+            type: DataTypes.DATE,
+            allowNull: false
         },
         user_id: {
             type: DataTypes.INTEGER,

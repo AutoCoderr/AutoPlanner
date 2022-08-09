@@ -11,9 +11,6 @@ import Node from "./Node";
 import Todo from "./Todo";
 import User from "./User";
 import {ITodoModel, ITodoModelCreation} from "../interfaces/TodoModel";
-import {INode} from "../interfaces/Node";
-import {ITodo} from "../interfaces/Todo";
-import {IUser} from "../interfaces/User";
 
 class TodoModel extends Model<InferAttributes<TodoModel>, ITodoModelCreation> implements ITodoModel {
     declare description: string;
@@ -23,10 +20,13 @@ class TodoModel extends Model<InferAttributes<TodoModel>, ITodoModelCreation> im
     declare published: boolean;
     declare user_id: number;
 
-    declare setFirstNode: BelongsToSetAssociationMixin<INode|Node, any>;
-    declare setTodos: HasManySetAssociationsMixin<ITodo|Todo, any>;
-    declare addTodo: HasManyAddAssociationMixin<ITodo|Todo, any>;
-    declare setUser: BelongsToSetAssociationMixin<IUser|User, any>;
+    declare createdAt: Date;
+    declare updatedAt: Date;
+
+    declare setFirstNode: BelongsToSetAssociationMixin<Node, any>;
+    declare setTodos: HasManySetAssociationsMixin<Todo, any>;
+    declare addTodo: HasManyAddAssociationMixin<Todo, any>;
+    declare setUser: BelongsToSetAssociationMixin<User, any>;
 }
 
 TodoModel.init(
@@ -49,6 +49,14 @@ TodoModel.init(
             type: DataTypes.BOOLEAN,
             allowNull: false,
             defaultValue: false
+        },
+        createdAt: {
+            type: DataTypes.DATE,
+            allowNull: false
+        },
+        updatedAt: {
+            type: DataTypes.DATE,
+            allowNull: false
         },
         user_id: {
             type: DataTypes.INTEGER,
