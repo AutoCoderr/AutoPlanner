@@ -26,6 +26,7 @@ export interface IUser {
     addFolder: HasManyAddAssociationMixin<Folder, any>;
 }
 export type IUserCreation = Optional<IUser, 'id' | 'createdAt' | 'updatedAt' | 'setModels' | 'addModel' | 'setTodos' | 'addTodo' | 'setFolders' | 'addFolder'>;
+export type IUserConnected = Pick<IUser, 'id' | 'email' | 'username'>;
 
 export interface UserWithModels extends User {
     models: TodoModel[]

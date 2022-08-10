@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
+import {IUserConnected} from "../../interfaces/models/User";
 
-export default function generateJWTAccessToken(user: {username: string, email: string}) {
+export default function generateJWTAccessToken(user: IUserConnected) {
     return jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '15m' });
 }

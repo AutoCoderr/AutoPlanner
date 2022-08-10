@@ -3,7 +3,7 @@ import validate from "../libs/validator/validate";
 import RegisterForm from "../forms/RegisterForm";
 import User from "../models/User";
 import getDbFields from "../libs/validator/getDbFields";
-import {IUserCreation} from "../interfaces/models/User";
+import {IUserConnected, IUserCreation} from "../interfaces/models/User";
 import {findOneUserByUsernameOrEmail} from "../repositories/UserRepository";
 import bcrypt from "bcryptjs";
 import generateJWTAccessToken from "../libs/jwt/generateJWTAccessToken";
@@ -31,7 +31,7 @@ router.post("/login", async (req,res) => {
     if (user === null || !(await bcrypt.compare(req.body.password, user.password)))
         return res.sendStatus(401);
 
-    const userObj = {
+    const userObj: IUserConnected = {
         ...compileDataValues(user),
         password: undefined,
         updatedAt: undefined,
