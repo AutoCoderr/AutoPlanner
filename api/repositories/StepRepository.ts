@@ -17,5 +17,5 @@ export function findOneStepByIdWithAssociatedTodosAndFolders(id: number): Promis
                 as: "associatedFolders"
             }
         ]
-    }).then(res => compileDataValues(res))
+    })
 }

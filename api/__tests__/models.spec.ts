@@ -20,6 +20,7 @@ import {
 import {findOneTodoByIdWithParent} from "../repositories/TodoRepository";
 import {findOneStepByIdWithAssociatedTodosAndFolders} from "../repositories/StepRepository";
 import {IUser} from "../interfaces/models/User";
+import compileDataValues from "../libs/compileDatavalues";
 
 let user: IUser;
 let t;
@@ -75,7 +76,7 @@ describe("Test models to check database coherence", () => {
 
         const child1_get2 = await findOneFolderByIdWithParent(child1.id);
         
-        expect(parent_get2?.folders).toEqual([
+        expect(compileDataValues(parent_get2?.folders)).toEqual([
             {
                 "id": expect.any(Number),
                 "name": "Enfant 1",
@@ -117,7 +118,7 @@ describe("Test models to check database coherence", () => {
             }
         ])
         
-        expect(child1_get2?.parent).toEqual({
+        expect(compileDataValues(child1_get2?.parent)).toEqual({
             "id": expect.any(Number),
             "name": "Je suis le parent",
             "description": null,
@@ -149,7 +150,7 @@ describe("Test models to check database coherence", () => {
 
         const searchedNode1 = await findOneNodeByIdWithModel(node1.id);
         
-        expect(searchedNode1?.model).toEqual({
+        expect(compileDataValues(searchedNode1?.model)).toEqual({
             id: model.id,
             name: 'Test',
             description: null,
@@ -170,7 +171,7 @@ describe("Test models to check database coherence", () => {
 
         const searchedNode1_2 = await findOneNodeByIdWithChildren(node1.id)
         
-        expect(searchedNode1_2?.children).toEqual([
+        expect(compileDataValues(searchedNode1_2?.children)).toEqual([
             { 
                 id: node2.id,
                 text: 'Manger des pâtes',
@@ -191,7 +192,7 @@ describe("Test models to check database coherence", () => {
         const searchedNode2 = await findOneNodeByIdWithChildren(node2.id);
 
         
-        expect(searchedNode2?.children).toEqual([
+        expect(compileDataValues(searchedNode2?.children)).toEqual([
             { 
                 id: question.id,
                 text: 'Fait-il beau ?',
@@ -227,7 +228,7 @@ describe("Test models to check database coherence", () => {
 
         const searchedQuestion = await findOneNodeByIdWithChildrenAndResponses(question.id);
 
-        expect(searchedQuestion).toEqual({
+        expect(compileDataValues(searchedQuestion)).toEqual({
             id: searchedQuestion?.id,
             text: 'Fait-il beau ?',
             type: 'question', 
@@ -274,7 +275,7 @@ describe("Test models to check database coherence", () => {
 
         const searchedActionResponse1 = await findOneNodeByIdWithChildren(actionResponse1.id);
         
-        expect(searchedActionResponse1?.children).toEqual([
+        expect(compileDataValues(searchedActionResponse1?.children)).toEqual([
             { 
                 id: lastAction.id,
                 text: 'Dormir',
@@ -289,7 +290,7 @@ describe("Test models to check database coherence", () => {
 
         const searchedLastAction = await findOneNodeByIdWithParents(lastAction.id);
         
-        expect(searchedLastAction?.parents).toEqual([
+        expect(compileDataValues(searchedLastAction?.parents)).toEqual([
             { 
                 id: actionResponse1.id,
                 text: 'Alors sort',
@@ -328,7 +329,7 @@ describe("Test models to check database coherence", () => {
 
         const searchTodo = await findOneTodoByIdWithParent(todo.id);
         
-        expect(searchTodo?.parent).toEqual({
+        expect(compileDataValues(searchTodo?.parent)).toEqual({
             id: folder.id,
             name: 'Folder test',
             description: null,
@@ -344,7 +345,7 @@ describe("Test models to check database coherence", () => {
 
         const searchedFolder = await findOneFolderByIdWithTodos(folder.id);
 
-        expect(searchedFolder?.todos).toEqual([
+        expect(compileDataValues(searchedFolder?.todos)).toEqual([
             { 
                 id: todo.id,
                 name: 'Todo test',
@@ -408,7 +409,7 @@ describe("Test models to check database coherence", () => {
 
         const searchedStep = await findOneStepByIdWithAssociatedTodosAndFolders(step.id);
 
-        expect(searchedStep).toEqual({
+        expect(compileDataValues(searchedStep)).toEqual({
             id: step.id,
             percent: 0,
             percentSynchronized: false,

@@ -10,5 +10,5 @@ export function findOneTodoByIdWithParent(id: number): Promise<null|TodoWithPare
             model: Folder,
             as: "parent"
         }
-    }).then(res => compileDataValues(res));
+    })
 }

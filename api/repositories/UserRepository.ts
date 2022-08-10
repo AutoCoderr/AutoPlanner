@@ -14,5 +14,5 @@ export function findOneUserByUsernameOrEmail(usernameOrEmail: string): Promise<n
                 }
             ]
         }
-    }).then(res => compileDataValues(res));
+    })
 }

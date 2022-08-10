@@ -7,6 +7,7 @@ import {IUserCreation} from "../interfaces/models/User";
 import {findOneUserByUsernameOrEmail} from "../repositories/UserRepository";
 import bcrypt from "bcryptjs";
 import generateJWTAccessToken from "../libs/jwt/generateJWTAccessToken";
+import compileDataValues from "../libs/compileDatavalues";
 
 const router = Router();
 
@@ -30,9 +31,16 @@ router.post("/login", async (req,res) => {
     if (user === null || !(await bcrypt.compare(req.body.password, user.password)))
         return res.sendStatus(401);
 
+    const userObj = {
+        ...compileDataValues(user),
+        password: undefined,
+        updatedAt: undefined,
+        createdAt: undefined
+    }
+
     res.status(200).json({
-        ...user,
-        access_token: generateJWTAccessToken(user)
+        ...userObj,
+        access_token: generateJWTAccessToken(userObj)
     })
 });
 
