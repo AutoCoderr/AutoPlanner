@@ -3,7 +3,8 @@ import sequelize from "../sequelize";
 import TodoModel from "./TodoModel";
 import Todo from "./Todo";
 import Folder from "./Folder";
-import {IUser, IUserCreation} from "../interfaces/User";
+import {IUser, IUserCreation} from "../interfaces/models/User";
+import bcrypt from "bcryptjs";
 
 class User extends Model<InferAttributes<User>,IUserCreation> implements IUser {
     declare id: number;
@@ -44,7 +45,8 @@ User.init(
         },
         username: {
             type: DataTypes.STRING(50),
-            allowNull: false
+            allowNull: false,
+            unique: true
         },
         createdAt: {
             type: DataTypes.DATE,
@@ -69,5 +71,20 @@ User.hasMany(Todo, {foreignKey: "user_id", as: "todos"});
 
 Folder.belongsTo(User, {foreignKey: "user_id", as: "user"});
 User.hasMany(Folder, {foreignKey: "user_id", as: "folders"});
+
+
+
+const updatePassword = async (user) => {
+    if ((user.type === "BULKUPDATE" && user.fields.includes('password')) ||
+        (user.type === undefined && user._previousDataValues.password !== user.dataValues.password)) {
+
+        const attributes = user.type === "BULKUPDATE" ? user.attributes : user;
+        attributes.password = await bcrypt.hash(attributes.password, await bcrypt.genSalt());
+    }
+};
+
+User.addHook("beforeCreate", updatePassword);
+User.addHook("beforeBulkUpdate", updatePassword);
+User.addHook("beforeUpdate", updatePassword);
 
 export default User;

@@ -4,10 +4,10 @@ import {
     BelongsToSetAssociationMixin,
     HasManyAddAssociationMixin, Optional
 } from "sequelize";
-import Folder from "../models/Folder";
-import Todo from "../models/Todo";
-import Step from "../models/Step";
-import User from "../models/User";
+import Folder from "../../models/Folder";
+import Todo from "../../models/Todo";
+import Step from "../../models/Step";
+import User from "../../models/User";
 
 export interface IFolder {
     id: number;

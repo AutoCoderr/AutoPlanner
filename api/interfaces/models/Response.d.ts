@@ -1,5 +1,5 @@
 import {BelongsToSetAssociationMixin, Optional} from "sequelize";
-import Node from "../models/Node";
+import Node from "../../models/Node";
 
 export interface IResponse {
     id: number;

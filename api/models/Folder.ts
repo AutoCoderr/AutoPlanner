@@ -10,7 +10,7 @@ import sequelize from "../sequelize";
 import Todo from "./Todo";
 import Step from "./Step";
 import User from "./User";
-import {IFolder, IFolderCreation} from "../interfaces/Folder";
+import {IFolder, IFolderCreation} from "../interfaces/models/Folder";
 
 class Folder extends Model<InferAttributes<Folder>, IFolderCreation> implements IFolder {
     declare id: number;

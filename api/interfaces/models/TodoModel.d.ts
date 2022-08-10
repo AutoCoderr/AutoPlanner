@@ -4,10 +4,10 @@ import {
     HasManySetAssociationsMixin,
     Optional
 } from "sequelize";
-import Node from "../models/Node";
-import Todo from "../models/Todo";
-import User from "../models/User";
-import TodoModel from "../models/TodoModel";
+import Node from "../../models/Node";
+import Todo from "../../models/Todo";
+import User from "../../models/User";
+import TodoModel from "../../models/TodoModel";
 
 export interface ITodoModel {
     id: number;

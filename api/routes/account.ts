@@ -1,0 +1,39 @@
+import {Router} from "express";
+import validate from "../libs/validator/validate";
+import RegisterForm from "../forms/RegisterForm";
+import User from "../models/User";
+import getDbFields from "../libs/validator/getDbFields";
+import {IUserCreation} from "../interfaces/models/User";
+import {findOneUserByUsernameOrEmail} from "../repositories/UserRepository";
+import bcrypt from "bcryptjs";
+import generateJWTAccessToken from "../libs/jwt/generateJWTAccessToken";
+
+const router = Router();
+
+router.post("/register", (req,res) => {
+    const validateRes = validate(req.body, RegisterForm);
+    if (validateRes !== true)
+        return res.status(422).json({violations: validateRes});
+
+    User.create(<IUserCreation>getDbFields(req.body, RegisterForm))
+        .then(() => res.sendStatus(201))
+        .catch(e => res.sendStatus(e.name === 'SequelizeValidationError' ? 400 : e.name === 'SequelizeUniqueConstraintError' ? 409 : 500));
+});
+
+router.post("/login", async (req,res) => {
+    const {usernameOrEmail,password} = req.body;
+
+    if (!usernameOrEmail || !password)
+        return res.sendStatus(400);
+
+    const user = await findOneUserByUsernameOrEmail(usernameOrEmail);
+    if (user === null || !(await bcrypt.compare(req.body.password, user.password)))
+        return res.sendStatus(401);
+
+    res.status(200).json({
+        ...user,
+        access_token: generateJWTAccessToken(user)
+    })
+});
+
+export default router

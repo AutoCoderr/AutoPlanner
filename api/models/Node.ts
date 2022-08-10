@@ -12,7 +12,7 @@ import sequelize from "../sequelize";
 import TodoModel from "./TodoModel";
 import RelationNode from "./RelationNode";
 import Response from "./Response";
-import {INode, INodeCreation} from "../interfaces/Node";
+import {INode, INodeCreation} from "../interfaces/models/Node";
 
 class Node extends Model<InferAttributes<Node>, INodeCreation> implements INode {
     declare id: number;

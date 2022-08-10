@@ -19,7 +19,7 @@ import {
 } from "../repositories/NodeRepository";
 import {findOneTodoByIdWithParent} from "../repositories/TodoRepository";
 import {findOneStepByIdWithAssociatedTodosAndFolders} from "../repositories/StepRepository";
-import {IUser} from "../interfaces/User";
+import {IUser} from "../interfaces/models/User";
 
 let user: IUser;
 let t;

@@ -1,7 +1,7 @@
 import Folder from "../models/Folder";
 import compileDataValues from "../libs/compileDatavalues";
 import Todo from "../models/Todo";
-import {FolderWithFolders, FolderWithParent, FolderWithTodos} from "../interfaces/Folder";
+import {FolderWithFolders, FolderWithParent, FolderWithTodos} from "../interfaces/models/Folder";
 
 export function findOneFolderByIdWithFolders(id: number): Promise<null|FolderWithFolders> {
     return <Promise<null|FolderWithFolders>>Folder.findOne({
