@@ -1,11 +1,11 @@
 import {HasManyAddAssociationMixin, HasManySetAssociationsMixin, Optional} from "sequelize";
-import TodoModel from "../models/TodoModel";
-import Todo from "../models/Todo";
-import Folder from "../models/Folder";
+import TodoModel from "../../models/TodoModel";
+import Todo from "../../models/Todo";
+import Folder from "../../models/Folder";
 import {ITodoModel} from "./TodoModel";
 import {ITodo} from "./Todo";
 import {IFolder} from "./Folder";
-import User from "../models/User";
+import User from "../../models/User";
 
 export interface IUser {
     id: number;
@@ -26,6 +26,7 @@ export interface IUser {
     addFolder: HasManyAddAssociationMixin<Folder, any>;
 }
 export type IUserCreation = Optional<IUser, 'id' | 'createdAt' | 'updatedAt' | 'setModels' | 'addModel' | 'setTodos' | 'addTodo' | 'setFolders' | 'addFolder'>;
+export type IUserConnected = Pick<IUser, 'id' | 'email' | 'username'>;
 
 export interface UserWithModels extends User {
     models: TodoModel[]

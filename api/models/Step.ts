@@ -11,7 +11,7 @@ import Node from "./Node";
 import Folder from "./Folder";
 import RelationStepTodo from "./RelationStepTodo";
 import RelationStepFolder from "./RelationStepFolder";
-import {IStep, IStepCreation} from "../interfaces/Step";
+import {IStep, IStepCreation} from "../interfaces/models/Step";
 
 class Step extends Model <InferAttributes<Step>, IStepCreation> implements IStep {
     declare id: number;

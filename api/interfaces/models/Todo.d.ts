@@ -3,11 +3,11 @@ import {
     BelongsToManySetAssociationsMixin, BelongsToSetAssociationMixin, HasManyAddAssociationMixin,
     HasManySetAssociationsMixin, Optional
 } from "sequelize";
-import Step from "../models/Step";
-import Folder from "../models/Folder";
-import TodoModel from "../models/TodoModel";
-import User from "../models/User";
-import Todo from "../models/Todo";
+import Step from "../../models/Step";
+import Folder from "../../models/Folder";
+import TodoModel from "../../models/TodoModel";
+import User from "../../models/User";
+import Todo from "../../models/Todo";
 
 export interface ITodo {
     id: number;

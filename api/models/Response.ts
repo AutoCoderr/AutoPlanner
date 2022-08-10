@@ -1,7 +1,7 @@
 import {Model, DataTypes, InferAttributes, BelongsToSetAssociationMixin} from "sequelize";
 import sequelize from "../sequelize";
 import Node from "./Node";
-import {IResponse, IResponseCreation} from "../interfaces/Response";
+import {IResponse, IResponseCreation} from "../interfaces/models/Response";
 
 class Response extends Model<InferAttributes<Response>, IResponseCreation> implements IResponse {
     declare id: number;

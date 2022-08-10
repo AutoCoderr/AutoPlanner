@@ -3,10 +3,10 @@ import {
     BelongsToManySetAssociationsMixin,
     BelongsToSetAssociationMixin, Optional
 } from "sequelize";
-import Node from "../models/Node";
-import Todo from "../models/Todo";
-import Folder from "../models/Folder";
-import Step from "../models/Step";
+import Node from "../../models/Node";
+import Todo from "../../models/Todo";
+import Folder from "../../models/Folder";
+import Step from "../../models/Step";
 
 export interface IStep {
     id: number;

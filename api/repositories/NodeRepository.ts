@@ -2,7 +2,7 @@ import Node from "../models/Node";
 import TodoModel from "../models/TodoModel";
 import compileDataValues from "../libs/compileDatavalues";
 import Response from "../models/Response";
-import {NodeWithChildren, NodeWithModel, NodeWithParents, NodeWithResponses} from "../interfaces/Node";
+import {NodeWithChildren, NodeWithModel, NodeWithParents, NodeWithResponses} from "../interfaces/models/Node";
 
 export function findOneNodeByIdWithModel(id: number): Promise<null|NodeWithModel> {
     return <Promise<null|NodeWithModel>>Node.findOne({
@@ -11,7 +11,7 @@ export function findOneNodeByIdWithModel(id: number): Promise<null|NodeWithModel
             model: TodoModel,
             as: "model"
         }
-    }).then(res => compileDataValues(res))
+    })
 }
 
 export function findOneNodeByIdWithChildren(id: number): Promise<null|NodeWithChildren> {
@@ -21,7 +21,7 @@ export function findOneNodeByIdWithChildren(id: number): Promise<null|NodeWithCh
             model: Node,
             as: "children"
         }
-    }).then(res => compileDataValues(res))
+    })
 }
 
 export function findOneNodeByIdWithChildrenAndResponses(id: number): Promise< null | NodeWithChildren&NodeWithResponses > {
@@ -37,7 +37,7 @@ export function findOneNodeByIdWithChildrenAndResponses(id: number): Promise< nu
                 as: "children"
             }
         ]
-    }).then(res => compileDataValues(res))
+    })
 }
 
 export function findOneNodeByIdWithParents(id: number): Promise<null|NodeWithParents> {

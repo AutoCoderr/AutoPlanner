@@ -3,9 +3,9 @@ import {
     BelongsToManySetAssociationsMixin,
     BelongsToSetAssociationMixin, HasManyAddAssociationMixin, HasManySetAssociationsMixin, Optional
 } from "sequelize";
-import Node from "../models/Node";
-import TodoModel from "../models/TodoModel";
-import Response from "../models/Response";
+import Node from "../../models/Node";
+import TodoModel from "../../models/TodoModel";
+import Response from "../../models/Response";
 
 export interface INode {
     id: number;

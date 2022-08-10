@@ -10,7 +10,7 @@ import sequelize from "../sequelize";
 import Node from "./Node";
 import Todo from "./Todo";
 import User from "./User";
-import {ITodoModel, ITodoModelCreation} from "../interfaces/TodoModel";
+import {ITodoModel, ITodoModelCreation} from "../interfaces/models/TodoModel";
 
 class TodoModel extends Model<InferAttributes<TodoModel>, ITodoModelCreation> implements ITodoModel {
     declare description: string;

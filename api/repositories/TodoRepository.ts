@@ -1,7 +1,7 @@
 import Todo from "../models/Todo";
 import Folder from "../models/Folder";
 import compileDataValues from "../libs/compileDatavalues";
-import {TodoWithParent} from "../interfaces/Todo";
+import {TodoWithParent} from "../interfaces/models/Todo";
 
 export function findOneTodoByIdWithParent(id: number): Promise<null|TodoWithParent> {
     return <Promise<null|TodoWithParent>>Todo.findOne({
@@ -10,5 +10,5 @@ export function findOneTodoByIdWithParent(id: number): Promise<null|TodoWithPare
             model: Folder,
             as: "parent"
         }
-    }).then(res => compileDataValues(res));
+    })
 }

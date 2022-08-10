@@ -13,7 +13,7 @@ import TodoModel from "./TodoModel";
 import Folder from "./Folder";
 import Step from "./Step";
 import User from "./User";
-import {ITodo, ITodoCreation} from "../interfaces/Todo";
+import {ITodo, ITodoCreation} from "../interfaces/models/Todo";
 
 
 class Todo extends Model<InferAttributes<Todo>, ITodoCreation> implements ITodo {

@@ -1,7 +1,7 @@
 import Folder from "../models/Folder";
 import compileDataValues from "../libs/compileDatavalues";
 import Todo from "../models/Todo";
-import {FolderWithFolders, FolderWithParent, FolderWithTodos} from "../interfaces/Folder";
+import {FolderWithFolders, FolderWithParent, FolderWithTodos} from "../interfaces/models/Folder";
 
 export function findOneFolderByIdWithFolders(id: number): Promise<null|FolderWithFolders> {
     return <Promise<null|FolderWithFolders>>Folder.findOne({
@@ -10,7 +10,7 @@ export function findOneFolderByIdWithFolders(id: number): Promise<null|FolderWit
             model: Folder,
             as: 'folders'
         }
-    }).then(res => compileDataValues(res))
+    })
 }
 
 export function findOneFolderByIdWithParent(id: number): Promise<null|FolderWithParent> {
@@ -20,7 +20,7 @@ export function findOneFolderByIdWithParent(id: number): Promise<null|FolderWith
             model: Folder,
             as: 'parent'
         }
-    }).then(res => compileDataValues(res))
+    })
 }
 
 export function findOneFolderByIdWithTodos(id: number): Promise<null|FolderWithTodos> {
@@ -30,5 +30,5 @@ export function findOneFolderByIdWithTodos(id: number): Promise<null|FolderWithT
             model: Todo,
             as: 'todos'
         }
-    }).then(res => compileDataValues(res))
+    })
 }
