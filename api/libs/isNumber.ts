@@ -1,0 +1,1 @@
+export default (value) => typeof(value) === "number" || (typeof(value) === "string" && new RegExp("^\\d+$").test(value))

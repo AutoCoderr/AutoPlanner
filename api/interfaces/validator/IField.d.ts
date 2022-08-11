@@ -1,7 +1,19 @@
-export default interface IField {
+import {IUserConnected} from "../models/User";
+import Folder from "../../models/Folder";
+import Node from "../../models/Node";
+import Response from "../../models/Response";
+import Step from "../../models/Step";
+import Todo from "../../models/Todo";
+import TodoModel from "../../models/TodoModel";
+import User from "../../models/User";
+
+interface IField {
     required?: boolean;
-    valid?: (value: any, body?: {[key: string]: any}) => boolean;
-    format?: (value: any) => any;
+    valid?: (value: any, data?: {[key: string]: any}, connectedUser: undefined|IUserConnected) => Promise<boolean>|boolean;
+    format?: (value: any) => Promise<any>|any;
     msg: string;
-    inDB?: boolean
+    inDB?: boolean;
+    model?: typeof Folder|typeof Node|typeof Response|typeof Step|typeof Todo|typeof TodoModel|typeof User
 }
+
+export default IField;

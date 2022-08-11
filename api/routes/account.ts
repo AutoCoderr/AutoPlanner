@@ -1,8 +1,7 @@
 import {Router} from "express";
-import validate from "../libs/validator/validate";
+import computeForm from "../libs/validator/computeForm";
 import RegisterForm from "../forms/RegisterForm";
 import User from "../models/User";
-import getDbFields from "../libs/validator/getDbFields";
 import {IUserConnected, IUserCreation} from "../interfaces/models/User";
 import {findOneUserByUsernameOrEmail} from "../repositories/UserRepository";
 import bcrypt from "bcryptjs";
@@ -11,12 +10,12 @@ import compileDataValues from "../libs/compileDatavalues";
 
 const router = Router();
 
-router.post("/register", (req,res) => {
-    const validateRes = validate(req.body, RegisterForm);
-    if (validateRes !== true)
-        return res.status(422).json({violations: validateRes});
+router.post("/register", async (req,res) => {
+    const {success, computedData, violations} = await computeForm(req.body, RegisterForm);
+    if (!success)
+        return res.status(422).json({violations});
 
-    User.create(<IUserCreation>getDbFields(req.body, RegisterForm))
+    User.create(<IUserCreation><unknown>computedData)
         .then(() => res.sendStatus(201))
         .catch(e => res.sendStatus(e.name === 'SequelizeValidationError' ? 400 : e.name === 'SequelizeUniqueConstraintError' ? 409 : 500));
 });
