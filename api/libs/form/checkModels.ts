@@ -1,4 +1,4 @@
-import IField from "../../interfaces/validator/IField";
+import IField from "../../interfaces/form/IField";
 import isNumber from "../isNumber";
 
 export default async function checkModels(

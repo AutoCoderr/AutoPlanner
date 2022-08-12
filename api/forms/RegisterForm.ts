@@ -1,4 +1,4 @@
-import IForm from "../interfaces/validator/IForm";
+import IForm from "../interfaces/form/IForm";
 import email from "../asserts/email";
 import password from "../asserts/password";
 import confirm_password from "../asserts/confirm_password";

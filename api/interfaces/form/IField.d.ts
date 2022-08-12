@@ -1,4 +1,3 @@
-import {IUserConnected} from "../models/User";
 import Folder from "../../models/Folder";
 import Node from "../../models/Node";
 import Response from "../../models/Response";
@@ -6,10 +5,11 @@ import Step from "../../models/Step";
 import Todo from "../../models/Todo";
 import TodoModel from "../../models/TodoModel";
 import User from "../../models/User";
+import IReqData from "./IReqData";
 
 interface IField {
     required?: boolean;
-    valid?: (value: any, data?: {[key: string]: any}, connectedUser: undefined|IUserConnected) => Promise<boolean>|boolean;
+    valid?: (value: any, data: {[key: string]: any}, reqData: IReqData) => Promise<boolean>|boolean;
     format?: (value: any) => Promise<any>|any;
     msg: string;
     inDB?: boolean;
