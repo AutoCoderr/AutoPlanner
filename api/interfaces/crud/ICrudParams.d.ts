@@ -1,6 +1,6 @@
 interface ICrudParams {
     errorCode?: number | ((e) => number),
-    finished?: (createdElement) => Promise<any>|any
+    finished?: (element: any = undefined) => Promise<any>|any
 }
 
-export default IPostParams;
+export default ICrudParams;

@@ -1,7 +1,6 @@
 import IForm from "../../interfaces/form/IForm";
-import IReqData from "../../interfaces/form/IReqData";
 
-export default async function getFields(data: {[key: string]: any}, form: IForm, reqData: IReqData, withNotStoredFields = false) {
+export default async function getFields(data: {[key: string]: any}, form: IForm, withNotStoredFields = false) {
     const formattedData = await Promise.all(
         Object.entries(data)
             .filter(([key]) => withNotStoredFields || (form.fields[key].inDB??true))
@@ -18,7 +17,7 @@ export default async function getFields(data: {[key: string]: any}, form: IForm,
         await Promise.all(
             Object.entries(form.additionalFields).map(async ([key,f]) => [
                 key,
-                await f(formattedData,reqData)
+                await f(formattedData)
             ])
         ).then(arrayedData => arrayedData.reduce((acc,[key,value]) => ({
             ...acc,

@@ -2,8 +2,9 @@ import IForm from "../interfaces/form/IForm";
 import email from "../asserts/email";
 import password from "../asserts/password";
 import confirm_password from "../asserts/confirm_password";
+import IFormGetter from "../interfaces/form/IFormGetter";
 
-const RegisterForm: IForm = {
+const getRegisterForm: IFormGetter = () => ({
     fields: {
         email: {
             msg: "Adresse mail invalide",
@@ -27,6 +28,6 @@ const RegisterForm: IForm = {
             inDB: false
         }
     }
-};
+})
 
-export default RegisterForm;
+export default getRegisterForm;

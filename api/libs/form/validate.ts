@@ -1,8 +1,7 @@
 import IField from "../../interfaces/form/IField";
 import IViolation from "../../interfaces/form/IViolations";
-import IReqData from "../../interfaces/form/IReqData";
 
-export default async function validate(data: {[key: string]: any}, fields: {[key: string]: IField }, reqData: IReqData) {
+export default async function validate(data: {[key: string]: any}, fields: {[key: string]: IField }) {
         const violations: IViolation[] = await <Promise<IViolation[]>>Promise.all(Object.entries(fields).map(async ([key,{msg, required, valid, model}]) => {
             if (data[key] === undefined && (required??true))
                 return {
@@ -14,7 +13,7 @@ export default async function validate(data: {[key: string]: any}, fields: {[key
                     propertyPath: key,
                     message: "Données irrécupérables"
                 }
-            if (data[key] !== undefined && valid && !(await valid(data[key],data,reqData)))
+            if (data[key] !== undefined && valid && !(await valid(data[key],data)))
                 return {
                     propertyPath: key,
                     message: msg

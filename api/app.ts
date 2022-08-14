@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import account from "./routes/account";
 import isAuth from "./middleWare/isAuth";
+import todo from "./routes/todo";
 
 const app = express();
 
@@ -10,6 +11,7 @@ app.use(express.json());
 
 app.use("/account", account);
 
-app.get("/test", isAuth, (req, res) => res.send("Vous êtes connecté!"))
+app.use(isAuth);
+app.use("/todos", todo);
 
 export default app;

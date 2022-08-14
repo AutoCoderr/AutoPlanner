@@ -1,13 +1,9 @@
-import IField from "./IField";
-import IReqData from "./IReqData";
+import IFields from "./IFields";
+import IAdditionalFields from "./IAdditionalFields";
 
 interface IForm {
-    fields: {
-        [key: string]: IField
-    },
-    additionalFields?: {
-        [key: string]: (data: {[key: string]: any}, reqData: IReqData) => Promise<any>|any
-    }
+    fields: IFields,
+    additionalFields?: IAdditionalFields
 }
 
 export default IForm;

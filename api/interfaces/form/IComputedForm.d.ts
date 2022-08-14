@@ -1,5 +1,7 @@
 import IViolation from "./IViolations";
 
-type IComputedForm = Promise<{success: true, computedData: {[key: string]: string}, violations: null}|{success: false, violations: IViolation[], computedData: null}>;
+type IComputedForm = Promise<
+    {computedData: {[key: string]: string}, violations: null} |
+    {violations: IViolation[], computedData: null}>;
 
 export default IComputedForm;
