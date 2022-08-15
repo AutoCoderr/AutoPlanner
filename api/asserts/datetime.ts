@@ -1,0 +1,1 @@
+export default (value: string|number) => !isNaN(new Date(value).getTime());

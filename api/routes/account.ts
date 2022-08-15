@@ -1,24 +1,20 @@
 import {Router} from "express";
-import computeForm from "../libs/validator/computeForm";
-import RegisterForm from "../forms/RegisterForm";
+import getRegisterForm from "../forms/getRegisterForm";
 import User from "../models/User";
-import {IUserConnected, IUserCreation} from "../interfaces/models/User";
+import {IUserConnected} from "../interfaces/models/User";
 import {findOneUserByUsernameOrEmail} from "../repositories/UserRepository";
 import bcrypt from "bcryptjs";
 import generateJWTAccessToken from "../libs/jwt/generateJWTAccessToken";
 import compileDataValues from "../libs/compileDatavalues";
+import post from "../libs/crud/requests/post";
+import specifiedUserCreateAccessCheck from "../security/createWriteChecks/specifiedUserCreateAccessCheck";
 
 const router = Router();
 
-router.post("/register", async (req,res) => {
-    const {success, computedData, violations} = await computeForm(req.body, RegisterForm);
-    if (!success)
-        return res.status(422).json({violations});
 
-    User.create(<IUserCreation><unknown>computedData)
-        .then(() => res.sendStatus(201))
-        .catch(e => res.sendStatus(e.name === 'SequelizeValidationError' ? 400 : e.name === 'SequelizeUniqueConstraintError' ? 409 : 500));
-});
+router.post("/register", post(User, getRegisterForm, specifiedUserCreateAccessCheck, {
+    errorCode: (e) => e.name === 'SequelizeValidationError' ? 400 : e.name === 'SequelizeUniqueConstraintError' ? 409 : 500
+}));
 
 router.post("/login", async (req,res) => {
     const {usernameOrEmail,password} = req.body;

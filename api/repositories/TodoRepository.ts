@@ -1,7 +1,7 @@
 import Todo from "../models/Todo";
 import Folder from "../models/Folder";
-import compileDataValues from "../libs/compileDatavalues";
 import {TodoWithParent} from "../interfaces/models/Todo";
+import IReqData from "../interfaces/form/IReqData";
 
 export function findOneTodoByIdWithParent(id: number): Promise<null|TodoWithParent> {
     return <Promise<null|TodoWithParent>>Todo.findOne({
@@ -11,4 +11,12 @@ export function findOneTodoByIdWithParent(id: number): Promise<null|TodoWithPare
             as: "parent"
         }
     })
+}
+
+export function findTodos(reqData: IReqData): Promise<Todo[]>|Todo[] {
+    return reqData.user ? <Promise<Todo[]>>Todo.findAll({
+        where: {
+            user_id: reqData.user.id
+        }
+    }) : []
 }

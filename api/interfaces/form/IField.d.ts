@@ -1,4 +1,3 @@
-import {IUserConnected} from "../models/User";
 import Folder from "../../models/Folder";
 import Node from "../../models/Node";
 import Response from "../../models/Response";
@@ -9,7 +8,7 @@ import User from "../../models/User";
 
 interface IField {
     required?: boolean;
-    valid?: (value: any, data?: {[key: string]: any}, connectedUser: undefined|IUserConnected) => Promise<boolean>|boolean;
+    valid?: (value: any, data: {[key: string]: any}) => Promise<boolean>|boolean;
     format?: (value: any) => Promise<any>|any;
     msg: string;
     inDB?: boolean;
