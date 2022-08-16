@@ -1,7 +1,7 @@
 import allModelsTypes from "../allModelsType";
 import IAccessCheck from "./security/IAccessCheck";
 import IGetAndCheckExistingResourceParams from "./IGetAndCheckExistingResourceParams";
-import IReqData from "../form/IReqData";
+import IReqData from "../IReqData";
 
 type IMiddleWareGenerator = (
     model: allModelsTypes,

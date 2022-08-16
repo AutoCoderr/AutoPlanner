@@ -1,7 +1,8 @@
 import Folder from "../models/Folder";
-import compileDataValues from "../libs/compileDatavalues";
 import Todo from "../models/Todo";
 import {FolderWithFolders, FolderWithParent, FolderWithTodos} from "../interfaces/models/Folder";
+import IReqData from "../interfaces/IReqData";
+import {Op} from "sequelize";
 
 export function findOneFolderByIdWithFolders(id: number): Promise<null|FolderWithFolders> {
     return <Promise<null|FolderWithFolders>>Folder.findOne({
@@ -31,4 +32,14 @@ export function findOneFolderByIdWithTodos(id: number): Promise<null|FolderWithT
             as: 'todos'
         }
     })
+}
+
+export function findFolders(reqData: IReqData): Promise<Folder[]>|Folder[] {
+    return reqData.user ?
+        <Promise<Folder[]>>Folder.findAll({
+            where: {
+                user_id: reqData.user.id,
+                parent_id: reqData.folder ? reqData.folder.id : {[Op.is]: null}
+            }
+        }) : []
 }

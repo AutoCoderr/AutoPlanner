@@ -12,7 +12,8 @@ interface IField {
     format?: (value: any) => Promise<any>|any;
     msg: string;
     inDB?: boolean;
-    model?: typeof Folder|typeof Node|typeof Response|typeof Step|typeof Todo|typeof TodoModel|typeof User
+    model?: typeof Folder|typeof Node|typeof Response|typeof Step|typeof Todo|typeof TodoModel|typeof User,
+    allowNull?: boolean
 }
 
 export default IField;

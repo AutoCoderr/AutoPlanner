@@ -17,7 +17,7 @@ export interface ITodo {
     priority: number;
     deadLine?: Date;
     model_id?: number;
-    parent_id?: number;
+    parent_id?: number|null;
     user_id: number;
 
     createdAt: Date;

@@ -3,11 +3,11 @@ import IAllGetter from "../../../interfaces/crud/IAllGetter";
 import getReqData from "../getReqData";
 import IGetAndCheckExistingResourceParams from "../../../interfaces/crud/IGetAndCheckExistingResourceParams";
 
-export default function getAll(getAllAccessCheck: IGetAllAccessCheck, allGetter: IAllGetter, params: IGetAndCheckExistingResourceParams = {}) {
+export default function getAll(allGetter: IAllGetter, getAllAccessCheck: null|IGetAllAccessCheck = null, params: IGetAndCheckExistingResourceParams = {}) {
     return async function (req,res) {
         const reqData = getReqData(req);
 
-        if (!(await getAllAccessCheck(reqData)))
+        if (getAllAccessCheck && !(await getAllAccessCheck(reqData)))
             return res.sendStatus(params.forbiddenCode??403);
 
         const data = await allGetter(reqData);

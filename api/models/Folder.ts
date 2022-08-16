@@ -20,7 +20,7 @@ class Folder extends Model<InferAttributes<Folder>, IFolderCreation> implements 
     declare percentSynchronized: boolean;
     declare deadLine?: Date;
     declare priority: number;
-    declare parent_id?: number;
+    declare parent_id?: number|null;
     declare user_id: number;
 
     declare createdAt: Date;

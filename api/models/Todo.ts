@@ -25,7 +25,7 @@ class Todo extends Model<InferAttributes<Todo>, ITodoCreation> implements ITodo 
     declare deadLine?: Date;
     declare user_id: number;
     declare model_id?: number;
-    declare parent_id?: number;
+    declare parent_id?: number|null;
 
     declare createdAt: Date;
     declare updatedAt: Date;

@@ -1,4 +1,3 @@
-import migrate from "../libs/migrate";
 import sequelize from "../sequelize";
 import Folder from "../models/Folder";
 import TodoModel from "../models/TodoModel";
@@ -27,8 +26,6 @@ let t;
 
 
 beforeAll(async () => {
-    await migrate()
-
     t = await sequelize.transaction();
     sequelize.constructor['_cls'] = new Map();
     sequelize.constructor['_cls'].set('transaction', t);
