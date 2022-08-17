@@ -7,12 +7,11 @@ import bcrypt from "bcryptjs";
 import generateJWTAccessToken from "../libs/jwt/generateJWTAccessToken";
 import compileDataValues from "../libs/compileDatavalues";
 import post from "../libs/crud/requests/post";
-import specifiedUserCreateAccessCheck from "../security/createWriteChecks/specifiedUserCreateAccessCheck";
 
 const router = Router();
 
 
-router.post("/register", post(User, getRegisterForm, specifiedUserCreateAccessCheck, {
+router.post("/register", post(User, getRegisterForm, null, {
     errorCode: (e) => e.name === 'SequelizeValidationError' ? 400 : e.name === 'SequelizeUniqueConstraintError' ? 409 : 500
 }));
 

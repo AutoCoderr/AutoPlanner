@@ -17,7 +17,7 @@ export interface IFolder {
     percentSynchronized: boolean;
     deadLine?: Date;
     priority: number;
-    parent_id?: number;
+    parent_id?: number|null;
     user_id: number;
 
     createdAt: Date;

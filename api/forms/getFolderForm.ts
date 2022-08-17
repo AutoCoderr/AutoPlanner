@@ -1,29 +1,35 @@
-import datetime from "../asserts/datetime";
-import formatNumber from "../asserts/format/formatNumber";
-import formatInteger from "../asserts/format/formatInteger";
-import formatDatetime from "../asserts/format/formatDatetime";
 import IFormGetter from "../interfaces/form/IFormGetter";
+import formatNumber from "../asserts/format/formatNumber";
+import boolean from "../asserts/boolean";
+import formatInteger from "../asserts/format/formatInteger";
 import percent from "../asserts/percent";
 import priority from "../asserts/priority";
+import datetime from "../asserts/datetime";
+import formatDatetime from "../asserts/format/formatDatetime";
 import Folder from "../models/Folder";
 import folderAccessCheck from "../security/accessChecks/folderAccessCheck";
 
-const getTodoForm: IFormGetter = (reqData) => ({
+const getFolderForm: IFormGetter = (reqData) => ({
     fields: {
         name: {
             msg: "Le nom doit faire entre 2 et 50 caractères",
-            valid: value => 2 <= value.length && value.length <= 50,
+            valid: value => value.length >= 2 && value.length <= 50,
             required: true
         },
         description: {
-            msg: "Le description doit faire entre 2 et 200 caractères",
-            valid: value => 2 <= value.length && value.length <= 200,
+            msg: "La description doit faire entre 2 et 200 caractères",
+            valid: value => value.length >= 2 && value.length <= 200,
             required: false
         },
         percent: {
             msg: "Vous devez rentrer un nombre entre 0 et 100",
             valid: percent,
             format: formatNumber,
+            required: false
+        },
+        percentSynchronized: {
+            msg: "Vous devez rentrer un booléen",
+            valid: boolean,
             required: false
         },
         priority: {
@@ -53,4 +59,4 @@ const getTodoForm: IFormGetter = (reqData) => ({
     }
 })
 
-export default getTodoForm;
+export default getFolderForm;

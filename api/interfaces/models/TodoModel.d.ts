@@ -12,7 +12,7 @@ import TodoModel from "../../models/TodoModel";
 export interface ITodoModel {
     id: number;
     name: string;
-    description: string;
+    description?: string;
     published: boolean;
     firstnode_id?: number;
     user_id: number;

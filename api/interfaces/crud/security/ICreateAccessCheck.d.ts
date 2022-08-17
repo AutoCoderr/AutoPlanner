@@ -1,4 +1,4 @@
-import IReqData from "../../form/IReqData";
+import IReqData from "../../IReqData";
 
 type ICreateAccessCheck = (
     reqData: IReqData

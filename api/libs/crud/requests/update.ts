@@ -8,7 +8,7 @@ import computeForm from "../../form/computeFields";
 import getReqData from "../getReqData";
 import IFormGetter from "../../../interfaces/form/IFormGetter";
 
-export default function update(model, formGetter: IFormGetter, fieldExtractor: ((form: IForm) => IForm)|null, accessCheck: IAccessCheck, params: ICrudParams&IGetAndCheckExistingResourceParams = {}) {
+export default function update(model, formGetter: IFormGetter, accessCheck: IAccessCheck, fieldExtractor: ((form: IForm) => IForm)|null = null, params: ICrudParams&IGetAndCheckExistingResourceParams = {}) {
     return async function (req,res) {
         const {id} = req.params;
 
@@ -36,16 +36,17 @@ export default function update(model, formGetter: IFormGetter, fieldExtractor: (
                 if (params.finished)
                     await params.finished(elem);
 
-                res.sendStatus(200)
+                res.status(200).json(elem);
             })
-            .catch(e =>
+            .catch(e => {
+                console.error(e);
                 res.sendStatus(
-                    typeof(params.errorCode) === "number" ?
+                    typeof (params.errorCode) === "number" ?
                         params.errorCode :
-                        typeof(params.errorCode) === "function" ?
+                        typeof (params.errorCode) === "function" ?
                             params.errorCode(e) :
                             500
                 )
-            )
+            });
     }
 }
