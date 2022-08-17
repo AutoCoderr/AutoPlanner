@@ -6,10 +6,9 @@ import Folder from "../models/Folder";
 import getFolderForm from "../forms/getFolderForm";
 import get from "../libs/crud/requests/get";
 import folderAccessCheck from "../security/accessChecks/folderAccessCheck";
-import put from "../libs/crud/requests/put";
 import deleteOne from "../libs/crud/requests/deleteOne";
-import patch from "../libs/crud/requests/patch";
 import extractFields from "../libs/form/extractFields";
+import update from "../libs/crud/requests/update";
 
 const router = Router();
 
@@ -19,10 +18,10 @@ router.post("/", post(Folder, getFolderForm));
 
 router.get("/:id", get(Folder, folderAccessCheck));
 
-router.put("/:id", put(Folder, getFolderForm, folderAccessCheck));
+router.put("/:id", update(Folder, getFolderForm, folderAccessCheck));
 
 for (const field of (['name','description','percent','percentSynchronized','priority','deadLine','parent_id'])) {
-    router.patch("/:id/"+field, patch(Folder, getFolderForm, extractFields(field), folderAccessCheck));
+    router.patch("/:id/"+field, update(Folder, getFolderForm, folderAccessCheck, extractFields(field)));
 }
 
 router.delete("/:id", deleteOne(Folder, folderAccessCheck));

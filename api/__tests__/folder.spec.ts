@@ -433,6 +433,26 @@ describe("Tests update folder", () => {
             })
     })
 
+    test("Patch folder with bad parent", () => {
+        return request(app)
+            .patch("/folders/"+folder.id+"/parent_id")
+            .set('Authorization', 'Bearer ' + jwt)
+            .send({
+                parent_id: 123456789
+            })
+            .then(res => {
+                expect(res.statusCode).toEqual(422);
+                expect(JSON.parse(res.text)).toEqual({
+                    "violations": [
+                        {
+                            "propertyPath": "parent_id",
+                            "message": "Données irrécupérables"
+                        }
+                    ]
+                });
+            })
+    })
+
     test("Patch folder", async () => {
         const toPatch = {
             description: "Ananas",

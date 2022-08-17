@@ -8,13 +8,17 @@ export default async function validate(data: {[key: string]: any}, fields: {[key
                     propertyPath: key,
                     message: "Champs '"+key+"' non spécifié",
                 };
-            if (!allowNull && data[key] === null && model)
+
+            if (data[key] === undefined)
+                return null;
+
+            if (model && !(data[key] instanceof model) && (!allowNull || data[key] !== null))
                 return {
                     propertyPath: key,
                     message: "Données irrécupérables"
                 }
+
             if (
-                data[key] !== undefined &&
                 (
                     !allowNull ||
                     data[key] !== null ||

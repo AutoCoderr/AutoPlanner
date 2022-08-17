@@ -19,13 +19,10 @@ export default async function checkModels(
                 computedData
             )
 
-        const value = field.model ?
-            isNumber(data[key]) ? //@ts-ignore
+        const value = (field.model && isNumber(data[key])) ? //@ts-ignore
                 await field.model.findOne({
                   where: {id: parseInt(data[key])}
-                }) :
-                null :
-            data[key]
+                }).then(res => res??data[key]) : data[key]
 
 
         return checkModels(

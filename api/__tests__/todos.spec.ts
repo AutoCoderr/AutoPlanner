@@ -443,7 +443,6 @@ describe("Test update todo", () => {
     let t;
 
     let todo: Todo;
-    let todo2: Todo;
 
     let folder: Folder;
     let badFolder: Folder;
@@ -469,14 +468,6 @@ describe("Test update todo", () => {
             deadLine: new Date("2022/09/10"),
             user_id: user.id,
             parent_id: folder.id
-        })
-
-        todo2 = await Todo.create({
-            name: "Manger des bananes",
-            description: "C'est plein de potatium",
-            priority: 2,
-            deadLine: new Date("2022/09/10"),
-            user_id: user.id
         })
     })
 
@@ -562,6 +553,26 @@ describe("Test update todo", () => {
                     parent_id: null,
                     model_id: null
                 })
+            })
+    })
+
+    test("Patch todo with bad parent", () => {
+        return request(app)
+            .patch("/todos/"+todo.id+"/parent_id")
+            .set('Authorization', 'Bearer ' + jwt)
+            .send({
+                parent_id: "ze6e56"
+            })
+            .then(res => {
+                expect(res.statusCode).toEqual(422);
+                expect(JSON.parse(res.text)).toEqual({
+                    "violations": [
+                        {
+                            "propertyPath": "parent_id",
+                            "message": "Données irrécupérables"
+                        }
+                    ]
+                });
             })
     })
 

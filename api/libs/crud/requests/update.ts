@@ -8,7 +8,7 @@ import computeForm from "../../form/computeFields";
 import getReqData from "../getReqData";
 import IFormGetter from "../../../interfaces/form/IFormGetter";
 
-export default function update(model, formGetter: IFormGetter, fieldExtractor: ((form: IForm) => IForm)|null, accessCheck: IAccessCheck, params: ICrudParams&IGetAndCheckExistingResourceParams = {}) {
+export default function update(model, formGetter: IFormGetter, accessCheck: IAccessCheck, fieldExtractor: ((form: IForm) => IForm)|null = null, params: ICrudParams&IGetAndCheckExistingResourceParams = {}) {
     return async function (req,res) {
         const {id} = req.params;
 
