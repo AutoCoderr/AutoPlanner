@@ -6,7 +6,7 @@ export default async function getFields(data: {[key: string]: any}, form: IForm,
             .filter(([key]) => withNotStoredFields || (form.fields[key].inDB??true))
             .map(async ([key,value]) => [
                 key,
-                (!form.fields[key].allowNull || value !== null || !form.fields[key].model) ?
+                (!(form.fields[key].allowNull ?? !form.fields[key].required) || value !== null) ?
                     ((await form.fields[key].format?.(value)) ?? value) : value
             ])
     ).then(arrayedData => arrayedData.reduce((acc,[key,value]) => ({

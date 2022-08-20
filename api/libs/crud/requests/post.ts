@@ -11,7 +11,7 @@ export default function post(model, formGetter: IFormGetter, createAccessCheck: 
         if (createAccessCheck && !(await createAccessCheck(reqData)))
             return res.sendStatus(403);
 
-        const {computedData, violations} = await computeForm(req.body, formGetter(reqData));
+        const {computedData, violations} = await computeForm(req.body, formGetter(reqData,req.method.toLowerCase(), null));
         if (violations)
             return res.status(422).json({violations});
 

@@ -9,12 +9,13 @@ import formatDatetime from "../asserts/format/formatDatetime";
 import Folder from "../models/Folder";
 import folderAccessCheck from "../security/accessChecks/folderAccessCheck";
 
-const getFolderForm: IFormGetter = (reqData) => ({
+const getFolderForm: IFormGetter = (reqData, method) => ({
+    model: Folder,
     fields: {
         name: {
             msg: "Le nom doit faire entre 2 et 50 caractères",
             valid: value => value.length >= 2 && value.length <= 50,
-            required: true
+            required: method !== "patch"
         },
         description: {
             msg: "La description doit faire entre 2 et 200 caractères",
@@ -49,14 +50,13 @@ const getFolderForm: IFormGetter = (reqData) => ({
             model: Folder,
             valid: (folder: Folder) => folderAccessCheck(folder, "update", reqData.user),
             format: (folder: Folder) => folder.id,
-            allowNull: true,
             required: false
         }
     },
-    additionalFields: {
+    additionalFields: method === "post" ? {
         user_id: () => reqData.user?.id,
         parent_id: () => reqData.folder?.id
-    }
+    } : undefined
 })
 
 export default getFolderForm;

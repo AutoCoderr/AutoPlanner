@@ -535,7 +535,7 @@ describe("Test update todo", () => {
             .send({
                 "name": "Coucou",
                 "priority": 5,
-                "deadLine": "2025/08/10",
+                "deadLine": null,
                 "parent_id": null
             })
             .then(res => {
@@ -546,7 +546,7 @@ describe("Test update todo", () => {
                     description: "C'est plein de potatium",
                     percent: 0,
                     priority: 5,
-                    deadLine: new Date("2025/08/10").toISOString(),
+                    deadLine: null,
                     createdAt: todo.createdAt.toISOString(),
                     updatedAt: expect.any(String),
                     user_id: user.id,
@@ -558,7 +558,7 @@ describe("Test update todo", () => {
 
     test("Patch todo with bad parent", () => {
         return request(app)
-            .patch("/todos/"+todo.id+"/parent_id")
+            .patch("/todos/"+todo.id)
             .set('Authorization', 'Bearer ' + jwt)
             .send({
                 parent_id: "ze6e56"
@@ -581,7 +581,8 @@ describe("Test update todo", () => {
             description: "Ananas",
             percent: 99,
             priority: 1,
-            parent_id: folder.id
+            parent_id: folder.id,
+            deadLine: "2050/12/12"
         };
         const toMatch = {
             id: expect.any(Number),
@@ -609,7 +610,7 @@ describe("Test update todo", () => {
 
         return Promise.all(todosToPatchByField.map(([field,todo]) =>
             request(app)
-                .patch("/todos/"+todo.id+"/"+field)
+                .patch("/todos/"+todo.id)
                 .set('Authorization', 'Bearer ' + jwt)
                 .send({
                     [field]: toPatch[field]
@@ -618,7 +619,7 @@ describe("Test update todo", () => {
                     expect(res.statusCode).toEqual(200)
                     expect(JSON.parse(res.text)).toEqual({
                         ...toMatch,
-                        [field]: toPatch[field]
+                        [field]: field === "deadLine" ? new Date(toPatch[field]).toISOString() : toPatch[field]
                     })
                 })
         ))

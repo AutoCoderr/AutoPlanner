@@ -1,5 +1,4 @@
 import IAccessCheck from "../../../interfaces/crud/security/IAccessCheck";
-import ICrudParams from "../../../interfaces/crud/ICrudParams";
 import getAndCheckExistingResource from "../getAndCheckExistingResource";
 import IGetAndCheckExistingResourceParams from "../../../interfaces/crud/IGetAndCheckExistingResourceParams";
 import isNumber from "../../isNumber";
@@ -7,8 +6,9 @@ import IForm from "../../../interfaces/form/IForm";
 import computeForm from "../../form/computeFields";
 import getReqData from "../getReqData";
 import IFormGetter from "../../../interfaces/form/IFormGetter";
+import IUpdateParams from "../../../interfaces/crud/IUpdateParams";
 
-export default function update(model, formGetter: IFormGetter, accessCheck: IAccessCheck, fieldExtractor: ((form: IForm) => IForm)|null = null, params: ICrudParams&IGetAndCheckExistingResourceParams = {}) {
+export default function update(model, formGetter: IFormGetter, accessCheck: IAccessCheck, params: IUpdateParams&IGetAndCheckExistingResourceParams = {}) {
     return async function (req,res) {
         const {id} = req.params;
 
@@ -22,8 +22,9 @@ export default function update(model, formGetter: IFormGetter, accessCheck: IAcc
 
         const reqData = getReqData(req);
 
-        const form = fieldExtractor ? fieldExtractor(formGetter(reqData)) : {...formGetter(reqData), additionalFields: undefined};
-        const {computedData, violations} = await computeForm(req.body, form);
+        const form_0 = formGetter(reqData, req.method.toLowerCase(), elem);
+        const form: IForm = params.fieldExtractor ? params.fieldExtractor(form_0) : form_0;
+        const {computedData, violations} = await computeForm(req.body, form, elem, params.checkAllFieldsUnique??false);
         if (violations)
             return res.status(422).json({violations});
 

@@ -1,8 +1,5 @@
 export default function compileDataValues(obj) {
-    if (typeof(obj) !== "object")
-        return obj;
-
-    if (obj === null || obj instanceof Date)
+    if (typeof(obj) !== "object" || obj === null || obj instanceof Date)
         return obj;
 
     if (obj instanceof Array)
