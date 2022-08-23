@@ -21,7 +21,8 @@ export default async function checkModels(
 
         const value = (field.model && isNumber(data[key])) ? //@ts-ignore
                 await field.model.findOne({
-                  where: {id: parseInt(data[key])}
+                    where: {id: parseInt(data[key])},
+                    include: field.include
                 }).then(res => res??data[key]) : data[key]
 
 

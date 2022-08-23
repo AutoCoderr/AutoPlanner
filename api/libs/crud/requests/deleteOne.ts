@@ -21,7 +21,7 @@ export default function deleteOne(model, accessCheck: IAccessCheck, params: ICru
         elem.destroy()
             .then(async () => {
                 if (params.finished)
-                    await params.finished();
+                    await params.finished(getReqData(req));
 
                 res.sendStatus(204);
             })

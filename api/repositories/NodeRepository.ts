@@ -3,6 +3,7 @@ import TodoModel from "../models/TodoModel";
 import compileDataValues from "../libs/compileDatavalues";
 import Response from "../models/Response";
 import {NodeWithChildren, NodeWithModel, NodeWithParents, NodeWithResponses} from "../interfaces/models/Node";
+import IReqData from "../interfaces/IReqData";
 
 export function findOneNodeByIdWithModel(id: number): Promise<null|NodeWithModel> {
     return <Promise<null|NodeWithModel>>Node.findOne({
@@ -48,4 +49,26 @@ export function findOneNodeByIdWithParents(id: number): Promise<null|NodeWithPar
             as: "parents"
         }
     }).then(res => compileDataValues(res))
+}
+
+export function findNodes(reqData: IReqData, subResourceType: null|'children'|'parents' = null): Promise<Node[]>|Node[] {
+    if (reqData.user === undefined)
+        return [];
+
+    if (reqData.node === undefined || subResourceType === null)
+        return reqData.model ? Node.findAll({
+            where: {
+                model_id: reqData.model.id
+            }
+        }) : []
+
+    return Node.findOne({
+        where: {
+            id: reqData.node.id
+        },
+        include: {
+            model: Node,
+            as: subResourceType
+        } // @ts-ignore
+    }).then((node: null|(NodeWithParents&NodeWithChildren)) => node[subResourceType])
 }

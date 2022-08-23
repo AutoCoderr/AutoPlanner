@@ -8,6 +8,11 @@ import {findModels} from "../repositories/ModelRepository";
 import TodoModel from "../models/TodoModel";
 import modelAccessCheck from "../security/accessChecks/modelAccessCheck";
 import getModelForm from "../forms/getModelForm";
+import getModelMiddleWare from "../middleWare/getModelMiddleWare";
+import getSubNodeRoute from "./getSubNodeRoute";
+import {TodoModelWithFirstNode} from "../interfaces/models/TodoModel";
+import nodeAccessCheck from "../security/accessChecks/nodeAccessCheck";
+import {modelIncludeFirstNode} from "../includeConfigs/model";
 
 const router = Router();
 
@@ -24,5 +29,13 @@ router.patch("/:id", update(TodoModel, getModelForm, modelAccessCheck, {
 }));
 
 router.delete("/:id", deleteOne(TodoModel, modelAccessCheck));
+
+router.get("/:id/firstnode", get(TodoModel, modelAccessCheck, {
+    include: modelIncludeFirstNode,
+    getter: (model: TodoModelWithFirstNode) => model.firstNode,
+    gettedAccessCheck: nodeAccessCheck
+}))
+
+router.use("/:model_id/nodes", getModelMiddleWare(), getSubNodeRoute());
 
 export default router;

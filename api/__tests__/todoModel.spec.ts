@@ -4,6 +4,8 @@ import app from "../app";
 import sequelize from "../sequelize";
 import TodoModel from "../models/TodoModel";
 import IViolation from "../interfaces/form/IViolations";
+import Node from "../models/Node";
+import Response from "../models/Response";
 
 let user: User;
 let user2: User;
@@ -79,6 +81,7 @@ describe("Test create models", () => {
             .post("/models")
             .set('Authorization', 'Bearer ' + jwt)
             .send({
+                name: true,
                 description: 1234
             })
             .then(res => {
@@ -87,7 +90,7 @@ describe("Test create models", () => {
                     "violations": [
                         {
                             "propertyPath": "name",
-                            "message": "Champs 'name' non spécifié"
+                            "message": "Le nom doit faire entre 2 et 50 caractères"
                         },
                         {
                             "propertyPath": "description",
@@ -170,6 +173,9 @@ describe("Tests update model", () => {
     let modelToPut: TodoModel;
     let modelToPatch: TodoModel;
 
+    let firstNode1: Node;
+    let firstNode2: Node;
+
     let model2: TodoModel;
 
     let modelOtherUserNotPublished: TodoModel;
@@ -184,6 +190,14 @@ describe("Tests update model", () => {
             name: "model to put",
             user_id: user.id
         });
+        firstNode1 = await Node.create({
+            text: "first node",
+            type: "action",
+            model_id: modelToPut.id
+        });
+        modelToPut.firstnode_id = firstNode1.id;
+        await modelToPut.save();
+
         model2 = await TodoModel.create({
             name: "model 2",
             published: true,
@@ -194,6 +208,13 @@ describe("Tests update model", () => {
             name: "model to patch",
             user_id: user.id
         });
+        firstNode2 = await Node.create({
+            text: "first node 2",
+            type: "action",
+            model_id: modelToPatch.id
+        });
+        modelToPatch.firstnode_id = firstNode2.id;
+        await modelToPatch.save();
 
         modelOtherUserNotPublished = await TodoModel.create({
             name: "other not published model",
@@ -298,7 +319,7 @@ describe("Tests update model", () => {
                     createdAt: modelToPut.createdAt.toISOString(),
                     updatedAt: expect.any(String),
                     user_id: user.id,
-                    firstnode_id: null
+                    firstnode_id: firstNode1.id
                 })
             })
     })
@@ -334,7 +355,7 @@ describe("Tests update model", () => {
                     createdAt: modelToPut.createdAt.toISOString(),
                     updatedAt: expect.any(String),
                     user_id: user.id,
-                    firstnode_id: null
+                    firstnode_id: firstNode1.id
                 })
 
                 return TodoModel.update({
@@ -456,7 +477,7 @@ describe("Tests update model", () => {
                     createdAt: modelToPatch.createdAt.toISOString(),
                     updatedAt: expect.any(String),
                     user_id: user.id,
-                    firstnode_id: null
+                    firstnode_id: firstNode2.id
                 })
             })
     })
@@ -499,7 +520,7 @@ describe("Tests update model", () => {
                     createdAt: modelToPatch.createdAt.toISOString(),
                     updatedAt: expect.any(String),
                     user_id: user.id,
-                    firstnode_id: null
+                    firstnode_id: firstNode2.id
                 })
             })
     })
@@ -514,6 +535,179 @@ describe("Tests update model", () => {
             .then(res => {
                 expect(res.statusCode).toEqual(403);
             })
+    })
+})
+
+function testPublishModel(model: TodoModel, firstnode: null|Node = null, success = false) {
+    return request(app)
+        .patch("/models/"+model.id)
+        .set('Authorization', 'Bearer ' + jwt)
+        .send({
+            published: true
+        })
+        .then(res => {
+            expect(res.statusCode).toEqual(success ? 200 : 422);
+            expect(JSON.parse(res.text)).toEqual((success && firstnode) ? {
+                id: model.id,
+                name: model.name,
+                description: model.description,
+                published: true,
+                firstnode_id: firstnode.id,
+                user_id: user.id,
+                createdAt: expect.any(String),
+                updatedAt: expect.any(String)
+            } : {
+                "violations": [
+                    {
+                        "propertyPath": "published",
+                        "message": "Vous ne pouvez pas encore publier ce modèle"
+                    }
+                ]
+            });
+        })
+}
+
+describe("Tests publish model, with invalid and valid tree", () => {
+    let t;
+
+    let model: TodoModel;
+    let firstnode: Node;
+    let action: Node;
+    let question: Node;
+    let responseAction: Node;
+    let responseQuestion: Node;
+
+    beforeAll(async () => {
+        t = await sequelize.transaction();
+        sequelize.constructor['_cls'] = new Map();
+        sequelize.constructor['_cls'].set('transaction', t);
+
+        model = await TodoModel.create({
+            name: "Test model",
+            user_id: user.id
+        });
+    });
+
+    afterAll(() => t.rollback());
+
+    test("Publish model without firstnode", () => {
+        return testPublishModel(model)
+    });
+
+    test("Publish model with only a firstnode", async () => {
+        firstnode = await Node.create({
+            text: "firstnode",
+            type: "action",
+            model_id: model.id
+        });
+
+        model.firstnode_id = firstnode.id;
+        await model.save();
+
+        return testPublishModel(model, firstnode, true)
+    })
+
+    test("Publish model with an orphan action", async () => {
+        await TodoModel.update({
+            published: false
+        }, {
+            where: {id: model.id}
+        })
+
+        action = await Node.create({
+            text: "action",
+            type: "action",
+            model_id: model.id
+        });
+
+        return testPublishModel(model);
+    })
+
+    test("Publish model with a linked action", async () => {
+        await firstnode.addChild(action);
+
+        return testPublishModel(model, firstnode, true);
+    })
+
+    test("Publish with two children on an action", async () => {
+        await TodoModel.update({
+            published: false
+        }, {
+            where: {id: model.id}
+        })
+        question = await Node.create({
+            text: "question",
+            type: "question",
+            model_id: model.id
+        });
+
+        await firstnode.addChild(question);
+
+        return testPublishModel(model);
+    })
+
+    test("Publish with an orphan question", async () => {
+        await firstnode.removeChild(question);
+
+        return testPublishModel(model);
+    })
+
+    test("Publish with a linked question but with 0 responses", async () => {
+        await action.addChild(question);
+
+        return testPublishModel(model);
+    })
+
+    test("Publish with a question which has children without associated responses", async () => {
+        responseAction = await Node.create({
+            text: "response action",
+            type: "action",
+            model_id: model.id
+        })
+        responseQuestion = await Node.create({
+            text: "response question",
+            type: "question",
+            model_id: model.id
+        })
+
+        await question.addChild(responseAction);
+        await question.addChild(responseQuestion);
+
+        return testPublishModel(model);
+    })
+
+    test("Publish with a question which has only one child with associated responses", async () => {
+        await Response.create({
+            text: "A",
+            question_id: question.id,
+            action_id: responseAction.id
+        })
+
+        return testPublishModel(model)
+    })
+
+    test("Publish with a question which has all associated responses", async () => {
+        await Response.create({
+            text: "B",
+            question_id: question.id,
+            action_id: responseQuestion.id
+        });
+
+        const subResponseAction = await Node.create({
+            text: "sub response action",
+            type: "action",
+            model_id: model.id
+        })
+
+        await responseQuestion.addChild(subResponseAction);
+
+        await Response.create({
+            text: "C",
+            question_id: responseQuestion.id,
+            action_id: subResponseAction.id
+        })
+
+        return testPublishModel(model, firstnode, true);
     })
 })
 

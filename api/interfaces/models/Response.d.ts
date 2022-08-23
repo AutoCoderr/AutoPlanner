@@ -1,4 +1,4 @@
-import {BelongsToSetAssociationMixin, Optional} from "sequelize";
+import {BelongsToSetAssociationMixin, InferAttributes, Optional} from "sequelize";
 import Node from "../../models/Node";
 
 export interface IResponse {
@@ -10,7 +10,7 @@ export interface IResponse {
     setQuestion: BelongsToSetAssociationMixin<Node, any>;
     setAction: BelongsToSetAssociationMixin<Node, any>;
 }
-export type IResponseCreation = Optional<IResponse, 'id' | 'setQuestion' | 'setAction'>;
+export type IResponseCreation = InferAttributes<Optional<IResponse, 'id' >>;
 
 export interface ResponseWithQuestion extends Response {
     question: Node

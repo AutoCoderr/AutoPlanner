@@ -2,7 +2,7 @@ import {
     BelongsToManyAddAssociationMixin,
     BelongsToManySetAssociationsMixin,
     BelongsToSetAssociationMixin,
-    HasManyAddAssociationMixin, Optional
+    HasManyAddAssociationMixin, InferAttributes, Optional
 } from "sequelize";
 import Folder from "../../models/Folder";
 import Todo from "../../models/Todo";
@@ -30,7 +30,7 @@ export interface IFolder {
     addAssociatedStep: BelongsToManyAddAssociationMixin<Step, any>;
     setUser: BelongsToSetAssociationMixin<User, any>;
 }
-export type IFolderCreation = Optional<IFolder, 'id' | 'description' | 'percent' | 'percentSynchronized' | 'priority' | 'parent_id' | 'deadLine' | 'createdAt' | 'updatedAt' | 'setParent' | 'addFolder' | 'addTodo' | 'setAssociatedSteps' | 'addAssociatedStep' | 'setUser'>;
+export type IFolderCreation = InferAttributes<Optional<IFolder, 'id' | 'description' | 'percent' | 'percentSynchronized' | 'priority' | 'parent_id' | 'deadLine' | 'createdAt' | 'updatedAt'>>;
 
 export interface FolderWithParent extends Folder {
     parent: null|IFolder

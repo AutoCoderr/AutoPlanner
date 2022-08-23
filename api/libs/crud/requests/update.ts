@@ -35,7 +35,7 @@ export default function update(model, formGetter: IFormGetter, accessCheck: IAcc
         elem.save()
             .then(async () => {
                 if (params.finished)
-                    await params.finished(elem);
+                    await params.finished(reqData, elem);
 
                 res.status(200).json(elem);
             })

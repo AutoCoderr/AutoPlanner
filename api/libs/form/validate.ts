@@ -4,6 +4,18 @@ import IForm from "../../interfaces/form/IForm";
 import {Op} from "sequelize";
 import compileDataValues from "../compileDatavalues";
 
+async function findOtherValidateErrorMsg(data: {[key: string]: any}, field: string, otherValidate: IField["otherValidates"]) {
+    if (!otherValidate || otherValidate.length === 0)
+        return null;
+
+    const {msg,valid} = otherValidate[0];
+
+    if (!(await valid(data[field],data)))
+        return msg;
+
+    return findOtherValidateErrorMsg(data, field, otherValidate.slice(1));
+}
+
 export default async function validate(
     data: {[key: string]: any},
     form: IForm,
@@ -22,7 +34,7 @@ export default async function validate(
     if (fieldsArray.length === 0)
         return violations;
 
-    const [field, {msg, required, valid, model, allowNull, unique, uniqueMsg}] = fieldsArray[0];
+    const [field, {msg, required, valid, otherValidates, model, allowNull, unique, uniqueMsg}] = fieldsArray[0];
 
     const computedRequired = (required??true);
     if (data[field] === undefined && computedRequired)
@@ -64,24 +76,28 @@ export default async function validate(
         (
             !computedAllowNull ||
             data[field] !== null
-        ) &&
-        valid &&
-        !(await valid(data[field],data))
-    )
-        return validate(
-            data,
-            form,
-            validatedData,
-            checkAllFieldsUnique,
-            fieldsArray.slice(1),
-            [
-                ...violations,
-                {
-                    propertyPath: field,
-                    message: typeof(msg) === "string" ? msg : msg(data)
-                }
-            ]
         )
+    ) {
+        const validateErrorMessage: string|null = (valid && !(await valid(data[field],data))) ?
+            typeof (msg) === "string" ? msg : msg(data) :
+            (await findOtherValidateErrorMsg(data, field, otherValidates))
+
+        if (validateErrorMessage !== null)
+            return validate(
+                data,
+                form,
+                validatedData,
+                checkAllFieldsUnique,
+                fieldsArray.slice(1),
+                [
+                    ...violations,
+                    {
+                        propertyPath: field,
+                        message: validateErrorMessage
+                    }
+                ]
+            )
+    }
 
     if (
         (data[field] !== undefined || checkAllFieldsUnique) &&

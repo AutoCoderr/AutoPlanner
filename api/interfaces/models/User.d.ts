@@ -1,4 +1,4 @@
-import {HasManyAddAssociationMixin, HasManySetAssociationsMixin, Optional} from "sequelize";
+import {HasManyAddAssociationMixin, HasManySetAssociationsMixin, InferAttributes, Optional} from "sequelize";
 import TodoModel from "../../models/TodoModel";
 import Todo from "../../models/Todo";
 import Folder from "../../models/Folder";
@@ -25,7 +25,7 @@ export interface IUser {
     setFolders: HasManySetAssociationsMixin<Folder, any>;
     addFolder: HasManyAddAssociationMixin<Folder, any>;
 }
-export type IUserCreation = Optional<IUser, 'id' | 'createdAt' | 'updatedAt' | 'setModels' | 'addModel' | 'setTodos' | 'addTodo' | 'setFolders' | 'addFolder'>;
+export type IUserCreation = InferAttributes<Optional<IUser, 'id' | 'createdAt' | 'updatedAt'>>;
 export type IUserConnected = Pick<IUser, 'id' | 'email' | 'username'>;
 
 export interface UserWithModels extends User {

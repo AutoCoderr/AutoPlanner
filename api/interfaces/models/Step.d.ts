@@ -1,7 +1,7 @@
 import {
     BelongsToManyAddAssociationMixin,
     BelongsToManySetAssociationsMixin,
-    BelongsToSetAssociationMixin, Optional
+    BelongsToSetAssociationMixin, InferAttributes, Optional
 } from "sequelize";
 import Node from "../../models/Node";
 import Todo from "../../models/Todo";
@@ -27,7 +27,7 @@ export interface IStep {
     setAssociatedFolders: BelongsToManySetAssociationsMixin<Folder, any>;
     addAssociatedFolder: BelongsToManyAddAssociationMixin<Folder, any>;
 }
-export type IStepCreation = Optional<IStep, 'id' | 'percent' | 'percentSynchronized' | 'nb' | 'deadLine' | 'createdAt' | 'updatedAt' | 'setNode' | 'setTodo' | 'setAssociatedTodos' | 'addAssociatedTodo' | 'setAssociatedFolders' | 'addAssociatedFolder'>;
+export type IStepCreation = InferAttributes<Optional<IStep, 'id' | 'percent' | 'percentSynchronized' | 'nb' | 'deadLine' | 'createdAt' | 'updatedAt'>>;
 
 export interface StepWithNode extends Step {
     node: Node
