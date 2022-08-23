@@ -358,7 +358,7 @@ describe("Tests update folder", () => {
             .set('Authorization', 'Bearer ' + jwt)
             .send({
                 description: 12,
-                percentSynchronized: "abc"
+                percentSynchronized: "abc",
             })
             .then(res => {
                 expect(res.statusCode).toEqual(422);
@@ -413,7 +413,8 @@ describe("Tests update folder", () => {
                 description: "coucou",
                 percentSynchronized: true,
                 priority: 2,
-                parent_id: parentFolder.id
+                parent_id: parentFolder.id,
+                deadLine: "2050/12/12"
             })
             .then(res => {
                 expect(res.statusCode).toEqual(200);
@@ -424,7 +425,7 @@ describe("Tests update folder", () => {
                     percent: null,
                     percentSynchronized: true,
                     priority: 2,
-                    deadLine: null,
+                    deadLine: new Date("2050/12/12").toISOString(),
                     createdAt: expect.any(String),
                     updatedAt: expect.any(String),
                     user_id: user.id,
@@ -435,7 +436,7 @@ describe("Tests update folder", () => {
 
     test("Patch folder with bad parent", () => {
         return request(app)
-            .patch("/folders/"+folder.id+"/parent_id")
+            .patch("/folders/"+folder.id)
             .set('Authorization', 'Bearer ' + jwt)
             .send({
                 parent_id: 123456789
@@ -459,7 +460,8 @@ describe("Tests update folder", () => {
             percent: 52,
             priority: 1,
             percentSynchronized: true,
-            parent_id: null
+            parent_id: null,
+            deadLine: null
         };
         const toMatch = {
             id: expect.any(Number),
@@ -468,11 +470,11 @@ describe("Tests update folder", () => {
             percent: null,
             percentSynchronized: false,
             priority: 4,
-            deadLine: null,
+            deadLine: new Date("2050/12/12").toISOString(),
             createdAt: expect.any(String),
             updatedAt: expect.any(String),
             user_id: user.id,
-            parent_id: parentFolder.id
+            parent_id: parentFolder.id,
         }
 
         const foldersToPatchByField: [string,Folder][] = await Promise.all(Object.entries(toPatch).map(async ([field]) => [
@@ -482,14 +484,15 @@ describe("Tests update folder", () => {
                 user_id: user.id,
                 description: "coucou",
                 parent_id: parentFolder.id,
-                priority: 4
+                priority: 4,
+                deadLine: new Date("2050/12/12")
             })
         ]))
 
         return Promise.all(
             foldersToPatchByField.map(([field, folder]) =>
                 request(app)
-                    .patch("/folders/"+parentFolder.id+"/folders/"+folder.id+"/"+field)
+                    .patch("/folders/"+parentFolder.id+"/folders/"+folder.id)
                     .set('Authorization', 'Bearer ' + jwt)
                     .send({
                         [field]: toPatch[field]

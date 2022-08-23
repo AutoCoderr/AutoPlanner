@@ -20,9 +20,7 @@ router.get("/:id", get(Folder, folderAccessCheck));
 
 router.put("/:id", update(Folder, getFolderForm, folderAccessCheck));
 
-for (const field of (['name','description','percent','percentSynchronized','priority','deadLine','parent_id'])) {
-    router.patch("/:id/"+field, update(Folder, getFolderForm, folderAccessCheck, extractFields(field)));
-}
+ router.patch("/:id", update(Folder, getFolderForm, folderAccessCheck));
 
 router.delete("/:id", deleteOne(Folder, folderAccessCheck));
 

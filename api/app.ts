@@ -4,7 +4,12 @@ import account from "./routes/account";
 import isAuth from "./middleWare/isAuth";
 import todo from "./routes/todo";
 import folder from "./routes/folder";
+import model from "./routes/model";
 import getFolderMiddleWare from "./middleWare/getFolderMiddleWare";
+import getSpecifiedUserMiddleWare from "./middleWare/getSpecifiedUserMiddleWare";
+import specifiedUser from "./routes/specifiedUser";
+import accessAllMiddleWare from "./middleWare/accessAllMiddleWare";
+import all from "./routes/all";
 
 const app = express();
 
@@ -13,9 +18,13 @@ app.use(express.json());
 
 app.use("/account", account);
 
-app.use(isAuth);
+app.use(isAuth());
 app.use("/todos", todo);
 app.use("/folders", folder);
+app.use("/models", model);
+
+app.use("/users/:specifiedUser_id", getSpecifiedUserMiddleWare(), specifiedUser);
+app.use("/all", accessAllMiddleWare(), all);
 
 const folderMiddleWare = getFolderMiddleWare();
 app.use("/folders/:folder_id/folders", folderMiddleWare, folder);

@@ -61,6 +61,10 @@ TodoModel.init(
         user_id: {
             type: DataTypes.INTEGER,
             allowNull: false
+        },
+        firstnode_id: {
+            type: DataTypes.INTEGER,
+            allowNull: true
         }
     },
     { //@ts-ignore

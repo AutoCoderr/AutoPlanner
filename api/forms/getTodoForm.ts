@@ -7,13 +7,15 @@ import percent from "../asserts/percent";
 import priority from "../asserts/priority";
 import Folder from "../models/Folder";
 import folderAccessCheck from "../security/accessChecks/folderAccessCheck";
+import Todo from "../models/Todo";
 
-const getTodoForm: IFormGetter = (reqData) => ({
+const getTodoForm: IFormGetter = (reqData, method) => ({
+    model: Todo,
     fields: {
         name: {
             msg: "Le nom doit faire entre 2 et 50 caractères",
             valid: value => 2 <= value.length && value.length <= 50,
-            required: true
+            required: method !== "patch"
         },
         description: {
             msg: "Le description doit faire entre 2 et 200 caractères",
@@ -43,14 +45,13 @@ const getTodoForm: IFormGetter = (reqData) => ({
             model: Folder,
             valid: (folder: Folder) => folderAccessCheck(folder, "update", reqData.user),
             format: (folder: Folder) => folder.id,
-            allowNull: true,
             required: false
         }
     },
-    additionalFields: {
+    additionalFields: method === "post" ? {
         user_id: () => reqData.user?.id,
         parent_id: () => reqData.folder?.id
-    }
+    } : undefined
 })
 
 export default getTodoForm;
