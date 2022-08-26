@@ -14,17 +14,22 @@ const getResponseForm: IFormGetter = function(reqData, mode)  {
                 valid: value => value.length >= 2 && value.length <= 140,
                 required: mode !== "patch",
             },
-            action_id: {
-                model: Node,
-                msg: "Vous ne pouvez pas ajouter de réponse à ce noeud",
-                include: nodeIncludeModelAndParents,
-                valid: (action: NodeWithModel&NodeWithParents) => reqData.node !== undefined &&
-                    nodeAccessCheck(action, "update", reqData.user) &&
-                    action.model_id === reqData.node.model_id &&
-                    action.parents.some(parent => parent.id === reqData.node?.id),
-                format: (action: Node) => action.id,
-                required: mode === "post"
-            }
+            ...(
+                mode === "post" ?
+                {
+                    action_id: {
+                        model: Node,
+                        msg: "Vous ne pouvez pas ajouter de réponse à ce noeud",
+                        include: nodeIncludeModelAndParents,
+                        valid: (action: NodeWithModel&NodeWithParents) => reqData.node !== undefined &&
+                            nodeAccessCheck(action, "update", reqData.user) &&
+                            action.model_id === reqData.node.model_id &&
+                            action.parents.some(parent => parent.id === reqData.node?.id),
+                        format: (action: Node) => action.id,
+                        required: true
+                    }
+                } : {}
+            )
         },
         additionalFields: mode === "post" ? {
             question_id: () => reqData.node?.id

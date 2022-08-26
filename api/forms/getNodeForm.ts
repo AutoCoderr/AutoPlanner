@@ -12,7 +12,7 @@ const getNodeForm: IFormGetter = function(reqData, mode)  {
 
             },
             type: {
-                msg: "Le type ne peut être que 'question' et 'action'",
+                msg: "Le type ne peut être que 'question' ou 'action'",
                 valid: value => ['question','action'].includes(value),
                 required: mode !== "patch"
             }

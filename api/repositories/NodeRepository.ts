@@ -70,5 +70,8 @@ export function findNodes(reqData: IReqData, subResourceType: null|'children'|'p
             model: Node,
             as: subResourceType
         } // @ts-ignore
-    }).then((node: null|(NodeWithParents&NodeWithChildren)) => node[subResourceType])
+    }).then((node: null|(NodeWithParents&NodeWithChildren)) => node[subResourceType].map(elem => ({
+        ...compileDataValues(elem),
+        RelationNode: undefined
+    })))
 }

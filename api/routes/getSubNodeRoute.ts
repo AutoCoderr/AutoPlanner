@@ -7,7 +7,7 @@ import {findNodes} from "../repositories/NodeRepository";
 import isNumber from "../libs/isNumber";
 import getAndCheckExistingResource from "../libs/crud/getAndCheckExistingResource";
 import nodeAccessCheck from "../security/accessChecks/nodeAccessCheck";
-import {nodeIncludeModel, nodeIncludeModelAndChildren} from "../includeConfigs/node";
+import {nodeIncludeModel} from "../includeConfigs/node";
 import {NodeWithChildren, NodeWithModel, NodeWithParents} from "../interfaces/models/Node";
 import deleteOne from "../libs/crud/requests/deleteOne";
 import getReqData from "../libs/crud/getReqData";
@@ -24,6 +24,29 @@ export default function getSubNodeRoute(subResourceType: null|'children'|'parent
             return reqData.node.addParent(node);
         }
     }))
+
+    router.post("/:id", async (req, res) => {
+        const reqData = getReqData(req);
+        if (subResourceType === null || reqData.node === undefined)
+            return res.sendStatus(400);
+
+        const {id} = req.params;
+
+        if (!isNumber(id))
+            return res.sendStatus(400);
+
+        const {elem, code} = await <Promise<{elem: Node|null, code: number|null}>>getAndCheckExistingResource(Node, id, "update", nodeAccessCheck, req.user);
+
+        if (!elem)
+            return res.sendStatus(code);
+
+        if (subResourceType === "children")
+            await reqData.node.addChild(elem)
+        else
+            await reqData.node.addParent(elem)
+
+        res.sendStatus(201);
+    })
 
     router.delete("/:id", subResourceType !== null ? (async (req, res) => {
         const reqData = getReqData(req);
