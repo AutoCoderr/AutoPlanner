@@ -19,7 +19,7 @@ const getResponseForm: IFormGetter = function(reqData, mode)  {
                 {
                     action_id: {
                         model: Node,
-                        msg: "Vous ne pouvez pas ajouter de réponse à ce noeud",
+                        msg: "Vous ne pouvez pas ajouter cette réponse à ce noeud",
                         include: nodeIncludeModelAndParents,
                         valid: (action: NodeWithModel&NodeWithParents) => reqData.node !== undefined &&
                             nodeAccessCheck(action, "update", reqData.user) &&

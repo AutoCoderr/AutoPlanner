@@ -7,6 +7,7 @@ import Node from "../models/Node";
 import expectElem from "../libs/expectElem";
 import compileDataValues from "../libs/compileDatavalues";
 import Response from "../models/Response";
+import {nodeIncludeResponses} from "../includeConfigs/node";
 
 let user: User;
 let user2: User;
@@ -55,6 +56,8 @@ describe("Tests generate tree", () => {
     let subChildAction: Node;
 
     let thirdChildNode: Node;
+
+    let thirdParent: Node;
 
     let childQuestion: Node;
     let response1: Response;
@@ -247,9 +250,9 @@ describe("Tests generate tree", () => {
             })
     })
 
-    test("Create third child node, and add firstnode as parent", () => {
+    test("Add firstnode to a third child as parent", () => {
         return request(app)
-            .post("/nodes/"+thirdChildNode.id+"/parent/"+firstnode.id)
+            .post("/nodes/"+thirdChildNode.id+"/parents/"+firstnode.id)
             .set('Authorization', 'Bearer ' + jwt)
             .then(res => {
                 expect(res.statusCode).toEqual(201)
@@ -264,7 +267,7 @@ describe("Tests generate tree", () => {
                 res,
                 code: 200,
                 checkDbElem: false,
-                toCheck: [childAction,childQuestion,thirdChildNode].map(child => compileDataValues(child))
+                toCheck: [thirdChildNode,childAction,childQuestion].map(child => compileDataValues(child))
             }))
     })
 
@@ -347,7 +350,7 @@ describe("Tests generate tree", () => {
                         "violations": [
                             {
                                 "propertyPath": "action_id",
-                                "message": "Vous ne pouvez pas ajouter de réponse à ce noeud"
+                                "message": "Vous ne pouvez pas ajouter cette réponse à ce noeud"
                             }
                         ]
                     }
@@ -373,7 +376,7 @@ describe("Tests generate tree", () => {
                         "violations": [
                             {
                                 "propertyPath": "action_id",
-                                "message": "Vous ne pouvez pas ajouter de réponse à ce noeud"
+                                "message": "Vous ne pouvez pas ajouter cette réponse à ce noeud"
                             }
                         ]
                     }
@@ -471,22 +474,22 @@ describe("Tests generate tree", () => {
             )
     })
 
-    /*test("Add child action as child to question response question", () => {
+    test("Add sub child action as child to question response question", () => {
         return request(app)
-            .post("/nodes/"+questionResponseQuestion.id+"/children/"+childAction.id)
+            .post("/nodes/"+questionResponseQuestion.id+"/children/"+subChildAction.id)
             .set('Authorization', 'Bearer ' + jwt)
             .then(res => {
                 expect(res.statusCode).toEqual(201);
             })
-    })*/
+    })
 
-    /*test("Add response between question response question and child action",() => {
+    test("Add response between question response question and sub child action",() => {
         return request(app)
-            .post("/node/"+questionResponseQuestion.id+"/responses")
+            .post("/nodes/"+questionResponseQuestion.id+"/responses")
             .set('Authorization', 'Bearer ' + jwt)
             .send({
                 text: "truc",
-                action_id: childAction.id
+                action_id: subChildAction.id
             })
             .then(res =>
                 expectElem({
@@ -496,10 +499,125 @@ describe("Tests generate tree", () => {
                     toCheck: {
                         id: expect.any(Number),
                         text: "truc",
-                        action_id: childAction.id,
+                        action_id: subChildAction.id,
                         question_id: questionResponseQuestion.id
                     }
                 })
             )
+    })
+
+    test("Create a third parent on sub child action", () => {
+        const toCreate = {
+            text: "third parent",
+            type: "action"
+        }
+        return request(app)
+            .post("/nodes/"+subChildAction.id+"/parents")
+            .set('Authorization', 'Bearer ' + jwt)
+            .send(toCreate)
+            .then(async res => {
+                thirdParent = await expectElem({
+                    res,
+                    code: 201,
+                    model: Node,
+                    toCheck: {
+                        ...toCreate,
+                        id: expect.any(Number),
+                        model_id: model.id
+                    }
+                })
+            })
+    });
+
+    test("Link third parent to first node", () => {
+        return request(app)
+            .post("/nodes/"+firstnode.id+"/children/"+thirdChildNode.id)
+            .set('Authorization', 'Bearer ' + jwt)
+            .then(res => {
+                expect(res.statusCode).toEqual(201);
+            })
+    })
+
+    test("Get sub child action parents", () => {
+        return request(app)
+            .get("/nodes/"+subChildAction.id+"/parents")
+            .set('Authorization', 'Bearer ' + jwt)
+            .then(res =>
+                expectElem({
+                    res,
+                    code: 200,
+                    checkDbElem: false,
+                    toCheck: [childAction,questionResponseQuestion,thirdParent].map(parent => compileDataValues(parent))
+                })
+            )
+    })
+
+    test("Remove third parent from sub child action parents", () => {
+        return request(app)
+            .delete("/nodes/"+subChildAction.id+"/parents/"+questionResponseQuestion.id)
+            .set('Authorization', 'Bearer ' + jwt)
+            .then(res =>
+                expectElem({
+                    res,
+                    code: 204,
+                    checkBody: false,
+                    model: Node,
+                    getter: () => Node.findOne({
+                        where: {id: questionResponseQuestion.id},
+                        include: nodeIncludeResponses
+                    }),
+                    toCheck: {
+                        ...compileDataValues(questionResponseQuestion),
+                        responses: []
+                    }
+                })
+            )
+    })
+
+
+    /*test("Re get sub child action parents", () => {
+        return request(app)
+            .get("/nodes/"+subChildAction.id+"/parents")
+            .set('Authorization', 'Bearer ' + jwt)
+            .then(res =>
+                expectElem({
+                    res,
+                    code: 200,
+                    checkDbElem: false,
+                    toCheck: [childAction,questionResponseQuestion].map(parent => compileDataValues(parent))
+                })
+            )
     })*/
 })
+
+/*describe("Tests update nodes", () => {
+    let t;
+
+    let model: TodoModel;
+    let node: Node;
+
+    beforeAll(async () => {
+        t = await sequelize.transaction();
+        sequelize.constructor['_cls'] = new Map();
+        sequelize.constructor['_cls'].set('transaction', t);
+
+        model = await TodoModel.create({
+           name: "model",
+           user_id: user.id
+        });
+        node = await Node.create({
+            text: "node",
+            type: "action",
+            model_id: model.id
+        })
+    });
+
+    afterAll(() => t.rollback());
+
+    test("Put with bad fields", () => {
+        return request(app)
+            .put("/nodes/"+node.id)
+            .set('Authorization', 'Bearer ' + jwt)
+            .send()
+    })
+})*/

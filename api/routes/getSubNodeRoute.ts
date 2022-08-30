@@ -28,15 +28,16 @@ export default function getSubNodeRoute(subResourceType: null|'children'|'parent
     router.post("/:id", async (req, res) => {
         const reqData = getReqData(req);
         if (subResourceType === null || reqData.node === undefined)
-            return res.sendStatus(400);
+            return res.sendStatus(404);
 
         const {id} = req.params;
 
         if (!isNumber(id))
             return res.sendStatus(400);
 
-        const {elem, code} = await <Promise<{elem: Node|null, code: number|null}>>getAndCheckExistingResource(Node, id, "update", nodeAccessCheck, req.user);
-
+        const {elem, code} = await <Promise<{elem: Node|null, code: number|null}>>getAndCheckExistingResource(Node, parseInt(id), "update", nodeAccessCheck, reqData.user, {
+            include: nodeIncludeModel
+        });
         if (!elem)
             return res.sendStatus(code);
 
@@ -80,7 +81,7 @@ export default function getSubNodeRoute(subResourceType: null|'children'|'parent
         else
             await reqData.node.removeParent(elem);
 
-        res.sendStatus(200);
+        res.sendStatus(204);
     }) : deleteOne(Node, nodeAccessCheck, {
         include: nodeIncludeModel
     }))
