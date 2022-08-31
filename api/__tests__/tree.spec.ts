@@ -301,7 +301,7 @@ describe("Tests generate tree", () => {
                 type: "action"
             },
             {
-                text: "question response response",
+                text: "question question response",
                 type: "question"
             }
         ].map(data =>
@@ -561,7 +561,6 @@ describe("Tests generate tree", () => {
                     res,
                     code: 204,
                     checkBody: false,
-                    model: Node,
                     getter: () => Node.findOne({
                         where: {id: questionResponseQuestion.id},
                         include: nodeIncludeResponses
@@ -574,8 +573,17 @@ describe("Tests generate tree", () => {
             )
     })
 
+    test("Remove sub child action from third parent children", () => {
+        return request(app)
+            .delete("/nodes/"+thirdParent.id+"/children/"+subChildAction.id)
+            .set('Authorization', 'Bearer ' + jwt)
+            .then(res => {
+                expect(res.statusCode).toEqual(204)
+            })
+    })
 
-    /*test("Re get sub child action parents", () => {
+
+    test("Re get sub child action parents", () => {
         return request(app)
             .get("/nodes/"+subChildAction.id+"/parents")
             .set('Authorization', 'Bearer ' + jwt)
@@ -584,10 +592,10 @@ describe("Tests generate tree", () => {
                     res,
                     code: 200,
                     checkDbElem: false,
-                    toCheck: [childAction,questionResponseQuestion].map(parent => compileDataValues(parent))
+                    toCheck: [childAction].map(parent => compileDataValues(parent))
                 })
             )
-    })*/
+    })
 })
 
 /*describe("Tests update nodes", () => {

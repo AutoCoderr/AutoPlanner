@@ -11,6 +11,7 @@ import {nodeIncludeModel} from "../includeConfigs/node";
 import {NodeWithChildren, NodeWithModel, NodeWithParents} from "../interfaces/models/Node";
 import deleteOne from "../libs/crud/requests/deleteOne";
 import getReqData from "../libs/crud/getReqData";
+import Response from "../models/Response";
 
 export default function getSubNodeRoute(subResourceType: null|'children'|'parents' = null) {
     const router = Router();
@@ -75,6 +76,13 @@ export default function getSubNodeRoute(subResourceType: null|'children'|'parent
 
         if (!elem)
             return res.sendStatus(code);
+
+        await Response.destroy({
+            where: {
+                question_id: subResourceType === "children" ? reqData.node.id : elem.id,
+                action_id: subResourceType === "parents" ? reqData.node.id : elem.id
+            }
+        })
 
         if (subResourceType === "children")
             await reqData.node.removeChild(elem);
