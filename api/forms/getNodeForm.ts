@@ -9,7 +9,6 @@ const getNodeForm: IFormGetter = function(reqData, mode)  {
                 msg: "Le texte doit faire entre 2 et 150 caractères",
                 valid: value => value.length >= 2 && value.length <= 150,
                 required: mode !== "patch",
-
             },
             type: {
                 msg: "Le type ne peut être que 'question' ou 'action'",

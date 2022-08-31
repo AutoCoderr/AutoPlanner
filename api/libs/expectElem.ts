@@ -1,5 +1,6 @@
 import compileDataValues from "./compileDatavalues";
 import allModelsTypes from "../interfaces/allModelsType";
+import {Includeable} from "sequelize/types/model";
 
 type obj = {[key: string]: any};
 type objs = object[];
@@ -13,6 +14,7 @@ interface IExpectElemParam {
     id?: number;
     getter?: (() => Promise<any>);
     model?: allModelsTypes;
+    include?: Includeable|Includeable[];
 }
 
 function getParamsValues(params: IExpectElemParam) {
@@ -51,7 +53,8 @@ export default async function expectElem(params: IExpectElemParam) {
     const elem = getter ?
         await getter() :
         await (<any>model).findOne({
-            where: { id: id??body.id }
+            where: { id: id??body.id },
+            include: params.include
         })
 
     expect(compileDataValues(elem)).toEqual(typeof(toCheck) == "function" ? toCheck(false) : toCheck);

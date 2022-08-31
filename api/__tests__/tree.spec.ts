@@ -445,7 +445,7 @@ describe("Tests generate tree", () => {
         })
     })
 
-    test("Get responses on an action", () => {
+    test("Get responses of an action", () => {
         return request(app)
             .get("/nodes/"+childAction.id+"/responses")
             .set('Authorization', 'Bearer ' + jwt)
@@ -598,34 +598,4 @@ describe("Tests generate tree", () => {
     })
 })
 
-/*describe("Tests update nodes", () => {
-    let t;
 
-    let model: TodoModel;
-    let node: Node;
-
-    beforeAll(async () => {
-        t = await sequelize.transaction();
-        sequelize.constructor['_cls'] = new Map();
-        sequelize.constructor['_cls'].set('transaction', t);
-
-        model = await TodoModel.create({
-           name: "model",
-           user_id: user.id
-        });
-        node = await Node.create({
-            text: "node",
-            type: "action",
-            model_id: model.id
-        })
-    });
-
-    afterAll(() => t.rollback());
-
-    test("Put with bad fields", () => {
-        return request(app)
-            .put("/nodes/"+node.id)
-            .set('Authorization', 'Bearer ' + jwt)
-            .send()
-    })
-})*/
