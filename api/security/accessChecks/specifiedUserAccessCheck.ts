@@ -1,4 +1,4 @@
-import IAccessCheck from "../../interfaces/crud/security/IAccessCheck";
+import {IAccessCheck} from "../../interfaces/crud/security/IAccessCheck";
 import User from "../../models/User";
 
 const specifiedUserAccessCheck: IAccessCheck = (specifiedUser: User, mode, user) =>

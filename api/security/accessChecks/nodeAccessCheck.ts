@@ -1,4 +1,4 @@
-import IAccessCheck from "../../interfaces/crud/security/IAccessCheck";
+import {IAccessCheck} from "../../interfaces/crud/security/IAccessCheck";
 import {NodeWithModel} from "../../interfaces/models/Node";
 import modelAccessCheck from "./modelAccessCheck";
 

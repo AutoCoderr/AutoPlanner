@@ -1,4 +1,4 @@
-import IGetAllAccessCheck from "../../interfaces/crud/security/IGetAllAccessCheck";
+import {IGetAllAccessCheck} from "../../interfaces/crud/security/IGetAllAccessCheck";
 
 const responseGetAllAccessCheck: IGetAllAccessCheck = (reqData) =>
     reqData.user !== undefined &&

@@ -43,6 +43,7 @@ Response.init(
 
 Response.belongsTo(Node, { foreignKey: "question_id", as: "question" });
 Node.hasMany(Response, { foreignKey: "question_id", as: "responses" });
+Node.hasMany(Response, { foreignKey: "action_id", as: "related_responses" })
 
 Response.belongsTo(Node, { foreignKey: "action_id", as: "action" });
 

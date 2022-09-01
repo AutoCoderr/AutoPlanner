@@ -2,7 +2,7 @@ import {Router} from "express";
 import get from "../libs/crud/requests/get";
 import Node from "../models/Node";
 import nodeAccessCheck from "../security/accessChecks/nodeAccessCheck";
-import {nodeIncludeModel} from "../includeConfigs/node";
+import {nodeIncludeModel, nodeIncludeModelAndChildren} from "../includeConfigs/node";
 import getNodeMiddleWare from "../middleWare/getNodeMiddleWare";
 import getSubNodeRoute from "./getSubNodeRoute";
 import deleteOne from "../libs/crud/requests/deleteOne";
@@ -54,7 +54,7 @@ router.patch("/:id/set_as_firstnode", async (req, res) => {
         })
 })
 
-router.use("/:node_id/children", getNodeMiddleWare(), getSubNodeRoute("children"));
+router.use("/:node_id/children", getNodeMiddleWare(nodeIncludeModelAndChildren), getSubNodeRoute("children"));
 router.use("/:node_id/parents", getNodeMiddleWare(), getSubNodeRoute("parents"));
 router.use("/:node_id/responses", getNodeMiddleWare(), subResponseRoute);
 

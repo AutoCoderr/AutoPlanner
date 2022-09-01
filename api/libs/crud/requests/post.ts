@@ -2,7 +2,7 @@ import computeForm from "../../form/computeFields";
 import ICrudParams from "../../../interfaces/crud/ICrudParams";
 import IReqData from "../../../interfaces/IReqData";
 import getReqData from "../getReqData";
-import ICreateAccessCheck from "../../../interfaces/crud/security/ICreateAccessCheck";
+import {ICreateAccessCheck} from "../../../interfaces/crud/security/ICreateAccessCheck";
 import IFormGetter from "../../../interfaces/form/IFormGetter";
 import IGetAndCheckExistingResourceParams from "../../../interfaces/crud/IGetAndCheckExistingResourceParams";
 

@@ -1,6 +1,6 @@
 import isNumber from "../../isNumber";
 import getAndCheckExistingResource from "../getAndCheckExistingResource";
-import IAccessCheck from "../../../interfaces/crud/security/IAccessCheck";
+import {IAccessCheck} from "../../../interfaces/crud/security/IAccessCheck";
 import IGetAndCheckExistingResourceParams from "../../../interfaces/crud/IGetAndCheckExistingResourceParams";
 
 export default function get(model, accessCheck: IAccessCheck, params: IGetAndCheckExistingResourceParams = {}) {

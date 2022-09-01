@@ -1,4 +1,4 @@
-import ICreateAccessCheck from "../../interfaces/crud/security/ICreateAccessCheck";
+import {ICreateAccessCheck} from "../../interfaces/crud/security/ICreateAccessCheck";
 
 const responseCreateAccessCheck: ICreateAccessCheck = (reqData) =>
     reqData.user !== undefined &&

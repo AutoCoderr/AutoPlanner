@@ -1,4 +1,4 @@
-import IAccessCheck from "../../interfaces/crud/security/IAccessCheck";
+import {IAccessCheck} from "../../interfaces/crud/security/IAccessCheck";
 import {ResponseWithQuestion} from "../../interfaces/models/Response";
 import TodoModel from "../../models/TodoModel";
 

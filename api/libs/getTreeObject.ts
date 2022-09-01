@@ -3,19 +3,27 @@ import TodoModel from "../models/TodoModel";
 import Node from "../models/Node";
 import {InferAttributes} from "sequelize";
 import compileDataValues from "./compileDatavalues";
+import Response from "../models/Response";
 
 export default async function getTreeObject(
     model: TodoModel,
     children0: null|InferAttributes<Node>[] = null,
     parent: null|InferAttributes<Node> = null,
-    data: {[id: string]: (InferAttributes<Node>&{parents: number[], children: number[]})} = {}) {
-
-    const children = children0 === null ? await findNodesWithoutParentsByModelId(model.id) : children0;
+    data: {[id: string]: (InferAttributes<Node>&{parents: number[], children: number[], isFirstNode: boolean, responsesByQuestionId?: {[question_id: string]: Response}})} = {})
+{
+    const children: InferAttributes<Node>[] = children0 === null ? await findNodesWithoutParentsByModelId(model.id) : children0;
 
     if (children.length === 0)
         return data;
 
     const child = children[0];
+
+    const relatedResponse = (parent && parent.type === "question") ? await Response.findOne({
+        where: {
+            question_id: parent.id,
+            action_id: child.id
+        }
+    }) : null
 
     const newData = {
         ...data,
@@ -23,7 +31,16 @@ export default async function getTreeObject(
             ...(data[child.id]??compileDataValues(child)),
             parents: parent ?
                 [...(data[child.id] ? data[child.id].parents??[] : []), parent.id] :
-                (data[child.id] ? data[child.id].parents : undefined)
+                (data[child.id] ? data[child.id].parents : undefined),
+            isFirstNode: child.id === model.firstnode_id,
+            ...(
+                relatedResponse ? {
+                    responsesByQuestionId: {
+                        ...(data[child.id] ? data[child.id].responsesByQuestionId??{} : {}),
+                        [relatedResponse.question_id]: relatedResponse
+                    }
+                } : {}
+            )
         },
         ...(
             parent ? {
@@ -32,7 +49,7 @@ export default async function getTreeObject(
                   children: [...(data[parent.id].children??[]), child.id]
               }
             } : {}
-        )
+        ),
     }
 
     const subChildren = await findNodeChildren(child.id);

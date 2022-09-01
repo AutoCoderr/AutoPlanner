@@ -1,4 +1,4 @@
-import IGetAllAccessCheck from "../../../interfaces/crud/security/IGetAllAccessCheck";
+import {IGetAllAccessCheck} from "../../../interfaces/crud/security/IGetAllAccessCheck";
 import IAllGetter from "../../../interfaces/crud/IAllGetter";
 import getReqData from "../getReqData";
 import IGetAndCheckExistingResourceParams from "../../../interfaces/crud/IGetAndCheckExistingResourceParams";

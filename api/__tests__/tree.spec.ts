@@ -150,7 +150,7 @@ describe("Tests generate tree", () => {
     test("Create node successfully", () => {
         const toCreate = {
             text: "firstnode",
-            type: "action"
+            type: "question"
         }
         return request(app)
             .post("/models/" + model.id + "/nodes")
@@ -291,6 +291,19 @@ describe("Tests generate tree", () => {
                         model_id: model.id
                     }
                 })
+            })
+    })
+
+    test("Add second child to action", () => {
+        return request(app)
+            .post("/nodes/"+childAction.id+"/children")
+            .set('Authorization', 'Bearer ' + jwt)
+            .send({
+                text: "Coucou",
+                type: "action"
+            })
+            .then(res => {
+                expect(res.statusCode).toEqual(403)
             })
     })
 
@@ -597,6 +610,15 @@ describe("Tests generate tree", () => {
             )
     })
 
+    test("Re add sub child action to third parent children", () => {
+        return request(app)
+            .post("/nodes/" + thirdParent.id + "/children/" + subChildAction.id)
+            .set('Authorization', 'Bearer ' + jwt)
+            .then(res => {
+                expect(res.statusCode).toEqual(201)
+            })
+    })
+
     test("Get all other model nodes", () => {
         return request(app)
             .get("/models/" + otherModel.id + "/nodes")
@@ -635,16 +657,25 @@ describe("Tests generate tree", () => {
         const childrenByParentId = {
             [firstnode.id]: [thirdChildNode.id, childAction.id, childQuestion.id, thirdParent.id],
             [childAction.id]: [subChildAction.id],
-            [childQuestion.id]: [questionResponseAction.id, questionResponseQuestion.id]
+            [childQuestion.id]: [questionResponseAction.id, questionResponseQuestion.id],
+            [thirdParent.id]: [subChildAction.id]
         };
         const parentsByChildId = {
             [childAction.id]: [firstnode.id],
             [childQuestion.id]: [firstnode.id],
             [thirdChildNode.id]: [firstnode.id],
             [thirdParent.id]: [firstnode.id],
-            [subChildAction.id]: [childAction.id],
+            [subChildAction.id]: [childAction.id, thirdParent.id],
             [questionResponseAction.id]: [childQuestion.id],
             [questionResponseQuestion.id]: [childQuestion.id]
+        }
+        const responsesByChildAndQuestionId = {
+            [questionResponseAction.id]: {
+                [childQuestion.id]: compileDataValues(response1)
+            },
+            [questionResponseQuestion.id]: {
+                [childQuestion.id]: compileDataValues(response2)
+            }
         }
         return request(app)
             .get("/models/" + model.id + "/tree")
@@ -676,7 +707,13 @@ describe("Tests generate tree", () => {
                                     {
                                         parents: parentsByChildId[node.id]
                                     } : {}
-                            )
+                            ),
+                            ...(responsesByChildAndQuestionId[node.id] ?
+                                    {
+                                        responsesByQuestionId: responsesByChildAndQuestionId[node.id]
+                                    } : {}
+                            ),
+                            isFirstNode: node.id === firstnode.id
                         },
                     }), {}),
                 })

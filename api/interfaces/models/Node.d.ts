@@ -37,3 +37,6 @@ export interface NodeWithModel extends Node {
 export interface NodeWithResponses extends Node {
     responses: Response[]
 }
+export interface NodeWithRelatedResponses extends Node {
+    related_responses: Response[]
+}

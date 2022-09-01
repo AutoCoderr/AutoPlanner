@@ -30,3 +30,9 @@ export const nodeIncludeResponses: Includeable = {
     model: Response,
     as: "responses"
 }
+
+export const getNodeIncludeRelatedResponses = (question_id: number) => ({
+    model: Response,
+    as: "related_responses",
+    where: {question_id}
+})

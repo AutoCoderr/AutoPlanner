@@ -1,4 +1,4 @@
-import IAccessCheck from "../../../interfaces/crud/security/IAccessCheck";
+import {IAccessCheck} from "../../../interfaces/crud/security/IAccessCheck";
 import getAndCheckExistingResource from "../getAndCheckExistingResource";
 import IGetAndCheckExistingResourceParams from "../../../interfaces/crud/IGetAndCheckExistingResourceParams";
 import isNumber from "../../isNumber";
