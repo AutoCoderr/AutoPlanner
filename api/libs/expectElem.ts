@@ -7,7 +7,7 @@ type objs = object[];
 
 interface IExpectElemParam {
     res: {statusCode: number, text: string};
-    toCheck: obj|objs|((jsonRes: boolean) => obj|objs);
+    toCheck: obj|objs|null|((jsonRes: boolean) => obj|objs|null);
     code: number;
     checkBody?: boolean;
     checkDbElem?: boolean;

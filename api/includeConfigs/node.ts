@@ -8,12 +8,14 @@ export const nodeIncludeModel: Includeable = {
     as: "model"
 }
 
+export const nodeIncludeChildren: Includeable = {
+    model: Node,
+    as: "children"
+}
+
 export const nodeIncludeModelAndChildren: Includeable[] = [
     nodeIncludeModel,
-    {
-        model: Node,
-        as: "children"
-    }
+    nodeIncludeChildren
 ]
 
 export const nodeIncludeModelAndParents: Includeable[] = [

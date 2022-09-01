@@ -99,7 +99,7 @@ describe("Tests generate tree", () => {
 
     test("Create node with bad fields", () => {
         return request(app)
-            .post("/models/"+model.id+"/nodes")
+            .post("/models/" + model.id + "/nodes")
             .set('Authorization', 'Bearer ' + jwt)
             .send({
                 type: "ananas"
@@ -123,7 +123,7 @@ describe("Tests generate tree", () => {
 
     test("Create node on another user model", () => {
         return request(app)
-            .post("/models/"+otherModel.id+"/nodes")
+            .post("/models/" + otherModel.id + "/nodes")
             .set('Authorization', 'Bearer ' + jwt)
             .send({
                 text: "coucou",
@@ -136,7 +136,7 @@ describe("Tests generate tree", () => {
 
     test("Create node on published model", () => {
         return request(app)
-            .post("/models/"+publishedModel.id+"/nodes")
+            .post("/models/" + publishedModel.id + "/nodes")
             .set('Authorization', 'Bearer ' + jwt)
             .send({
                 text: "coucou",
@@ -149,11 +149,11 @@ describe("Tests generate tree", () => {
 
     test("Create node successfully", () => {
         const toCreate = {
-            text: "coucou",
+            text: "firstnode",
             type: "action"
         }
         return request(app)
-            .post("/models/"+model.id+"/nodes")
+            .post("/models/" + model.id + "/nodes")
             .set('Authorization', 'Bearer ' + jwt)
             .send(toCreate)
             .then(async res => {
@@ -173,7 +173,7 @@ describe("Tests generate tree", () => {
 
     test("Set node as firstnode", () => {
         return request(app)
-            .patch("/nodes/"+firstnode.id+"/set_as_firstnode")
+            .patch("/nodes/" + firstnode.id + "/set_as_firstnode")
             .set('Authorization', 'Bearer ' + jwt)
             .then(res =>
                 expectElem({
@@ -193,7 +193,7 @@ describe("Tests generate tree", () => {
 
     test("Add child to node of another model", () => {
         return request(app)
-            .post("/nodes/"+otherNode.id+"/children")
+            .post("/nodes/" + otherNode.id + "/children")
             .set('Authorization', 'Bearer ' + jwt)
             .send({
                 text: "child",
@@ -206,7 +206,7 @@ describe("Tests generate tree", () => {
 
     test("Add action child to node", () => {
         return request(app)
-            .post("/nodes/"+firstnode.id+"/children")
+            .post("/nodes/" + firstnode.id + "/children")
             .set('Authorization', 'Bearer ' + jwt)
             .send({
                 text: "child 1",
@@ -229,7 +229,7 @@ describe("Tests generate tree", () => {
 
     test("Add question child to node", () => {
         return request(app)
-            .post("/nodes/"+firstnode.id+"/children")
+            .post("/nodes/" + firstnode.id + "/children")
             .set('Authorization', 'Bearer ' + jwt)
             .send({
                 text: "child 2",
@@ -252,7 +252,7 @@ describe("Tests generate tree", () => {
 
     test("Add firstnode to a third child as parent", () => {
         return request(app)
-            .post("/nodes/"+thirdChildNode.id+"/parents/"+firstnode.id)
+            .post("/nodes/" + thirdChildNode.id + "/parents/" + firstnode.id)
             .set('Authorization', 'Bearer ' + jwt)
             .then(res => {
                 expect(res.statusCode).toEqual(201)
@@ -261,19 +261,19 @@ describe("Tests generate tree", () => {
 
     test("List firstnode children", () => {
         return request(app)
-            .get("/nodes/"+firstnode.id+"/children")
+            .get("/nodes/" + firstnode.id + "/children")
             .set('Authorization', 'Bearer ' + jwt)
             .then(res => expectElem({
                 res,
                 code: 200,
                 checkDbElem: false,
-                toCheck: [thirdChildNode,childAction,childQuestion].map(child => compileDataValues(child))
+                toCheck: [thirdChildNode, childAction, childQuestion].map(child => compileDataValues(child))
             }))
     })
 
     test("Add child to action", () => {
         return request(app)
-            .post("/nodes/"+childAction.id+"/children")
+            .post("/nodes/" + childAction.id + "/children")
             .set('Authorization', 'Bearer ' + jwt)
             .send({
                 text: "sub child action",
@@ -306,7 +306,7 @@ describe("Tests generate tree", () => {
             }
         ].map(data =>
             request(app)
-                .post("/nodes/"+childQuestion.id+"/children")
+                .post("/nodes/" + childQuestion.id + "/children")
                 .set('Authorization', 'Bearer ' + jwt)
                 .send(data)
                 .then(res =>
@@ -321,7 +321,7 @@ describe("Tests generate tree", () => {
                         }
                     })
                 )
-        )).then(async ([_questionResponseAction,_questionResponseQuestion]) => {
+        )).then(async ([_questionResponseAction, _questionResponseQuestion]) => {
             questionResponseAction = _questionResponseAction;
             questionResponseQuestion = _questionResponseQuestion;
         })
@@ -335,7 +335,7 @@ describe("Tests generate tree", () => {
         });
 
         return request(app)
-            .post("/nodes/"+childQuestion.id+"/responses")
+            .post("/nodes/" + childQuestion.id + "/responses")
             .set('Authorization', 'Bearer ' + jwt)
             .send({
                 text: "coucou",
@@ -346,7 +346,7 @@ describe("Tests generate tree", () => {
                     res,
                     code: 422,
                     checkDbElem: false,
-                    toCheck:{
+                    toCheck: {
                         "violations": [
                             {
                                 "propertyPath": "action_id",
@@ -361,7 +361,7 @@ describe("Tests generate tree", () => {
 
     test("Add response to question, on action of another user model", () => {
         return request(app)
-            .post("/nodes/"+childQuestion.id+"/responses")
+            .post("/nodes/" + childQuestion.id + "/responses")
             .set('Authorization', 'Bearer ' + jwt)
             .send({
                 text: "coucou",
@@ -372,7 +372,7 @@ describe("Tests generate tree", () => {
                     res,
                     code: 422,
                     checkDbElem: false,
-                    toCheck:{
+                    toCheck: {
                         "violations": [
                             {
                                 "propertyPath": "action_id",
@@ -386,7 +386,7 @@ describe("Tests generate tree", () => {
 
     test("Add response to an action", () => {
         return request(app)
-            .post("/nodes/"+childAction.id+"/responses")
+            .post("/nodes/" + childAction.id + "/responses")
             .set('Authorization', 'Bearer ' + jwt)
             .send({
                 text: "coucou",
@@ -399,7 +399,7 @@ describe("Tests generate tree", () => {
 
     test("Add response to another user question node", () => {
         return request(app)
-            .post("/nodes/"+otherNode.id+"/responses")
+            .post("/nodes/" + otherNode.id + "/responses")
             .set('Authorization', 'Bearer ' + jwt)
             .send({
                 text: "coucou",
@@ -423,7 +423,7 @@ describe("Tests generate tree", () => {
                 }
             ].map(data =>
                 request(app)
-                    .post("/nodes/"+childQuestion.id+"/responses")
+                    .post("/nodes/" + childQuestion.id + "/responses")
                     .set('Authorization', 'Bearer ' + jwt)
                     .send(data)
                     .then(res =>
@@ -439,7 +439,7 @@ describe("Tests generate tree", () => {
                         })
                     )
             )
-        ).then(([_response1,_response2]) => {
+        ).then(([_response1, _response2]) => {
             response1 = _response1;
             response2 = _response2;
         })
@@ -447,7 +447,7 @@ describe("Tests generate tree", () => {
 
     test("Get responses of an action", () => {
         return request(app)
-            .get("/nodes/"+childAction.id+"/responses")
+            .get("/nodes/" + childAction.id + "/responses")
             .set('Authorization', 'Bearer ' + jwt)
             .then(res => {
                 expect(res.statusCode).toEqual(404);
@@ -456,7 +456,7 @@ describe("Tests generate tree", () => {
 
     test("Get responses on question", () => {
         return request(app)
-            .get("/nodes/"+childQuestion.id+"/responses")
+            .get("/nodes/" + childQuestion.id + "/responses")
             .set('Authorization', 'Bearer ' + jwt)
             .then(res =>
                 expectElem({
@@ -464,9 +464,9 @@ describe("Tests generate tree", () => {
                     code: 200,
                     checkDbElem: false,
                     toCheck: [
-                        [response1,questionResponseAction],
-                        [response2,questionResponseQuestion]
-                    ].map(([response,questionAction]) => ({
+                        [response1, questionResponseAction],
+                        [response2, questionResponseQuestion]
+                    ].map(([response, questionAction]) => ({
                         ...compileDataValues(response),
                         action: compileDataValues(questionAction)
                     }))
@@ -476,16 +476,16 @@ describe("Tests generate tree", () => {
 
     test("Add sub child action as child to question response question", () => {
         return request(app)
-            .post("/nodes/"+questionResponseQuestion.id+"/children/"+subChildAction.id)
+            .post("/nodes/" + questionResponseQuestion.id + "/children/" + subChildAction.id)
             .set('Authorization', 'Bearer ' + jwt)
             .then(res => {
                 expect(res.statusCode).toEqual(201);
             })
     })
 
-    test("Add response between question response question and sub child action",() => {
+    test("Add response between question response question and sub child action", () => {
         return request(app)
-            .post("/nodes/"+questionResponseQuestion.id+"/responses")
+            .post("/nodes/" + questionResponseQuestion.id + "/responses")
             .set('Authorization', 'Bearer ' + jwt)
             .send({
                 text: "truc",
@@ -512,7 +512,7 @@ describe("Tests generate tree", () => {
             type: "action"
         }
         return request(app)
-            .post("/nodes/"+subChildAction.id+"/parents")
+            .post("/nodes/" + subChildAction.id + "/parents")
             .set('Authorization', 'Bearer ' + jwt)
             .send(toCreate)
             .then(async res => {
@@ -531,7 +531,7 @@ describe("Tests generate tree", () => {
 
     test("Link third parent to first node", () => {
         return request(app)
-            .post("/nodes/"+firstnode.id+"/children/"+thirdChildNode.id)
+            .post("/nodes/" + firstnode.id + "/children/" + thirdParent.id)
             .set('Authorization', 'Bearer ' + jwt)
             .then(res => {
                 expect(res.statusCode).toEqual(201);
@@ -540,21 +540,21 @@ describe("Tests generate tree", () => {
 
     test("Get sub child action parents", () => {
         return request(app)
-            .get("/nodes/"+subChildAction.id+"/parents")
+            .get("/nodes/" + subChildAction.id + "/parents")
             .set('Authorization', 'Bearer ' + jwt)
             .then(res =>
                 expectElem({
                     res,
                     code: 200,
                     checkDbElem: false,
-                    toCheck: [childAction,questionResponseQuestion,thirdParent].map(parent => compileDataValues(parent))
+                    toCheck: [childAction, questionResponseQuestion, thirdParent].map(parent => compileDataValues(parent))
                 })
             )
     })
 
-    test("Remove third parent from sub child action parents", () => {
+    test("Remove question response question from sub child action parents", () => {
         return request(app)
-            .delete("/nodes/"+subChildAction.id+"/parents/"+questionResponseQuestion.id)
+            .delete("/nodes/" + subChildAction.id + "/parents/" + questionResponseQuestion.id)
             .set('Authorization', 'Bearer ' + jwt)
             .then(res =>
                 expectElem({
@@ -575,7 +575,7 @@ describe("Tests generate tree", () => {
 
     test("Remove sub child action from third parent children", () => {
         return request(app)
-            .delete("/nodes/"+thirdParent.id+"/children/"+subChildAction.id)
+            .delete("/nodes/" + thirdParent.id + "/children/" + subChildAction.id)
             .set('Authorization', 'Bearer ' + jwt)
             .then(res => {
                 expect(res.statusCode).toEqual(204)
@@ -585,7 +585,7 @@ describe("Tests generate tree", () => {
 
     test("Re get sub child action parents", () => {
         return request(app)
-            .get("/nodes/"+subChildAction.id+"/parents")
+            .get("/nodes/" + subChildAction.id + "/parents")
             .set('Authorization', 'Bearer ' + jwt)
             .then(res =>
                 expectElem({
@@ -593,6 +593,92 @@ describe("Tests generate tree", () => {
                     code: 200,
                     checkDbElem: false,
                     toCheck: [childAction].map(parent => compileDataValues(parent))
+                })
+            )
+    })
+
+    test("Get all other model nodes", () => {
+        return request(app)
+            .get("/models/" + otherModel.id + "/nodes")
+            .set('Authorization', 'Bearer ' + jwt)
+            .then(res => {
+                expect(res.statusCode).toEqual(403)
+            })
+    })
+
+    test("Get all model nodes", () => {
+        return request(app)
+            .get("/models/" + model.id + "/nodes")
+            .set('Authorization', 'Bearer ' + jwt)
+            .then(res =>
+                expectElem({
+                    res,
+                    code: 200,
+                    checkDbElem: false,
+                    toCheck: [
+                        firstnode,
+                        childAction,
+                        subChildAction,
+                        thirdChildNode,
+                        thirdParent,
+                        childQuestion,
+                        questionResponseAction,
+                        questionResponseQuestion
+                    ]
+                        .sort((a, b) => a.id - b.id)
+                        .map(node => compileDataValues(node))
+                })
+            )
+    })
+
+    test("Get model tree", () => {
+        const childrenByParentId = {
+            [firstnode.id]: [thirdChildNode.id, childAction.id, childQuestion.id, thirdParent.id],
+            [childAction.id]: [subChildAction.id],
+            [childQuestion.id]: [questionResponseAction.id, questionResponseQuestion.id]
+        };
+        const parentsByChildId = {
+            [childAction.id]: [firstnode.id],
+            [childQuestion.id]: [firstnode.id],
+            [thirdChildNode.id]: [firstnode.id],
+            [thirdParent.id]: [firstnode.id],
+            [subChildAction.id]: [childAction.id],
+            [questionResponseAction.id]: [childQuestion.id],
+            [questionResponseQuestion.id]: [childQuestion.id]
+        }
+        return request(app)
+            .get("/models/" + model.id + "/tree")
+            .set('Authorization', 'Bearer ' + jwt)
+            .then(res =>
+                expectElem({
+                    res,
+                    code: 200,
+                    checkDbElem: false,
+                    toCheck: [
+                        firstnode,
+                        childAction,
+                        subChildAction,
+                        thirdChildNode,
+                        thirdParent,
+                        childQuestion,
+                        questionResponseAction,
+                        questionResponseQuestion
+                    ].reduce((acc, node) => ({
+                        ...acc,
+                        [node.id]: {
+                            ...compileDataValues(node),
+                            ...(childrenByParentId[node.id] ?
+                                    {
+                                        children: childrenByParentId[node.id]
+                                    } : {}
+                            ),
+                            ...(parentsByChildId[node.id] ?
+                                    {
+                                        parents: parentsByChildId[node.id]
+                                    } : {}
+                            )
+                        },
+                    }), {}),
                 })
             )
     })

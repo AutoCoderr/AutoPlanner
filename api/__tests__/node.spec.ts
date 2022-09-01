@@ -7,6 +7,8 @@ import expectElem from "../libs/expectElem";
 import User from "../models/User";
 import compileDataValues from "../libs/compileDatavalues";
 import {nodeIncludeModel} from "../includeConfigs/node";
+import {ITodoModelCreation} from "../interfaces/models/TodoModel";
+import {INodeCreation} from "../interfaces/models/Node";
 
 let user: User;
 let user2: User;
@@ -42,6 +44,82 @@ afterAll(async () => {
     await sequelize.close();
 })
 
+
+async function createNodesToTest() {
+    const toCreate: { model: ITodoModelCreation, node: Pick<INodeCreation, 'text' | 'type'> }[] = [
+        {
+            model: {
+                name: "model",
+                user_id: user.id
+            },
+            node: {
+                text: "node",
+                type: "action"
+            },
+        },
+        {
+            model: {
+                name: "other model",
+                user_id: user2.id
+            },
+            node: {
+                text: "other node",
+                type: "action"
+            }
+        },
+        {
+            model: {
+                name: "published model",
+                published: true,
+                user_id: user.id
+            },
+            node: {
+                text: "published node",
+                type: "action"
+            }
+        },
+        {
+            model: {
+                name: "other published model",
+                published: true,
+                user_id: user2.id
+            },
+            node: {
+                text: "other published node",
+                type: "action"
+            }
+        }
+    ]
+
+    const [
+        {
+            model,
+            node
+        },
+        {
+            model: otherModel,
+            node: otherNode
+        },
+        {
+            model: publishedModel,
+            node: publishedNode
+        },
+        {
+            model: otherPublishedModel,
+            node: otherPublishedNode
+        }
+    ] = await Promise.all(toCreate.map(async ({model, node}) => {
+        const modelElem = await TodoModel.create(model)
+        const nodeElem = await Node.create({
+            ...node,
+            model_id: modelElem.id
+        })
+        return {model: modelElem, node: nodeElem}
+    }))
+
+    return {model, node, otherModel, otherNode, publishedModel, publishedNode, otherPublishedModel, otherPublishedNode};
+}
+
 describe("Tests update nodes", () => {
     let t;
 
@@ -49,6 +127,8 @@ describe("Tests update nodes", () => {
     let node: Node;
     let publishedModel: TodoModel;
     let publishedNode: Node;
+    let otherPublishedModel: TodoModel;
+    let otherPublishedNode: Node;
     let otherModel: TodoModel;
     let otherNode: Node;
 
@@ -57,34 +137,16 @@ describe("Tests update nodes", () => {
         sequelize.constructor['_cls'] = new Map();
         sequelize.constructor['_cls'].set('transaction', t);
 
-        model = await TodoModel.create({
-            name: "model",
-            user_id: user.id
-        });
-        node = await Node.create({
-            text: "node",
-            type: "action",
-            model_id: model.id
-        });
-        publishedModel = await TodoModel.create({
-            name: "model",
-            published: true,
-            user_id: user.id
-        });
-        publishedNode = await Node.create({
-            text: "node",
-            type: "action",
-            model_id: publishedModel.id
-        });
-        otherModel = await TodoModel.create({
-            name: "other model",
-            user_id: user2.id
-        });
-        otherNode = await Node.create({
-            text: "other node",
-            type: "action",
-            model_id: otherModel.id
-        })
+        const elems = await createNodesToTest();
+
+        model = elems.model;
+        node = elems.node;
+        publishedModel = elems.publishedModel;
+        publishedNode = elems.publishedNode;
+        otherModel = elems.otherModel;
+        otherNode = elems.otherNode;
+        otherPublishedModel = elems.otherPublishedModel;
+        otherPublishedNode = elems.otherPublishedNode;
     });
 
     afterAll(() => t.rollback());
@@ -155,6 +217,15 @@ describe("Tests update nodes", () => {
     test("Put on other node", () => {
         return request(app)
             .put("/nodes/" + otherNode.id)
+            .set('Authorization', 'Bearer ' + jwt)
+            .then(res => {
+                expect(res.statusCode).toEqual(403);
+            })
+    })
+
+    test("Put on other published node", () => {
+        return request(app)
+            .put("/nodes/" + otherPublishedNode.id)
             .set('Authorization', 'Bearer ' + jwt)
             .then(res => {
                 expect(res.statusCode).toEqual(403);
@@ -258,62 +329,28 @@ describe("Test get node", () => {
 
     let model: TodoModel;
     let node: Node;
-
-    let otherModel: TodoModel;
-    let otherNode: Node;
-
     let publishedModel: TodoModel;
     let publishedNode: Node;
-
     let otherPublishedModel: TodoModel;
     let otherPublishedNode: Node;
+    let otherModel: TodoModel;
+    let otherNode: Node;
 
     beforeAll(async () => {
         t = await sequelize.transaction();
         sequelize.constructor['_cls'] = new Map();
         sequelize.constructor['_cls'].set('transaction', t);
 
-        model = await TodoModel.create({
-            name: "model",
-            user_id: user.id
-        });
-        node = await Node.create({
-            text: "node",
-            type: "action",
-            model_id: model.id
-        })
+        const elems = await createNodesToTest();
 
-        otherModel = await TodoModel.create({
-            name: "other model",
-            user_id: user2.id
-        });
-        otherNode = await Node.create({
-            text: "other node",
-            type: "action",
-            model_id: otherModel.id
-        })
-
-        publishedModel = await TodoModel.create({
-            name: "published model",
-            published: true,
-            user_id: user.id
-        });
-        publishedNode = await Node.create({
-            text: "published node",
-            type: "action",
-            model_id: publishedModel.id
-        })
-
-        otherPublishedModel = await TodoModel.create({
-            name: "other published model",
-            published: true,
-            user_id: user2.id
-        });
-        otherPublishedNode = await Node.create({
-            text: "other published node",
-            type: "action",
-            model_id: otherPublishedModel.id
-        })
+        model = elems.model;
+        node = elems.node;
+        publishedModel = elems.publishedModel;
+        publishedNode = elems.publishedNode;
+        otherModel = elems.otherModel;
+        otherNode = elems.otherNode;
+        otherPublishedModel = elems.otherPublishedModel;
+        otherPublishedNode = elems.otherPublishedNode;
     });
 
     afterAll(() => t.rollback());
@@ -390,3 +427,78 @@ describe("Test get node", () => {
             })
     })
 });
+
+describe("Tests delete nodes", () => {
+    let t;
+
+    let model: TodoModel;
+    let node: Node;
+    let publishedModel: TodoModel;
+    let publishedNode: Node;
+    let otherPublishedModel: TodoModel;
+    let otherPublishedNode: Node;
+    let otherModel: TodoModel;
+    let otherNode: Node;
+
+    beforeAll(async () => {
+        t = await sequelize.transaction();
+        sequelize.constructor['_cls'] = new Map();
+        sequelize.constructor['_cls'].set('transaction', t);
+
+        const elems = await createNodesToTest();
+
+        model = elems.model;
+        node = elems.node;
+        publishedModel = elems.publishedModel;
+        publishedNode = elems.publishedNode;
+        otherModel = elems.otherModel;
+        otherNode = elems.otherNode;
+        otherPublishedModel = elems.otherPublishedModel;
+        otherPublishedNode = elems.otherPublishedNode;
+    });
+
+    afterAll(() => t.rollback());
+
+    test("Delete own non published node", () => {
+        return request(app)
+            .delete("/nodes/" + node.id)
+            .set('Authorization', 'Bearer ' + jwt)
+            .then(res =>
+                expectElem({
+                    res,
+                    code: 204,
+                    checkBody: false,
+                    model: Node,
+                    id: node.id,
+                    toCheck: null
+                })
+            )
+    })
+
+    test("Delete own published node", () => {
+        return request(app)
+            .delete("/nodes/" + publishedNode.id)
+            .set('Authorization', 'Bearer ' + jwt)
+            .then(res => {
+                expect(res.statusCode).toEqual(403)
+            })
+    })
+
+    test("Delete other node", () => {
+        return request(app)
+            .delete("/nodes/" + otherNode.id)
+            .set('Authorization', 'Bearer ' + jwt)
+            .then(res => {
+                expect(res.statusCode).toEqual(403)
+            })
+    })
+
+    test("Delete other published node", () => {
+        return request(app)
+            .delete("/nodes/" + otherPublishedNode.id)
+            .set('Authorization', 'Bearer ' + jwt)
+            .then(res => {
+                expect(res.statusCode).toEqual(403)
+            })
+    })
+})
