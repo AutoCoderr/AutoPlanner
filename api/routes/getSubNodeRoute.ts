@@ -13,6 +13,7 @@ import deleteOne from "../libs/crud/requests/deleteOne";
 import getReqData from "../libs/crud/getReqData";
 import Response from "../models/Response";
 import nodeCreateAccessCheck from "../security/createAccessChecks/nodeCreateAccessCheck";
+import childCanBeAddToParent from "../libs/childCanBeAddToParent";
 
 export default function getSubNodeRoute(subResourceType: null|'children'|'parents' = null) {
     const router = Router();
@@ -37,11 +38,14 @@ export default function getSubNodeRoute(subResourceType: null|'children'|'parent
         if (!isNumber(id))
             return res.sendStatus(400);
 
-        const {elem, code} = await <Promise<{elem: Node|null, code: number|null}>>getAndCheckExistingResource(Node, parseInt(id), "update", nodeAccessCheck, reqData.user, {
+        const {elem, code} = await <Promise<{elem: (NodeWithModel & NodeWithChildren)|null, code: number|null}>>getAndCheckExistingResource(Node, parseInt(id), "update", nodeAccessCheck, reqData.user, {
             include: nodeIncludeModel
         });
         if (!elem)
             return res.sendStatus(code);
+
+        if (!childCanBeAddToParent(subResourceType === "children" ? reqData.node : elem))
+            return res.sendStatus(403);
 
         if (subResourceType === "children")
             await reqData.node.addChild(elem)

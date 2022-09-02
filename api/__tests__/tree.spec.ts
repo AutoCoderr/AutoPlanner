@@ -294,7 +294,7 @@ describe("Tests generate tree", () => {
             })
     })
 
-    test("Add second child to action", () => {
+    test("Add second child to action, need to be forbidden because of parent action has already a child", () => {
         return request(app)
             .post("/nodes/"+childAction.id+"/children")
             .set('Authorization', 'Bearer ' + jwt)
@@ -519,6 +519,15 @@ describe("Tests generate tree", () => {
             )
     })
 
+    test("Add sub child action as child to question response action", () => {
+        return request(app)
+            .post("/nodes/" + questionResponseAction.id + "/children/" + subChildAction.id)
+            .set('Authorization', 'Bearer ' + jwt)
+            .then(res => {
+                expect(res.statusCode).toEqual(201);
+            })
+    })
+
     test("Create a third parent on sub child action", () => {
         const toCreate = {
             text: "third parent",
@@ -542,6 +551,24 @@ describe("Tests generate tree", () => {
             })
     });
 
+    test("Add sub third parent as child to question response action, need to be forbidden because of parent action has already a child", () => {
+        return request(app)
+            .post("/nodes/" + questionResponseAction.id + "/children/" + thirdParent.id)
+            .set('Authorization', 'Bearer ' + jwt)
+            .then(res => {
+                expect(res.statusCode).toEqual(403);
+            })
+    })
+
+    test("Add question responses action as parent to third parent, need to be forbidden because of parent action has already a child", () => {
+        return request(app)
+            .post("/nodes/" + thirdParent.id + "/parents/" + questionResponseAction.id)
+            .set('Authorization', 'Bearer ' + jwt)
+            .then(res => {
+                expect(res.statusCode).toEqual(403);
+            })
+    })
+
     test("Link third parent to first node", () => {
         return request(app)
             .post("/nodes/" + firstnode.id + "/children/" + thirdParent.id)
@@ -560,7 +587,7 @@ describe("Tests generate tree", () => {
                     res,
                     code: 200,
                     checkDbElem: false,
-                    toCheck: [childAction, questionResponseQuestion, thirdParent].map(parent => compileDataValues(parent))
+                    toCheck: [childAction, questionResponseAction, questionResponseQuestion, thirdParent].map(parent => compileDataValues(parent))
                 })
             )
     })
@@ -605,7 +632,7 @@ describe("Tests generate tree", () => {
                     res,
                     code: 200,
                     checkDbElem: false,
-                    toCheck: [childAction].map(parent => compileDataValues(parent))
+                    toCheck: [childAction,questionResponseAction].map(parent => compileDataValues(parent))
                 })
             )
     })
@@ -658,14 +685,15 @@ describe("Tests generate tree", () => {
             [firstnode.id]: [thirdChildNode.id, childAction.id, childQuestion.id, thirdParent.id],
             [childAction.id]: [subChildAction.id],
             [childQuestion.id]: [questionResponseAction.id, questionResponseQuestion.id],
-            [thirdParent.id]: [subChildAction.id]
+            [thirdParent.id]: [subChildAction.id],
+            [questionResponseAction.id]: [subChildAction.id]
         };
         const parentsByChildId = {
             [childAction.id]: [firstnode.id],
             [childQuestion.id]: [firstnode.id],
             [thirdChildNode.id]: [firstnode.id],
             [thirdParent.id]: [firstnode.id],
-            [subChildAction.id]: [childAction.id, thirdParent.id],
+            [subChildAction.id]: [childAction.id, questionResponseAction.id,thirdParent.id],
             [questionResponseAction.id]: [childQuestion.id],
             [questionResponseQuestion.id]: [childQuestion.id]
         }
