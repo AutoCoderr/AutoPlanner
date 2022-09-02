@@ -1,5 +1,5 @@
 import IReqData from "../../IReqData";
 
-type IGetAllAccessCheck = (reqData: IReqData) => boolean|Promise<boolean>;
+export type IGetAllAccessCheck = (reqData: IReqData, params?: any) => boolean|Promise<boolean>;
 
-export default IGetAllAccessCheck;
+export type IFGetAllAccessCheck = ((params: any) => IGetAllAccessCheck);

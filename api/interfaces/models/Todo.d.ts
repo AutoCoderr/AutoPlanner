@@ -1,7 +1,7 @@
 import {
     BelongsToManyAddAssociationMixin,
     BelongsToManySetAssociationsMixin, BelongsToSetAssociationMixin, HasManyAddAssociationMixin,
-    HasManySetAssociationsMixin, Optional
+    HasManySetAssociationsMixin, InferAttributes, Optional
 } from "sequelize";
 import Step from "../../models/Step";
 import Folder from "../../models/Folder";
@@ -31,7 +31,7 @@ export interface ITodo {
     setModel: BelongsToSetAssociationMixin<TodoModel, any>;
     setUser: BelongsToSetAssociationMixin<User, any>;
 }
-export type ITodoCreation = Optional<ITodo, 'id' | 'description' | 'percent' | 'priority' | 'deadLine' | 'createdAt' | 'updatedAt' | 'setAssociatedSteps' | 'addAssociatedStep' | 'setSteps' | 'addStep' | 'setParent' | 'setModel' | 'setUser'>;
+export type ITodoCreation = InferAttributes<Optional<ITodo, 'id' | 'description' | 'percent' | 'priority' | 'deadLine' | 'createdAt' | 'updatedAt'>>;
 
 export interface TodoWithAssociatedSteps extends Todo {
     associatedSteps: Step[]

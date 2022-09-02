@@ -2,8 +2,9 @@ import IFormGetter from "../interfaces/form/IFormGetter";
 import boolean from "../asserts/boolean";
 import {Op} from "sequelize";
 import TodoModel from "../models/TodoModel";
+import canModelBePublished from "../libs/canModelBePublished";
 
-const getModelForm: IFormGetter = function (reqData, method, elem: null|TodoModel = null) {
+const getModelForm: IFormGetter = function (reqData, method, elem: TodoModel) {
     return {
         model: TodoModel,
         fields: {
@@ -11,6 +12,12 @@ const getModelForm: IFormGetter = function (reqData, method, elem: null|TodoMode
                 published: {
                     msg: "Vous devez rentrer un booléen",
                     valid: boolean,
+                    otherValidates: [
+                        {
+                            msg: "Vous ne pouvez pas encore publier ce modèle",
+                            valid: () => canModelBePublished(elem)
+                        }
+                    ],
                     required: method === "put"
                 }
             }: {}),

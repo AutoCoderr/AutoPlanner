@@ -1,7 +1,7 @@
 import {
     BelongsToSetAssociationMixin,
     HasManyAddAssociationMixin,
-    HasManySetAssociationsMixin,
+    HasManySetAssociationsMixin, InferAttributes,
     Optional
 } from "sequelize";
 import Node from "../../models/Node";
@@ -25,7 +25,7 @@ export interface ITodoModel {
     addTodo: HasManyAddAssociationMixin<Todo, any>;
     setUser: BelongsToSetAssociationMixin<User, any>;
 }
-export type ITodoModelCreation = Optional<ITodoModel, 'id' | 'description' | 'published' | 'firstnode_id' | 'createdAt' | 'updatedAt' | 'setFirstNode' | 'setTodos' | 'addTodo' | 'setUser'>;
+export type ITodoModelCreation = InferAttributes<Optional<ITodoModel, 'id' | 'description' | 'published' | 'firstnode_id' | 'createdAt' | 'updatedAt'>>;
 
 export interface TodoModelWithFirstNode extends TodoModel {
     firstNode: null|Node

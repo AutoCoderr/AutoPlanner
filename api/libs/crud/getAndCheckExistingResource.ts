@@ -10,7 +10,8 @@ const getAndCheckExistingResource: IGetAndCheckExistingResource = async (
 ) => {
     //@ts-ignore
     const elem = await  model.findOne({
-        where: { id }
+        where: { id },
+        include: params.include
     })
 
     if (elem === null)
@@ -19,7 +20,18 @@ const getAndCheckExistingResource: IGetAndCheckExistingResource = async (
     if (!(await accessCheck(elem,mode,connectedUser)))
         return {code: params.forbiddenCode??403, elem: null};
 
-    return {elem, code: null};
+    if (!params.getter)
+        return {elem, code: null};
+
+    const getted = params.getter(elem);
+
+    if (!getted)
+        return {code: params.notFoundCode??404, elem: null};
+
+    if (params.gettedAccessCheck && !(await params.gettedAccessCheck(getted, mode, connectedUser)))
+        return {code: params.forbiddenCode??403, elem: null};
+
+    return {elem: getted, code: null};
 }
 
 export default getAndCheckExistingResource;

@@ -1,4 +1,4 @@
-import IAccessCheck from "../../interfaces/crud/security/IAccessCheck";
+import {IAccessCheck} from "../../interfaces/crud/security/IAccessCheck";
 import TodoModel from "../../models/TodoModel";
 
 const modelAccessCheck: IAccessCheck = (model: TodoModel, mode, user) =>

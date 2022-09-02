@@ -1,4 +1,4 @@
-import IAccessCheck from "../../interfaces/crud/security/IAccessCheck";
+import {IAccessCheck} from "../../interfaces/crud/security/IAccessCheck";
 import Folder from "../../models/Folder";
 
 const folderAccessCheck: IAccessCheck = (folder: Folder, mode, user) =>

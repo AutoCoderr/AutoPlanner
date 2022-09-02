@@ -6,7 +6,7 @@ import {
     BelongsToManyAddAssociationMixin,
     BelongsToSetAssociationMixin,
     HasManySetAssociationsMixin,
-    HasManyAddAssociationMixin
+    HasManyAddAssociationMixin, BelongsToManyRemoveAssociationMixin
 } from "sequelize";
 import sequelize from "../sequelize";
 import TodoModel from "./TodoModel";
@@ -22,8 +22,10 @@ class Node extends Model<InferAttributes<Node>, INodeCreation> implements INode 
 
     declare setParents: BelongsToManySetAssociationsMixin<Node, any>;
     declare addParent: BelongsToManyAddAssociationMixin<Node, any>;
+    declare removeParent: BelongsToManyRemoveAssociationMixin<Node, any>;
     declare setChildren: BelongsToManySetAssociationsMixin<Node, any>;
     declare addChild: BelongsToManyAddAssociationMixin<Node, any>;
+    declare removeChild: BelongsToManyRemoveAssociationMixin<Node, any>;
     declare setModel: BelongsToSetAssociationMixin<TodoModel, any>;
     declare setResponses: HasManySetAssociationsMixin<Response, any>;
     declare addResponse: HasManyAddAssociationMixin<Response, any>

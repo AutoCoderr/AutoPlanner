@@ -1,7 +1,7 @@
 import IReqData from "../../IReqData";
 
-type ICreateAccessCheck = (
+export type ICreateAccessCheck = (
     reqData: IReqData
 ) => boolean|Promise<boolean>
 
-export default ICreateAccessCheck;
+export type IFCreateAccessCheck<T> = ((params: T) => ICreateAccessCheck)

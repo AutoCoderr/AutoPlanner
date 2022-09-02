@@ -1,4 +1,4 @@
-import IAccessCheck from "../../../interfaces/crud/security/IAccessCheck";
+import {IAccessCheck} from "../../../interfaces/crud/security/IAccessCheck";
 import getAndCheckExistingResource from "../getAndCheckExistingResource";
 import IGetAndCheckExistingResourceParams from "../../../interfaces/crud/IGetAndCheckExistingResourceParams";
 import isNumber from "../../isNumber";
@@ -35,7 +35,7 @@ export default function update(model, formGetter: IFormGetter, accessCheck: IAcc
         elem.save()
             .then(async () => {
                 if (params.finished)
-                    await params.finished(elem);
+                    await params.finished(reqData, elem);
 
                 res.status(200).json(elem);
             })
