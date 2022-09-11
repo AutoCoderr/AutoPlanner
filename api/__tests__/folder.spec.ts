@@ -3,6 +3,7 @@ import User from "../models/User";
 import app from "../app";
 import sequelize from "../sequelize";
 import Folder from "../models/Folder";
+import expectElem from "../libs/expectElem";
 
 let user: User;
 let user2: User;
@@ -224,6 +225,7 @@ describe("Tests get all", () => {
         });
         folder2 = await Folder.create({
             name: "folder2",
+            priority: 3,
             user_id: user.id
         })
         folder1A = await Folder.create({
@@ -260,13 +262,13 @@ describe("Tests get all", () => {
             .set('Authorization', 'Bearer ' + jwt)
             .then(res => {
                 expect(res.statusCode).toEqual(200)
-                expect(JSON.parse(res.text)).toEqual([folder1,folder2].map(({id,name}) => ({
+                expect(JSON.parse(res.text)).toEqual([folder1,folder2].map(({id,name, priority}) => ({
                     id,
                     name,
                     description: null,
                     percent: null,
                     percentSynchronized: false,
-                    priority: 1,
+                    priority,
                     deadLine: null,
                     createdAt: expect.any(String),
                     updatedAt: expect.any(String),
@@ -317,6 +319,31 @@ describe("Tests get all", () => {
                     parent_id: folder2.id
                 })))
             })
+    })
+    test("Get folders with priority 3", () => {
+        return request(app)
+            .get("/folders?priority=3")
+            .set('Authorization', 'Bearer ' + jwt)
+            .then(res =>
+                expectElem({
+                    res,
+                    code: 200,
+                    checkDbElem: false,
+                    toCheck: [folder2].map(({id,name}) => ({
+                        id,
+                        name,
+                        description: null,
+                        percent: null,
+                        percentSynchronized: false,
+                        priority: 3,
+                        deadLine: null,
+                        createdAt: expect.any(String),
+                        updatedAt: expect.any(String),
+                        user_id: user.id,
+                        parent_id: null
+                    }))
+                })
+            )
     })
 })
 

@@ -8,6 +8,7 @@ import Node from "../models/Node";
 import Response from "../models/Response";
 import expectElem from "../libs/expectElem";
 import compileDataValues from "../libs/compileDatavalues";
+import getJsonList from "../libs/getJsonList";
 
 let user: User;
 let user2: User;
@@ -815,24 +816,16 @@ describe("Tests get model", () => {
     })
 })
 
-function getModelsListJson(...models: (TodoModel|TodoModel[])[]) {
-    const modelsArray: TodoModel[] = models.reduce((acc: TodoModel[],modelOrArray) => [
-        ...acc,
-        ...(
-            modelOrArray instanceof Array ? modelOrArray : [modelOrArray]
-        )
-    ], [])
-    return modelsArray.map(({id,name, description,published, user_id, createdAt, updatedAt}) => ({
-        id,
-        name,
-        description,
-        published,
-        createdAt: createdAt.toISOString(),
-        updatedAt: updatedAt.toISOString(),
-        user_id,
-        firstnode_id: null
-    }))
-}
+const getModelsListJson = getJsonList<TodoModel>(({id,name, description,published, user_id, createdAt, updatedAt}) => ({
+    id,
+    name,
+    description,
+    published,
+    createdAt: createdAt.toISOString(),
+    updatedAt: updatedAt.toISOString(),
+    user_id,
+    firstnode_id: null
+}))
 
 describe("Tests get all models", () => {
     let t;

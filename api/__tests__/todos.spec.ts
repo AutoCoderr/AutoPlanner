@@ -4,6 +4,9 @@ import sequelize from "../sequelize";
 import User from "../models/User";
 import Todo from "../models/Todo";
 import Folder from "../models/Folder";
+import getJsonList from "../libs/getJsonList";
+import compileDataValues from "../libs/compileDatavalues";
+import expectElem from "../libs/expectElem";
 
 let user: User;
 let user2: User;
@@ -39,25 +42,70 @@ afterAll(async () => {
     await sequelize.close();
 })
 
+const getTodoListJson = getJsonList<Todo>(todo => ({
+    ...compileDataValues(todo),
+    deadLine: todo.deadLine?.toISOString()??null,
+    createdAt: todo.createdAt.toISOString(),
+    updatedAt: todo.updatedAt.toISOString()
+}))
+
 describe("Test get all todos", () => {
     let t;
-    let todos: Todo[];
+
+    let folder: Folder;
+
+    let todo1: Todo;
+    let todo2: Todo;
+    let todo3: Todo;
+    let todo4: Todo;
+    let todo5: Todo;
+    let todo6: Todo;
 
     beforeAll(async () => {
         t = await sequelize.transaction();
         sequelize.constructor['_cls'] = new Map();
         sequelize.constructor['_cls'].set('transaction', t);
 
-        const todosToCreate: [string,number][] = [['todo1',user.id],['todo2',user.id],['todo3',user2.id],['todo4',user.id]]
+        folder = await Folder.create({
+            name: "folder",
+            user_id: user.id
+        });
 
-        todos = await Promise.all(
-            todosToCreate.map(([name,user_id]) =>
-                Todo.create({
-                    name,
-                    user_id
-                })
-            )
-        )
+        todo1 = await Todo.create({
+            name: 'todo1',
+            percent: 49,
+            deadLine: new Date("2022-07-12"),
+            user_id: user.id
+        });
+        todo2 = await Todo.create({
+            name: 'ananas',
+            percent: 12,
+            deadLine: new Date("2022-05-14"),
+            user_id: user.id
+        });
+        todo3 = await Todo.create({
+            name: "todo3",
+            description: "ananas",
+            percent: 58,
+            deadLine: new Date("2022-09-25"),
+            user_id: user.id
+        });
+        todo4 = await Todo.create({
+            name: "todo4",
+            percent: 35,
+            deadLine: new Date("2022-01-18"),
+            user_id: user.id
+        });
+        todo5 = await Todo.create({
+            name: "todo5",
+            percent: 70,
+            deadLine: new Date("2022-06-19"),
+            user_id: user.id
+        });
+        todo6 = await Todo.create({
+            name: "todo6",
+            user_id: user2.id
+        });
     });
 
     afterAll(() => t.rollback());
@@ -66,27 +114,56 @@ describe("Test get all todos", () => {
         return request(app)
             .get("/todos")
             .set('Authorization', 'Bearer ' + jwt)
-            .then(res => {
-                expect(res.statusCode).toEqual(200);
+            .then(res =>
+                expectElem({
+                    res,
+                    code: 200,
+                    checkDbElem: false,
+                    toCheck: getTodoListJson(todo1,todo2,todo3,todo4,todo5)
+                })
+            )
+    })
 
-                expect(JSON.parse(res.text)).toEqual(
-                    todos
-                        .filter(todo => todo.user_id === user.id)
-                        .map(todo => ({
-                            id: todo.id,
-                            name: todo.name,
-                            description: null,
-                            percent: 0,
-                            priority: 1,
-                            deadLine: null,
-                            createdAt: todo.createdAt.toISOString(),
-                            updatedAt: todo.updatedAt.toISOString(),
-                            user_id: user.id,
-                            parent_id: null,
-                            model_id: null
-                        }))
-                )
-            })
+    test("Get todos which contains 'ananas'", () => {
+        return request(app)
+            .get("/todos?search=ananas")
+            .set('Authorization', 'Bearer ' + jwt)
+            .then(res =>
+                expectElem({
+                    res,
+                    code: 200,
+                    checkDbElem: false,
+                    toCheck: getTodoListJson(todo2,todo3)
+                })
+            )
+    })
+
+    test("Get todos which has more than 100%", () => {
+        return request(app)
+            .get("/todos?percent=50,100")
+            .set('Authorization', 'Bearer ' + jwt)
+            .then(res =>
+                expectElem({
+                    res,
+                    code: 200,
+                    checkDbElem: false,
+                    toCheck: getTodoListJson(todo3,todo5)
+                })
+            )
+    })
+
+    test("Get todos which has deadline in jun and july 2022", () => {
+        return request(app)
+            .get("/todos?deadLine=2022-06-01,2022-07-31&asc=deadLine")
+            .set('Authorization', 'Bearer ' + jwt)
+            .then(res =>
+                expectElem({
+                    res,
+                    code: 200,
+                    checkDbElem: false,
+                    toCheck: getTodoListJson(todo5,todo1)
+                })
+            )
     })
 })
 
