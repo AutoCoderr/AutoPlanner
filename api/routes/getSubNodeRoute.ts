@@ -13,7 +13,7 @@ import deleteOne from "../libs/crud/requests/deleteOne";
 import getReqData from "../libs/crud/getReqData";
 import Response from "../models/Response";
 import nodeCreateAccessCheck from "../security/createAccessChecks/nodeCreateAccessCheck";
-import childCanBeAddToParent from "../libs/childCanBeAddToParent";
+import childCanBeAddedToParent from "../libs/childCanBeAddedToParent";
 
 export default function getSubNodeRoute(subResourceType: null|'children'|'parents' = null) {
     const router = Router();
@@ -44,7 +44,7 @@ export default function getSubNodeRoute(subResourceType: null|'children'|'parent
         if (!elem)
             return res.sendStatus(code);
 
-        if (!childCanBeAddToParent(subResourceType === "children" ? reqData.node : elem))
+        if (!childCanBeAddedToParent(subResourceType === "children" ? reqData.node : elem))
             return res.sendStatus(403);
 
         if (subResourceType === "children")
