@@ -3,7 +3,9 @@ import User from "../models/User";
 import app from "../app";
 import sequelize from "../sequelize";
 import Folder from "../models/Folder";
-import expectElem from "../libs/expectElem";
+import expectElem from "../libs/tests/expectElem";
+import getJsonList from "../libs/tests/getJsonList";
+import compileDataValues from "../libs/compileDatavalues";
 
 let user: User;
 let user2: User;
@@ -197,6 +199,12 @@ describe("Test folder creation", () => {
     })
 })
 
+const getJsonListFolder = getJsonList<Folder>(folder => ({
+    ...compileDataValues(folder),
+    createdAt: folder.createdAt.toISOString(),
+    updatedAt: folder.updatedAt.toISOString()
+}))
+
 describe("Tests get all", () => {
     let t;
 
@@ -260,65 +268,41 @@ describe("Tests get all", () => {
         return request(app)
             .get("/folders")
             .set('Authorization', 'Bearer ' + jwt)
-            .then(res => {
-                expect(res.statusCode).toEqual(200)
-                expect(JSON.parse(res.text)).toEqual([folder1,folder2].map(({id,name, priority}) => ({
-                    id,
-                    name,
-                    description: null,
-                    percent: null,
-                    percentSynchronized: false,
-                    priority,
-                    deadLine: null,
-                    createdAt: expect.any(String),
-                    updatedAt: expect.any(String),
-                    user_id: user.id,
-                    parent_id: null
-                })))
-            })
+            .then(res =>
+                expectElem({
+                    res,
+                    code: 200,
+                    checkDbElem: false,
+                    toCheck: getJsonListFolder(folder1,folder2)
+                })
+            )
     });
 
     test("Get all folders of folder1", () => {
         return request(app)
             .get("/folders/"+folder1.id+"/folders")
             .set('Authorization', 'Bearer ' + jwt)
-            .then(res => {
-                expect(res.statusCode).toEqual(200)
-                expect(JSON.parse(res.text)).toEqual([folder1A,folder1B].map(({id,name}) => ({
-                    id,
-                    name,
-                    description: null,
-                    percent: null,
-                    percentSynchronized: false,
-                    priority: 1,
-                    deadLine: null,
-                    createdAt: expect.any(String),
-                    updatedAt: expect.any(String),
-                    user_id: user.id,
-                    parent_id: folder1.id
-                })))
-            })
+            .then(res =>
+                expectElem({
+                    res,
+                    code: 200,
+                    checkDbElem: false,
+                    toCheck: getJsonListFolder(folder1A,folder1B)
+                 })
+            )
     })
     test("Get all folders of folder2", () => {
         return request(app)
             .get("/folders/"+folder2.id+"/folders")
             .set('Authorization', 'Bearer ' + jwt)
-            .then(res => {
-                expect(res.statusCode).toEqual(200)
-                expect(JSON.parse(res.text)).toEqual([folder2A].map(({id,name}) => ({
-                    id,
-                    name,
-                    description: null,
-                    percent: null,
-                    percentSynchronized: false,
-                    priority: 1,
-                    deadLine: null,
-                    createdAt: expect.any(String),
-                    updatedAt: expect.any(String),
-                    user_id: user.id,
-                    parent_id: folder2.id
-                })))
-            })
+            .then(res =>
+                expectElem({
+                    res,
+                    code: 200,
+                    checkDbElem: false,
+                    toCheck: getJsonListFolder(folder2A)
+                })
+            )
     })
     test("Get folders with priority 3", () => {
         return request(app)
@@ -329,19 +313,7 @@ describe("Tests get all", () => {
                     res,
                     code: 200,
                     checkDbElem: false,
-                    toCheck: [folder2].map(({id,name}) => ({
-                        id,
-                        name,
-                        description: null,
-                        percent: null,
-                        percentSynchronized: false,
-                        priority: 3,
-                        deadLine: null,
-                        createdAt: expect.any(String),
-                        updatedAt: expect.any(String),
-                        user_id: user.id,
-                        parent_id: null
-                    }))
+                    toCheck: getJsonListFolder(folder2)
                 })
             )
     })

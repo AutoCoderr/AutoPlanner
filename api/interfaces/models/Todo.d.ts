@@ -48,3 +48,8 @@ export interface TodoWithModel extends Todo {
 export interface TodoWithUser extends Todo {
     user: User
 }
+
+
+export interface TodoWithFoldersString extends Todo {
+    folders: string
+}

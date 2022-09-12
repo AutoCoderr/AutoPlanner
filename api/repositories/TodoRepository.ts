@@ -1,10 +1,13 @@
 import Todo from "../models/Todo";
 import Folder from "../models/Folder";
-import {TodoWithParent} from "../interfaces/models/Todo";
+import {TodoWithFoldersString, TodoWithParent} from "../interfaces/models/Todo";
 import IReqData from "../interfaces/IReqData";
 import {Op} from "sequelize";
 import getQuerySearch from "../libs/getQuerySearch";
 import getQuerySort from "../libs/getQuerySort";
+import paginate from "../libs/paginate";
+import IPaginatedResult from "../interfaces/crud/IPaginatedResult";
+import compileDataValues from "../libs/compileDatavalues";
 
 export function findOneTodoByIdWithParent(id: number): Promise<null|TodoWithParent> {
     return <Promise<null|TodoWithParent>>Todo.findOne({
@@ -16,12 +19,13 @@ export function findOneTodoByIdWithParent(id: number): Promise<null|TodoWithPare
     })
 }
 
-function getTodoQuerySearch(reqData: IReqData) {
+export function getTodoQuerySearch(reqData: IReqData) {
     return getQuerySearch(reqData.query, {
         search: {
             liaisonCols: Op.or,
             opType: Op.iLike,
-            cols: ['name','description']
+            cols: ['name','description'],
+            computeValue: value => '%'+value+'%'
         },
         percent: {
             opType: Op.between,
@@ -37,10 +41,45 @@ function getTodoQuerySearch(reqData: IReqData) {
     })
 }
 
-function getTodoQuerySort(reqData: IReqData) {
+export function getTodoQuerySort(reqData: IReqData) {
     return getQuerySort(reqData.query, {
         asc: ['name','percent','priority','deadLine']
     })
+}
+
+function getRecursivelyTodoFolders(todoOrFolder: Todo|Folder, folders: string[] = []) {
+    return todoOrFolder.parent_id === null ?
+            '/'+folders.reverse().join("/") :
+        Folder.findOne({
+            where: {
+                id: todoOrFolder.parent_id
+            }
+        }).then(folder =>
+            folder === null ?
+                '/'+folders.reverse().join("/") :
+                getRecursivelyTodoFolders(folder, [...folders, folder.name])
+        )
+
+}
+
+export function searchTodos(reqData: IReqData): Promise<IPaginatedResult<TodoWithFoldersString>>|IPaginatedResult<TodoWithFoldersString> {
+    return reqData.user ?
+        <Promise<IPaginatedResult<TodoWithFoldersString>>>paginate(Todo,{
+            where: {
+                user_id: reqData.user.id,
+                ...getTodoQuerySearch(reqData)
+            },
+            order: getTodoQuerySort(reqData)
+        }, reqData.query, 10).then(async ({pages, elements}) => ({
+            pages,
+            elements: await Promise.all(
+                elements.map(async todo => ({
+                    ...compileDataValues(todo),
+                    folders: await getRecursivelyTodoFolders(todo)
+                }))
+            )
+        })) :
+        {pages: 0, elements: []}
 }
 
 export function findTodos(reqData: IReqData): Promise<Todo[]>|Todo[] {

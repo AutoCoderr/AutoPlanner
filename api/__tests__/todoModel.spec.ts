@@ -6,9 +6,10 @@ import TodoModel from "../models/TodoModel";
 import IViolation from "../interfaces/form/IViolations";
 import Node from "../models/Node";
 import Response from "../models/Response";
-import expectElem from "../libs/expectElem";
+import expectElem from "../libs/tests/expectElem";
 import compileDataValues from "../libs/compileDatavalues";
-import getJsonList from "../libs/getJsonList";
+import getJsonList from "../libs/tests/getJsonList";
+import generateNElements from "../libs/tests/generateNElements";
 
 let user: User;
 let user2: User;
@@ -1087,18 +1088,6 @@ describe("Tests get all models", () => {
             )
     })
 })
-
-async function generateNElements<T>(callback: (i: number) => Promise<T>, n, elements: T[] = [], i = 0): Promise<T[]> {
-    if (i === n)
-        return elements;
-
-    return generateNElements(
-        callback,
-        n,
-        [...elements, await callback(i)],
-        i+1
-    )
-}
 
 describe("Tests get all with pagination", () => {
     let t;

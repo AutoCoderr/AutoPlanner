@@ -1,5 +1,5 @@
-import compileDataValues from "./compileDatavalues";
-import allModelsTypes from "../interfaces/allModelsType";
+import compileDataValues from "../compileDatavalues";
+import allModelsTypes from "../../interfaces/allModelsType";
 import {Includeable} from "sequelize/types/model";
 
 type obj = {[key: string]: any};

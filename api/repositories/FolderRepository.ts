@@ -5,6 +5,7 @@ import IReqData from "../interfaces/IReqData";
 import {Op} from "sequelize";
 import getQuerySearch from "../libs/getQuerySearch";
 import getQuerySort from "../libs/getQuerySort";
+import {getTodoQuerySearch, getTodoQuerySort} from "./TodoRepository";
 
 export function findOneFolderByIdWithFolders(id: number): Promise<null|FolderWithFolders> {
     return <Promise<null|FolderWithFolders>>Folder.findOne({
@@ -37,30 +38,11 @@ export function findOneFolderByIdWithTodos(id: number): Promise<null|FolderWithT
 }
 
 function getFolderQuerySearch(reqData: IReqData) {
-    return getQuerySearch(reqData.query, {
-        search: {
-            liaisonCols: Op.or,
-            opType: Op.iLike,
-            cols: ['name','description']
-        },
-        percent: {
-            opType: Op.between,
-            cols: "percent",
-            computeValue: value => value.split(",").map(v => parseInt(v.trim()))
-        },
-        priority: Op.eq,
-        deadLine: {
-            opType: Op.between,
-            computeValue: value => value.split(",")
-                .map(date => new Date(date.trim()))
-        }
-    })
+    return getTodoQuerySearch(reqData)
 }
 
 function getFolderQuerySort(reqData: IReqData) {
-    return getQuerySort(reqData.query, {
-        asc: ['name','percent','priority','deadLine']
-    })
+    return getTodoQuerySort(reqData)
 }
 
 export function findFolders(reqData: IReqData): Promise<Folder[]>|Folder[] {

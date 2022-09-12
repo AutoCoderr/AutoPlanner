@@ -4,9 +4,10 @@ import sequelize from "../sequelize";
 import User from "../models/User";
 import Todo from "../models/Todo";
 import Folder from "../models/Folder";
-import getJsonList from "../libs/getJsonList";
+import getJsonList from "../libs/tests/getJsonList";
 import compileDataValues from "../libs/compileDatavalues";
-import expectElem from "../libs/expectElem";
+import expectElem from "../libs/tests/expectElem";
+import generateNElements from "../libs/tests/generateNElements";
 
 let user: User;
 let user2: User;
@@ -162,6 +163,139 @@ describe("Test get all todos", () => {
                     code: 200,
                     checkDbElem: false,
                     toCheck: getTodoListJson(todo5,todo1)
+                })
+            )
+    })
+})
+
+const getJsonListTodoWithFolderString = folderString => getJsonList<Todo>(todo => ({
+    ...compileDataValues(todo),
+    createdAt: todo.createdAt.toISOString(),
+    updatedAt: todo.updatedAt.toISOString(),
+    folders: folderString
+}))
+
+const getJsonListTodoWithFolderStringInRoot = getJsonListTodoWithFolderString("/")
+const getJsonListTodoWithFolderStringInFolder1 = getJsonListTodoWithFolderString("/folder 1")
+const getJsonListTodoWithFolderStringInFolder2 = getJsonListTodoWithFolderString("/folder 1/folder 2")
+
+describe("Search todos through sub folder", () => {
+    let t;
+
+    let folder1: Folder;
+    let folder2: Folder;
+
+    let todosInRoot: Todo[];
+    let todosInFolder1: Todo[];
+    let todosInFolder2: Todo[];
+
+    beforeAll(async () => {
+        t = await sequelize.transaction();
+        sequelize.constructor['_cls'] = new Map();
+        sequelize.constructor['_cls'].set('transaction', t);
+
+        folder1 = await Folder.create({
+            name: "folder 1",
+            user_id: user.id
+        });
+        folder2 = await Folder.create({
+            name: "folder 2",
+            user_id: user.id,
+            parent_id: folder1.id
+        })
+
+        const letters = ["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"]
+
+        todosInRoot = await generateNElements<Todo>(i =>
+                Todo.create({
+                    name: "root todo "+letters[i]+(Math.random() < 1/5 ? " ananas" : ""),
+                    description: Math.random() < 1/5 ? "ananas" : undefined,
+                    user_id: user.id
+                })
+            , 5)
+
+        todosInFolder1 = await generateNElements<Todo>(i =>
+                Todo.create({
+                    name: "sub todo "+letters[i]+(Math.random() < 1/5 ? " ananas" : ""),
+                    description: Math.random() < 1/5 ? "ananas" : undefined,
+                    user_id: user.id,
+                    parent_id: folder1.id
+                })
+            , 5)
+
+        todosInFolder2 = await generateNElements<Todo>(i =>
+                Todo.create({
+                    name: "sub sub todo "+letters[i]+(Math.random() < 1/5 ? " ananas" : ""),
+                    description: Math.random() < 1/5 ? "ananas" : undefined,
+                    user_id: user.id,
+                    parent_id: folder2.id
+                })
+            , 5)
+    })
+
+    afterAll(() => t.rollback())
+
+    test("Get first page searched todos", () => {
+        return request(app)
+            .get("/todos/search?asc=name")
+            .set('Authorization', 'Bearer ' + jwt)
+            .then(res =>
+                expectElem({
+                    res,
+                    code: 200,
+                    checkDbElem: false,
+                    toCheck: {
+                        pages: 2,
+                        elements: [...getJsonListTodoWithFolderStringInRoot(todosInRoot), ...getJsonListTodoWithFolderStringInFolder2(todosInFolder2)]
+                    }
+                })
+            )
+    })
+
+    test("Get second page searched todos", () => {
+        return request(app)
+            .get("/todos/search?asc=name&page=2")
+            .set('Authorization', 'Bearer ' + jwt)
+            .then(res =>
+                expectElem({
+                    res,
+                    code: 200,
+                    checkDbElem: false,
+                    toCheck: {
+                        pages: 2,
+                        elements: getJsonListTodoWithFolderStringInFolder1(todosInFolder1)
+                    }
+                })
+            )
+    })
+
+    test("Get todos which has 'ananas' string in name or description", () => {
+        const filterTodos = (todo: Todo) =>
+            todo.name.replace("ananas", "") !== todo.name ||
+            (todo.description !== null && todo.description.replace("ananas", "") !== todo.description)
+
+        return request(app)
+            .get("/todos/search?asc=name&search=ananas")
+            .set('Authorization', 'Bearer ' + jwt)
+            .then(res =>
+                expectElem({
+                    res,
+                    code: 200,
+                    checkDbElem: false,
+                    toCheck: {
+                        pages: 1,
+                        elements: [
+                            ...getJsonListTodoWithFolderStringInRoot(
+                                todosInRoot.filter(filterTodos)
+                            ),
+                            ...getJsonListTodoWithFolderStringInFolder2(
+                                todosInFolder2.filter(filterTodos)
+                            ),
+                            ...getJsonListTodoWithFolderStringInFolder1(
+                                todosInFolder1.filter(filterTodos)
+                            )
+                        ]
+                    }
                 })
             )
     })
