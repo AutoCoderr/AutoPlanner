@@ -168,16 +168,12 @@ describe("Test get all todos", () => {
     })
 })
 
-const getJsonListTodoWithFolderString = folderString => getJsonList<Todo>(todo => ({
+const getJsonListTodoWithFolders = (folders: Folder[] = []) => getJsonList<Todo>(todo => ({
     ...compileDataValues(todo),
     createdAt: todo.createdAt.toISOString(),
     updatedAt: todo.updatedAt.toISOString(),
-    folders: folderString
+    folders: folders.map(({id, name}) => ({id, name}))
 }))
-
-const getJsonListTodoWithFolderStringInRoot = getJsonListTodoWithFolderString("/")
-const getJsonListTodoWithFolderStringInFolder1 = getJsonListTodoWithFolderString("/folder 1")
-const getJsonListTodoWithFolderStringInFolder2 = getJsonListTodoWithFolderString("/folder 1/folder 2")
 
 describe("Search todos through sub folder", () => {
     let t;
@@ -188,6 +184,10 @@ describe("Search todos through sub folder", () => {
     let todosInRoot: Todo[];
     let todosInFolder1: Todo[];
     let todosInFolder2: Todo[];
+
+    let getJsonListTodoWithFolderStringInRoot;
+    let getJsonListTodoWithFolderStringInFolder1;
+    let getJsonListTodoWithFolderStringInFolder2;
 
     beforeAll(async () => {
         t = await sequelize.transaction();
@@ -231,6 +231,10 @@ describe("Search todos through sub folder", () => {
                     parent_id: folder2.id
                 })
             , 5)
+
+        getJsonListTodoWithFolderStringInRoot = getJsonListTodoWithFolders()
+        getJsonListTodoWithFolderStringInFolder1 = getJsonListTodoWithFolders([folder1])
+        getJsonListTodoWithFolderStringInFolder2 = getJsonListTodoWithFolders([folder1,folder2])
     })
 
     afterAll(() => t.rollback())

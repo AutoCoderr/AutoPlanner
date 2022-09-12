@@ -8,6 +8,7 @@ import getQuerySort from "../libs/getQuerySort";
 import paginate from "../libs/paginate";
 import IPaginatedResult from "../interfaces/crud/IPaginatedResult";
 import compileDataValues from "../libs/compileDatavalues";
+import {IFolder} from "../interfaces/models/Folder";
 
 export function findOneTodoByIdWithParent(id: number): Promise<null|TodoWithParent> {
     return <Promise<null|TodoWithParent>>Todo.findOne({
@@ -47,17 +48,17 @@ export function getTodoQuerySort(reqData: IReqData) {
     })
 }
 
-function getRecursivelyTodoFolders(todoOrFolder: Todo|Folder, folders: string[] = []) {
+function getRecursivelyTodoFolders(todoOrFolder: Todo|Folder, folders: Pick<IFolder, 'id' | 'name'>[] = []) {
     return todoOrFolder.parent_id === null ?
-            '/'+folders.reverse().join("/") :
+            folders :
         Folder.findOne({
             where: {
                 id: todoOrFolder.parent_id
             }
         }).then(folder =>
             folder === null ?
-                '/'+folders.reverse().join("/") :
-                getRecursivelyTodoFolders(folder, [...folders, folder.name])
+                folders :
+                getRecursivelyTodoFolders(folder, [{id: folder.id, name: folder.name}, ...folders])
         )
 
 }
