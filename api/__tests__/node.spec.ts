@@ -3,7 +3,7 @@ import TodoModel from "../models/TodoModel";
 import Node from "../models/Node";
 import sequelize from "../sequelize";
 import app from "../app";
-import expectElem from "../libs/expectElem";
+import expectElem from "../libs/tests/expectElem";
 import User from "../models/User";
 import compileDataValues from "../libs/compileDatavalues";
 import {nodeIncludeModel} from "../includeConfigs/node";

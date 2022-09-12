@@ -6,6 +6,10 @@ import TodoModel from "../models/TodoModel";
 import IViolation from "../interfaces/form/IViolations";
 import Node from "../models/Node";
 import Response from "../models/Response";
+import expectElem from "../libs/tests/expectElem";
+import compileDataValues from "../libs/compileDatavalues";
+import getJsonList from "../libs/tests/getJsonList";
+import generateNElements from "../libs/tests/generateNElements";
 
 let user: User;
 let user2: User;
@@ -813,18 +817,16 @@ describe("Tests get model", () => {
     })
 })
 
-function getModelsListJson(...models: TodoModel[]) {
-    return models.map(({id,name, description,published, user_id, createdAt, updatedAt}) => ({
-        id,
-        name,
-        description,
-        published,
-        createdAt: createdAt.toISOString(),
-        updatedAt: updatedAt.toISOString(),
-        user_id,
-        firstnode_id: null
-    }))
-}
+const getModelsListJson = getJsonList<TodoModel>(({id,name, description,published, user_id, createdAt, updatedAt}) => ({
+    id,
+    name,
+    description,
+    published,
+    createdAt: createdAt.toISOString(),
+    updatedAt: updatedAt.toISOString(),
+    user_id,
+    firstnode_id: null
+}))
 
 describe("Tests get all models", () => {
     let t;
@@ -886,144 +888,344 @@ describe("Tests get all models", () => {
         return request(app)
             .get("/models/")
             .set('Authorization', 'Bearer ' + jwt)
-            .then(res => {
-                expect(res.statusCode).toEqual(200)
-                expect(JSON.parse(res.text)).toEqual(
-                    getModelsListJson(ownModel1,ownModel2,ownModel3)
-                )
-            })
+            .then(res =>
+                expectElem({
+                    res,
+                    code: 200,
+                    checkDbElem: false,
+                    toCheck: {
+                        pages: 1,
+                        elements: getModelsListJson(ownModel1,ownModel2,ownModel3)
+                    }
+                })
+            )
     })
 
     test("Get all own models, trying filter and sort with not exists fields", () => {
         return request(app)
             .get("/models?asc=artichaud,ananas&wesh=12")
             .set('Authorization', 'Bearer ' + jwt)
-            .then(res => {
-                expect(res.statusCode).toEqual(200)
-                expect(JSON.parse(res.text)).toEqual(
-                    getModelsListJson(ownModel1,ownModel2,ownModel3)
-                )
-            })
+            .then(res =>
+                expectElem({
+                    res,
+                    code: 200,
+                    checkDbElem: false,
+                    toCheck: {
+                        pages: 1,
+                        elements: getModelsListJson(ownModel1,ownModel2,ownModel3)
+                    }
+                })
+            )
     })
 
     test("Get own models order by updatedAt desc with published false", () => {
         return request(app)
             .get("/models?desc=updatedAt&published=false")
             .set('Authorization', 'Bearer ' + jwt)
-            .then(res => {
-                expect(res.statusCode).toEqual(200)
-                expect(JSON.parse(res.text)).toEqual(
-                    getModelsListJson(ownModel3,ownModel1)
-                )
-            })
+            .then(res =>
+                expectElem({
+                    res,
+                    code: 200,
+                    checkDbElem: false,
+                    toCheck: {
+                        pages: 1,
+                        elements: getModelsListJson(ownModel3,ownModel1)
+                    }
+                })
+            )
     })
 
     test("Get own models order by name asc with published false", () => {
         return request(app)
             .get("/models?asc=name&published=false")
             .set('Authorization', 'Bearer ' + jwt)
-            .then(res => {
-                expect(res.statusCode).toEqual(200)
-                expect(JSON.parse(res.text)).toEqual(
-                    getModelsListJson(ownModel3,ownModel1)
-                )
-            })
+            .then(res =>
+                expectElem({
+                    res,
+                    code: 200,
+                    checkDbElem: false,
+                    toCheck: {
+                        pages: 1,
+                        elements: getModelsListJson(ownModel3,ownModel1)
+                    }
+                })
+            )
     })
 
     test("Get own models published true", () => {
         return request(app)
             .get("/models?published=true")
             .set('Authorization', 'Bearer ' + jwt)
-            .then(res => {
-                expect(res.statusCode).toEqual(200)
-                expect(JSON.parse(res.text)).toEqual(
-                    getModelsListJson(ownModel2)
-                )
-            })
+            .then(res =>
+                expectElem({
+                    res,
+                    code: 200,
+                    checkDbElem: false,
+                    toCheck: {
+                        pages: 1,
+                        elements: getModelsListJson(ownModel2)
+                    }
+                })
+            )
     })
 
     test("Get own models searching 'ananas'", () => {
         return request(app)
             .get("/models?search=ananas")
             .set('Authorization', 'Bearer ' + jwt)
-            .then(res => {
-                expect(res.statusCode).toEqual(200)
-                expect(JSON.parse(res.text)).toEqual(
-                    getModelsListJson(ownModel1,ownModel2)
-                )
-            })
+            .then(res =>
+                expectElem({
+                    res,
+                    code: 200,
+                    checkDbElem: false,
+                    toCheck: {
+                        pages: 1,
+                        elements: getModelsListJson(ownModel1,ownModel2)
+                    }
+                })
+            )
     })
 
     test("Get own models order by updatedAt desc/asc and name desc", () => {
         return request(app)
             .get("/models?desc=updatedAt,name&asc=updatedAt")
             .set('Authorization', 'Bearer ' + jwt)
-            .then(res => {
-                expect(res.statusCode).toEqual(200)
-                expect(JSON.parse(res.text)).toEqual(
-                    getModelsListJson(ownModel2,ownModel1,ownModel3)
-                )
-            })
+            .then(res =>
+                expectElem({
+                    res,
+                    code: 200,
+                    checkDbElem: false,
+                    toCheck: {
+                        pages: 1,
+                        elements: getModelsListJson(ownModel2,ownModel1,ownModel3)
+                    }
+                })
+            )
     })
 
     test("Get own models by specified user, order by name desc with 'ananas' search", () => {
         return request(app)
             .get("/users/"+user.id+"/models?desc=name&search=ananas")
             .set('Authorization', 'Bearer ' + jwt)
-            .then(res => {
-                expect(res.statusCode).toEqual(200)
-                expect(JSON.parse(res.text)).toEqual(
-                    getModelsListJson(ownModel2,ownModel1)
-                )
-            })
+            .then(res =>
+                expectElem({
+                    res,
+                    code: 200,
+                    checkDbElem: false,
+                    toCheck: {
+                        pages: 1,
+                        elements: getModelsListJson(ownModel2,ownModel1)
+                    }
+                })
+            )
     })
 
     test("Get other user models", () => {
         return request(app)
             .get("/users/"+user2.id+"/models")
             .set('Authorization', 'Bearer ' + jwt)
-            .then(res => {
-                expect(res.statusCode).toEqual(200)
-                expect(JSON.parse(res.text)).toEqual(
-                    getModelsListJson(otherModel2,otherModel3)
-                )
-            })
+            .then(res =>
+                expectElem({
+                    res,
+                    code: 200,
+                    checkDbElem: false,
+                    toCheck: {
+                        pages: 1,
+                        elements: getModelsListJson(otherModel2,otherModel3)
+                    }
+                })
+            )
     })
 
     test("Get other user models, order by name asc, trying getting published false", () => {
         return request(app)
             .get("/users/"+user2.id+"/models?asc=name&published=false")
             .set('Authorization', 'Bearer ' + jwt)
-            .then(res => {
-                expect(res.statusCode).toEqual(200)
-                expect(JSON.parse(res.text)).toEqual(
-                    getModelsListJson(otherModel3,otherModel2)
-                )
-            })
+            .then(res =>
+                expectElem({
+                    res,
+                    code: 200,
+                    checkDbElem: false,
+                    toCheck: {
+                        pages: 1,
+                        elements: getModelsListJson(otherModel3,otherModel2)
+                    }
+                })
+            )
     })
 
     test("Get all published models", () => {
         return request(app)
             .get("/all/models")
             .set('Authorization', 'Bearer ' + jwt)
-            .then(res => {
-                expect(res.statusCode).toEqual(200)
-                expect(JSON.parse(res.text)).toEqual(
-                    getModelsListJson(ownModel2,otherModel2,otherModel3)
-                )
-            })
+            .then(res =>
+                expectElem({
+                    res,
+                    code: 200,
+                    checkDbElem: false,
+                    toCheck: {
+                        pages: 1,
+                        elements: getModelsListJson(ownModel2,otherModel2,otherModel3)
+                    }
+                })
+            )
     })
 
     test("Get all published models order by updatedAt desc, trying published false", () => {
         return request(app)
             .get("/all/models?desc=updatedAt&published=false")
             .set('Authorization', 'Bearer ' + jwt)
-            .then(res => {
-                expect(res.statusCode).toEqual(200)
-                expect(JSON.parse(res.text)).toEqual(
-                    getModelsListJson(otherModel3,otherModel2,ownModel2)
-                )
-            })
+            .then(res =>
+                expectElem({
+                    res,
+                    code: 200,
+                    checkDbElem: false,
+                    toCheck: {
+                        pages: 1,
+                        elements: getModelsListJson(otherModel3,otherModel2,ownModel2)
+                    }
+                })
+            )
+    })
+})
+
+describe("Tests get all with pagination", () => {
+    let t;
+
+    let ownNonPublishedModels: TodoModel[];
+    let ownPublishedModels: TodoModel[];
+    let otherPublishedModels: TodoModel[];
+
+    beforeAll(async () => {
+        t = await sequelize.transaction();
+        sequelize.constructor['_cls'] = new Map();
+        sequelize.constructor['_cls'].set('transaction', t);
+
+        const letters = ["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"]
+
+        ownPublishedModels = await generateNElements<TodoModel>(
+            (i) =>
+                TodoModel.create({
+                    name: "own published element "+letters[i],
+                    user_id: user.id,
+                    published: true
+                }),
+            7
+        )
+        ownNonPublishedModels = await generateNElements<TodoModel>(
+            (i) =>
+                TodoModel.create({
+                    name: "own non published element "+letters[i],
+                    user_id: user.id
+                }),
+            10
+        )
+
+        otherPublishedModels = await generateNElements<TodoModel>(
+            (i) =>
+                TodoModel.create({
+                    name: "other published element "+letters[i],
+                    user_id: user2.id,
+                    published: true
+                }),
+            5
+        )
+        await generateNElements<TodoModel>(
+            (i) =>
+                TodoModel.create({
+                    name: "other non published element "+letters[i],
+                    user_id: user2.id
+                }),
+            3
+        )
+    });
+
+    afterAll(() => t.rollback());
+
+
+    test("Get all first own non published models", () => {
+        return request(app)
+            .get("/models?asc=name")
+            .set('Authorization', 'Bearer ' + jwt)
+            .then(res =>
+                expectElem({
+                    res,
+                    code: 200,
+                    checkDbElem: false,
+                    toCheck: {
+                        pages: 2,
+                        elements: getModelsListJson(ownNonPublishedModels)
+                    }
+                })
+            )
+    })
+
+    test("Get all second page own non published models", () => {
+        return request(app)
+            .get("/models?asc=name&page=2")
+            .set('Authorization', 'Bearer ' + jwt)
+            .then(res =>
+                expectElem({
+                    res,
+                    code: 200,
+                    checkDbElem: false,
+                    toCheck: {
+                        pages: 2,
+                        elements: getModelsListJson(ownPublishedModels)
+                    }
+                })
+            )
+    })
+
+    test("Get all first published models", () => {
+        return request(app)
+            .get("/all/models?asc=name")
+            .set('Authorization', 'Bearer ' + jwt)
+            .then(res =>
+                expectElem({
+                    res,
+                    code: 200,
+                    checkDbElem: false,
+                    toCheck: {
+                        pages: 2,
+                        elements: getModelsListJson(otherPublishedModels,ownPublishedModels.slice(0,5))
+                    }
+                })
+            )
+    })
+
+    test("Get all second page published models", () => {
+        return request(app)
+            .get("/all/models?asc=name&page=2")
+            .set('Authorization', 'Bearer ' + jwt)
+            .then(res =>
+                expectElem({
+                    res,
+                    code: 200,
+                    checkDbElem: false,
+                    toCheck: {
+                        pages: 2,
+                        elements: getModelsListJson(ownPublishedModels.slice(5))
+                    }
+                })
+            )
+    })
+
+    test("Get first page published model searching 'C'", () => {
+        return request(app)
+            .get("/all/models?search=C")
+            .set('Authorization', 'Bearer ' + jwt)
+            .then(res =>
+                expectElem({
+                    res,
+                    code: 200,
+                    checkDbElem: false,
+                    toCheck: {
+                        pages: 1,
+                        elements: getModelsListJson(ownPublishedModels[2],otherPublishedModels[2])
+                    }
+                })
+            )
     })
 })
 

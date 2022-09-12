@@ -1,8 +1,8 @@
 import IQuerySearchParams from "../interfaces/IQuerySearchParams";
 import {Op, WhereOptions} from "sequelize";
 
-function compareValues(value, liaisonValues, opType, col) {
-    return value instanceof Array ? {
+function compareValues(value, multipleValues, liaisonValues, opType, col) {
+    return (value instanceof Array && multipleValues) ? {
         [liaisonValues]: value.map(v => ({
             [col]: { [opType]: v }
         }))
@@ -26,14 +26,16 @@ export default function getQuerySearch(query: {[key: string]: string}, querySear
 
         const value = (typeof (param) === "object" && param.computeValue) ? param.computeValue(query[key]) : query[key]
 
+        const multipleValues = (typeof (param) === "object" && param.multipleValues !== undefined) ? param.multipleValues : false
+
         return {
             ...acc,
             ...(cols instanceof Array ? {
                         [liaisonCols]: cols.map(col =>
-                            compareValues(value, liaisonValues, opType, col)
+                            compareValues(value, multipleValues, liaisonValues, opType, col)
                         )
                     } :
-                    compareValues(value, liaisonValues, opType, cols)
+                    compareValues(value, multipleValues, liaisonValues, opType, cols)
             )
         }
     }, {})

@@ -13,7 +13,9 @@ type colTypes = OpTypes["eq"]|
     OpTypes["gt"]|
     OpTypes["gte"]|
     OpTypes["in"]|
-    OpTypes["notIn"]
+    OpTypes["notIn"]|
+    OpTypes['between']|
+    OpTypes['notBetween']
 
 interface IQuerySearchParams {
     [col: string]: colTypes | {
@@ -21,7 +23,8 @@ interface IQuerySearchParams {
         cols?: string|string[],
         liaisonCols?: OpTypes["and"]|OpTypes["or"],
         liaisonValues?: OpTypes["and"]|OpTypes["or"],
-        computeValue?: (value: string) => string|boolean|number|null|undefined|Array<string|boolean|number|null|undefined>,
+        multipleValues?: boolean,
+        computeValue?: (value: string) => string|boolean|number|Date|null|undefined|Array<string|boolean|number|Date|null|undefined>,
     }
 }
 

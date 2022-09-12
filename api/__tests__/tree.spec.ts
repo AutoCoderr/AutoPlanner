@@ -4,7 +4,7 @@ import app from "../app";
 import sequelize from "../sequelize";
 import TodoModel from "../models/TodoModel";
 import Node from "../models/Node";
-import expectElem from "../libs/expectElem";
+import expectElem from "../libs/tests/expectElem";
 import compileDataValues from "../libs/compileDatavalues";
 import Response from "../models/Response";
 import {nodeIncludeResponses} from "../includeConfigs/node";

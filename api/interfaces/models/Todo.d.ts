@@ -8,6 +8,7 @@ import Folder from "../../models/Folder";
 import TodoModel from "../../models/TodoModel";
 import User from "../../models/User";
 import Todo from "../../models/Todo";
+import {IFolder} from "./Folder";
 
 export interface ITodo {
     id: number;
@@ -47,4 +48,9 @@ export interface TodoWithModel extends Todo {
 }
 export interface TodoWithUser extends Todo {
     user: User
+}
+
+
+export interface TodoWithFoldersString extends Todo {
+    folders: Pick<IFolder, 'id' | 'name'>[]
 }
