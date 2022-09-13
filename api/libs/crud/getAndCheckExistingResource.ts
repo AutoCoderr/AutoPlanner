@@ -1,16 +1,19 @@
-import IGetAndCheckExistingResource from "../../interfaces/crud/IGetAndCheckExistingResource";
+import {Model} from "sequelize";
+import {ModelStatic} from "sequelize/types/model";
+import {IAccessCheck} from "../../interfaces/crud/security/IAccessCheck";
+import {IUserConnected} from "../../interfaces/models/User";
+import IGetAndCheckExistingResourceParams from "../../interfaces/crud/IGetAndCheckExistingResourceParams";
 
-const getAndCheckExistingResource: IGetAndCheckExistingResource = async (
-    model,
-    id,
-    mode,
-    accessCheck,
-    connectedUser = undefined,
-    params = {}
-) => {
-    //@ts-ignore
-    const elem = await  model.findOne({
-        where: { id },
+export default async function getAndCheckExistingResource<M extends Model>(
+    model: ModelStatic<M>,
+    id: number,
+    mode: 'get'|'update'|'delete',
+    accessCheck: IAccessCheck,
+    connectedUser: undefined|IUserConnected = undefined,
+    params: IGetAndCheckExistingResourceParams = {}
+) {
+    const elem = await model.findOne({
+        where: <M['_creationAttributes']>{ id },
         include: params.include
     })
 
@@ -33,5 +36,3 @@ const getAndCheckExistingResource: IGetAndCheckExistingResource = async (
 
     return {elem: getted, code: null};
 }
-
-export default getAndCheckExistingResource;

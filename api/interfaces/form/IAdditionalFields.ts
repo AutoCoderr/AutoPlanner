@@ -1,5 +1,5 @@
-interface IAdditionalFields {
-    [key: string]: (data: {[key: string]: any}) => Promise<any>|any
+interface IAdditionalFields<IData = any> {
+    [key: string]: (data: IData) => Promise<any>|any
 }
 
 export default IAdditionalFields;

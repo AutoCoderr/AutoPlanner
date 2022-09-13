@@ -1,9 +1,9 @@
 import IField from "../../interfaces/form/IField";
 import isNumber from "../isNumber";
 
-export default async function checkModels(
+export default async function checkModels<IData = any>(
     data: {[key: string]: any},
-    fields: {[key: string]: IField }|[string,IField][],
+    fields: {[key: string]: IField<IData> }|[string,IField<IData>][],
     computedData: {[key: string]: any} = {}): Promise<{[key: string]: any}>
 {
 

@@ -23,11 +23,11 @@ router.delete("/:id", deleteOne(Node, nodeAccessCheck, {
     include: nodeIncludeModel
 }));
 
-router.put("/:id", update(Node, getNodeForm, nodeAccessCheck, {
+router.put("/:id", update(Node, getNodeForm(null), nodeAccessCheck, {
     include: nodeIncludeModel
 }));
 
-router.patch("/:id", update(Node, getNodeForm, nodeAccessCheck, {
+router.patch("/:id", update(Node, getNodeForm(null), nodeAccessCheck, {
     include: nodeIncludeModel
 }));
 

@@ -8,8 +8,13 @@ import priority from "../asserts/priority";
 import Folder from "../models/Folder";
 import folderAccessCheck from "../security/accessChecks/folderAccessCheck";
 import Todo from "../models/Todo";
+import TodoModel from "../models/TodoModel";
+import modelAccessCheck from "../security/accessChecks/modelAccessCheck";
+import Node from "../models/Node";
+import Step from "../models/Step";
+import createFirstStepOnTodo from "../libs/createFirstStepOnTodo";
 
-const getTodoForm: IFormGetter = (reqData, method) => ({
+const getTodoForm: IFormGetter<Todo> = (reqData, method) => ({
     model: Todo,
     fields: {
         name: {
@@ -46,12 +51,22 @@ const getTodoForm: IFormGetter = (reqData, method) => ({
             valid: (folder: Folder) => folderAccessCheck(folder, "update", reqData.user),
             format: (folder: Folder) => folder.id,
             required: false
+        },
+        model_id: {
+            msg: "Vous n'avez pas accès à ce modèle",
+            model: TodoModel,
+            valid: (model: TodoModel) => modelAccessCheck(model, "get", reqData.user),
+            format: (model: TodoModel) => model.id,
+            required: false
         }
     },
     additionalFields: method === "post" ? {
         user_id: () => reqData.user?.id,
         parent_id: () => reqData.folder?.id
-    } : undefined
+    } : undefined,
+
+
+    onCreated: createFirstStepOnTodo
 })
 
 export default getTodoForm;

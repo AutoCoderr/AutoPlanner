@@ -6,14 +6,12 @@ import {
     NodeWithChildren,
     NodeWithModel,
     NodeWithParents,
-    NodeWithRelatedResponses,
     NodeWithResponses
 } from "../interfaces/models/Node";
 import IReqData from "../interfaces/IReqData";
 import sequelize from "../sequelize";
 import RelationNode from "../models/RelationNode";
 import {InferAttributes, Op, QueryTypes} from "sequelize";
-import {getNodeIncludeRelatedResponses} from "../includeConfigs/node";
 
 export function findOneNodeByIdWithModel(id: number): Promise<null | NodeWithModel> {
     return <Promise<null | NodeWithModel>>Node.findOne({
@@ -88,8 +86,8 @@ export function findNodesWithoutParentsByModelId(model_id: number): Promise<Infe
     )
 }
 
-export function findNodeChildren(node_id: number): Promise<NodeWithRelatedResponses[]> {
-    return <Promise<NodeWithRelatedResponses[]>>RelationNode.findAll({
+export function findNodeChildren(node_id: number): Promise<Node[]> {
+    return <Promise<Node[]>>RelationNode.findAll({
         where: {
             parent_id: node_id
         }
