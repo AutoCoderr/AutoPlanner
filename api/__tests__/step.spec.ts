@@ -8,6 +8,9 @@ import Response from "../models/Response";
 import Todo from "../models/Todo";
 import expectElem from "../libs/tests/expectElem";
 import Step from "../models/Step";
+import createFirstStepOnTodo from "../libs/createFirstStepOnTodo";
+import compileDataValues from "../libs/compileDatavalues";
+import subStepRoute from "../routes/subStepRoute";
 
 let user: User;
 let user2: User;
@@ -43,7 +46,7 @@ afterAll(async () => {
     await sequelize.close();
 })
 
-describe("Tests steps on todo", () => {
+describe("Tests progress steps in todo", () => {
     let t;
 
     let todo: Todo;
@@ -311,7 +314,7 @@ describe("Tests steps on todo", () => {
 
     test("Create step as response of other non published user node", () => {
         return request(app)
-            .post("/todos/"+todo.id+"/steps")
+            .post("/todos/" + todo.id + "/steps")
             .send({
                 parent_node: otherNonPublishedFirstnode.id
             })
@@ -335,7 +338,7 @@ describe("Tests steps on todo", () => {
 
     test("Create step as response other published user node", () => {
         return request(app)
-            .post("/todos/"+todo.id+"/steps")
+            .post("/todos/" + todo.id + "/steps")
             .send({
                 parent_node: otherPublishedFirstnode.id
             })
@@ -359,7 +362,7 @@ describe("Tests steps on todo", () => {
 
     test("Create step as response of firstnode which has nothing children", () => {
         return request(app)
-            .post("/todos/"+todo.id+"/steps")
+            .post("/todos/" + todo.id + "/steps")
             .send({
                 parent_node: firstnode.id
             })
@@ -416,7 +419,7 @@ describe("Tests steps on todo", () => {
 
     test("Create step as response on node which is not accessible at the time on the todo", async () => {
         return request(app)
-            .post("/todos/"+todo.id+"/steps")
+            .post("/todos/" + todo.id + "/steps")
             .send({
                 parent_node: question.id
             })
@@ -440,7 +443,7 @@ describe("Tests steps on todo", () => {
 
     test("Create step as response of firstnode, without specifying a response object", () => {
         return request(app)
-            .post("/todos/"+todo.id+"/steps")
+            .post("/todos/" + todo.id + "/steps")
             .send({
                 parent_node: firstnode.id
             })
@@ -464,7 +467,7 @@ describe("Tests steps on todo", () => {
 
     test("Create step as response, with response object of other non published firstnode", () => {
         return request(app)
-            .post("/todos/"+todo.id+"/steps")
+            .post("/todos/" + todo.id + "/steps")
             .send({
                 parent_node: firstnode.id,
                 response: otherNonPublishedResponse.id
@@ -489,7 +492,7 @@ describe("Tests steps on todo", () => {
 
     test("Create step as response, with response object of other published firstnode", () => {
         return request(app)
-            .post("/todos/"+todo.id+"/steps")
+            .post("/todos/" + todo.id + "/steps")
             .send({
                 parent_node: firstnode.id,
                 response: otherPublishedResponse.id
@@ -514,7 +517,7 @@ describe("Tests steps on todo", () => {
 
     test("Create step as response of firstnode, with good response object, without relation between firstnode and action", () => {
         return request(app)
-            .post("/todos/"+todo.id+"/steps")
+            .post("/todos/" + todo.id + "/steps")
             .send({
                 parent_node: firstnode.id,
                 response: firstnodeResponse1.id
@@ -540,7 +543,7 @@ describe("Tests steps on todo", () => {
 
     test("Create step as response of firstnode, successfuly", () => {
         return request(app)
-            .post("/todos/"+todo.id+"/steps")
+            .post("/todos/" + todo.id + "/steps")
             .send({
                 parent_node: firstnode.id,
                 response: firstnodeResponse1.id
@@ -568,7 +571,7 @@ describe("Tests steps on todo", () => {
 
     test("Create step as response of action, without child on action", () => {
         return request(app)
-            .post("/todos/"+todo.id+"/steps")
+            .post("/todos/" + todo.id + "/steps")
             .send({
                 parent_node: action.id
             })
@@ -601,7 +604,7 @@ describe("Tests steps on todo", () => {
 
     test("Create step as response of action, specifying a response", () => {
         return request(app)
-            .post("/todos/"+todo.id+"/steps")
+            .post("/todos/" + todo.id + "/steps")
             .send({
                 parent_node: action.id,
                 response: firstnodeResponse1.id
@@ -626,7 +629,7 @@ describe("Tests steps on todo", () => {
 
     test("Create step as response of action, successfuly", () => {
         return request(app)
-            .post("/todos/"+todo.id+"/steps")
+            .post("/todos/" + todo.id + "/steps")
             .send({
                 parent_node: action.id
             })
@@ -653,7 +656,7 @@ describe("Tests steps on todo", () => {
 
     test("Create another step as response of action", () => {
         return request(app)
-            .post("/todos/"+todo.id+"/steps")
+            .post("/todos/" + todo.id + "/steps")
             .send({
                 parent_node: action.id
             })
@@ -677,7 +680,7 @@ describe("Tests steps on todo", () => {
 
     test("Create step as response of subaction, which will create a new step on firstnode", () => {
         return request(app)
-            .post("/todos/"+todo.id+"/steps")
+            .post("/todos/" + todo.id + "/steps")
             .send({
                 parent_node: subAction.id
             })
@@ -698,6 +701,351 @@ describe("Tests steps on todo", () => {
                         createdAt: expect.any(jsonRes ? String : Date),
                         updatedAt: expect.any(jsonRes ? String : Date)
                     })
+                })
+            )
+    })
+})
+
+describe("Tests create, update, and delete steps", () => {
+    let t;
+
+    let model: TodoModel;
+    let firstnode: Node;
+    let action: Node;
+    let subAction: Node;
+
+    let todo: Todo;
+
+    let stepFirstnode: Step;
+    let stepAction: Step;
+    let stepSubAction: Step;
+
+    beforeAll(async () => {
+        t = await sequelize.transaction();
+        sequelize.constructor['_cls'] = new Map();
+        sequelize.constructor['_cls'].set('transaction', t);
+
+        model = await TodoModel.create({
+            name: "model",
+            user_id: user.id
+        });
+        firstnode = await Node.create({
+            text: "firstnode",
+            type: "action",
+            model_id: model.id
+        });
+        model.firstnode_id = firstnode.id;
+        await model.save();
+
+        action = await Node.create({
+            text: "action",
+            type: "action",
+            model_id: model.id
+        })
+        await firstnode.addChild(action);
+
+        subAction = await Node.create({
+            text: "sub action",
+            type: "action",
+            model_id: model.id
+        });
+        await action.addChild(subAction);
+
+        todo = await Todo.create({
+            name: "todo",
+            user_id: user.id,
+            model_id: model.id
+        })
+        stepFirstnode = await <Promise<Step>>createFirstStepOnTodo(todo);
+    });
+
+    afterAll(() => t.rollback());
+
+
+    test("Create step with bad fields", () => {
+        return request(app)
+            .post("/todos/" + todo.id + "/steps")
+            .send({
+                percentSynchronized: 123,
+                percent: "coucou",
+                deadLine: "abc",
+                parent_node: firstnode.id
+            })
+            .set('Authorization', 'Bearer ' + jwt)
+            .then(res =>
+                expectElem({
+                    res,
+                    code: 422,
+                    checkDbElem: false,
+                    toCheck: {
+                        "violations": [
+                            {
+                                "propertyPath": "percentSynchronized",
+                                "message": "Vous devez rentrer un booléen"
+                            },
+                            {
+                                "propertyPath": "percent",
+                                "message": "Vous devez spécifier un nombre entre 0 et 100"
+                            },
+                            {
+                                "propertyPath": "deadLine",
+                                "message": "Vous devez rentrer une date valide"
+                            }
+                        ]
+                    }
+                })
+            )
+    });
+
+    test("Create step with percent mentionned, but percent synchronized", () => {
+        return request(app)
+            .post("/todos/" + todo.id + "/steps")
+            .send({
+                parent_node: firstnode.id,
+                deadLine: '2022-12-12',
+                percentSynchronized: true,
+                percent: 50
+            })
+            .set('Authorization', 'Bearer ' + jwt)
+            .then(res =>
+                expectElem({
+                    res,
+                    code: 422,
+                    checkDbElem: false,
+                    toCheck: {
+                        "violations": [
+                            {
+                                "propertyPath": "percent",
+                                "message": "Vous ne pouvez pas définir le pourcentage s'il est déjà synchronisé"
+                            }
+                        ]
+                    }
+                })
+            )
+    })
+
+    test("Create step successfully", () => {
+        return request(app)
+            .post("/todos/" + todo.id + "/steps")
+            .send({
+                parent_node: firstnode.id,
+                deadLine: '2022-12-12',
+                percent: 50
+            })
+            .set('Authorization', 'Bearer ' + jwt)
+            .then(async res => {
+                stepAction = await expectElem({
+                    res,
+                    code: 201,
+                    model: Step,
+                    toCheck: jsonRes => ({
+                        id: expect.any(Number),
+                        percent: 50,
+                        percentSynchronized: false,
+                        nb: 1,
+                        node_id: action.id,
+                        todo_id: todo.id,
+                        deadLine: jsonRes ? new Date("2022-12-12").toISOString() : new Date("2022-12-12"),
+                        createdAt: expect.any(jsonRes ? String : Date),
+                        updatedAt: expect.any(jsonRes ? String : Date)
+                    })
+                })
+
+
+                // Set percentSynchronized for futur update tests
+                stepAction.percentSynchronized = true;
+                return stepAction.save();
+            })
+    })
+
+    test("Update percent of firstnode step", () => {
+        return request(app)
+            .patch("/steps/" + stepFirstnode.id)
+            .send({
+                percent: 50
+            })
+            .set('Authorization', 'Bearer ' + jwt)
+            .then(res =>
+                expectElem({
+                    res,
+                    code: 200,
+                    model: Step,
+                    toCheck: jsonRes => ({
+                        ...compileDataValues(stepFirstnode),
+                        percent: 50,
+                        createdAt: jsonRes ? stepFirstnode.createdAt.toISOString() : stepFirstnode.createdAt,
+                        updatedAt: expect.any(jsonRes ? String : Date)
+                    })
+                })
+            )
+    })
+
+    test("Update percent of firstnode step, setting percentSynchronized to true", () => {
+        return request(app)
+            .patch("/steps/" + stepFirstnode.id)
+            .send({
+                percentSynchronized: true,
+                percent: 50
+            })
+            .set('Authorization', 'Bearer ' + jwt)
+            .then(res =>
+                expectElem({
+                    res,
+                    code: 422,
+                    checkDbElem: false,
+                    toCheck: {
+                        "violations": [
+                            {
+                                "propertyPath": "percent",
+                                "message": "Vous ne pouvez pas définir le pourcentage s'il est déjà synchronisé"
+                            }
+                        ]
+                    }
+                })
+            )
+    })
+
+    test("Update percent of action step, keeping percentSynchronized on true", () => {
+        return request(app)
+            .patch("/steps/" + stepAction.id)
+            .send({
+                percent: 50
+            })
+            .set('Authorization', 'Bearer ' + jwt)
+            .then(res =>
+                expectElem({
+                    res,
+                    code: 422,
+                    checkDbElem: false,
+                    toCheck: {
+                        "violations": [
+                            {
+                                "propertyPath": "percent",
+                                "message": "Vous ne pouvez pas définir le pourcentage s'il est déjà synchronisé"
+                            }
+                        ]
+                    }
+                })
+            )
+    })
+
+    test("Update percent of action step, setting percentSynchronized to true", () => {
+        return request(app)
+            .patch("/steps/" + stepAction.id)
+            .send({
+                percentSynchronized: true,
+                percent: 50
+            })
+            .set('Authorization', 'Bearer ' + jwt)
+            .then(res =>
+                expectElem({
+                    res,
+                    code: 422,
+                    checkDbElem: false,
+                    toCheck: {
+                        "violations": [
+                            {
+                                "propertyPath": "percent",
+                                "message": "Vous ne pouvez pas définir le pourcentage s'il est déjà synchronisé"
+                            }
+                        ]
+                    }
+                })
+            )
+    })
+
+    test("Update percent of action step, setting percentSynchronized to false", () => {
+        return request(app)
+            .patch("/steps/" + stepAction.id)
+            .send({
+                percentSynchronized: false,
+                percent: 20
+            })
+            .set('Authorization', 'Bearer ' + jwt)
+            .then(res =>
+                expectElem({
+                    res,
+                    code: 200,
+                    model: Step,
+                    toCheck: jsonRes => ({
+                        ...compileDataValues(stepAction),
+                        percent: 20,
+                        percentSynchronized: false,
+                        createdAt: jsonRes ? stepAction.createdAt.toISOString() : stepAction.createdAt,
+                        updatedAt: expect.any(jsonRes ? String : Date),
+                        deadLine: jsonRes ? stepAction.deadLine.toISOString() : stepAction.deadLine,
+                    })
+                })
+            )
+    })
+
+
+
+    test("Create sub action step, and delete action step", async () => {
+        stepSubAction = await Step.create({
+            node_id: subAction.id,
+            todo_id: todo.id
+        })
+
+        return request(app)
+            .delete("/steps/"+stepAction.id)
+            .set('Authorization', 'Bearer ' + jwt)
+            .then(res =>
+                expectElem({
+                    res,
+                    code: 403,
+                    checkBody: false,
+                    model: Step,
+                    id: stepAction.id,
+                    toCheck: expect.any(Object)
+                })
+            )
+    })
+
+    test("Delete sub action step", () => {
+        return request(app)
+            .delete("/steps/"+stepSubAction.id)
+            .set('Authorization', 'Bearer ' + jwt)
+            .then(res =>
+                expectElem({
+                    res,
+                    code: 204,
+                    checkBody: false,
+                    model: Step,
+                    id: stepSubAction.id,
+                    toCheck: null
+                })
+            )
+    })
+
+    test("Delete action step, successfully", () => {
+        return request(app)
+            .delete("/steps/"+stepAction.id)
+            .set('Authorization', 'Bearer ' + jwt)
+            .then(res =>
+                expectElem({
+                    res,
+                    code: 204,
+                    checkBody: false,
+                    model: Step,
+                    id: stepAction.id,
+                    toCheck: null
+                })
+            )
+    })
+
+    test("Delete firstnode step", () => {
+        return request(app)
+            .delete("/steps/"+stepFirstnode.id)
+            .set('Authorization', 'Bearer ' + jwt)
+            .then(res =>
+                expectElem({
+                    res,
+                    code: 403,
+                    checkBody: false,
+                    model: Step,
+                    id: stepFirstnode.id,
+                    toCheck: expect.any(Object)
                 })
             )
     })

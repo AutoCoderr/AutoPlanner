@@ -9,7 +9,7 @@ import getTodoForm from "../forms/getTodoForm";
 import deleteOne from "../libs/crud/requests/deleteOne";
 import update from "../libs/crud/requests/update";
 import getTodoMiddleWare from "../middleWare/getTodoMiddleWare";
-import step from "./step";
+import subStepRoute from "./subStepRoute";
 import isNumber from "../libs/isNumber";
 import getAndCheckExistingResource from "../libs/crud/getAndCheckExistingResource";
 import getReqData from "../libs/crud/getReqData";
@@ -52,6 +52,6 @@ router.post("/:id/first_step", async (req, res) => {
     res.sendStatus(409)
 })
 
-router.use("/:todo_id/steps", getTodoMiddleWare(), step)
+router.use("/:todo_id/steps", getTodoMiddleWare(), subStepRoute)
 
 export default router;
