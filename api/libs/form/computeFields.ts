@@ -3,13 +3,15 @@ import checkModels from "./checkModels";
 import validate from "./validate";
 import getFields from "./getFields";
 import IComputedForm from "../../interfaces/form/IComputedForm";
+import {Model} from "sequelize";
 
-export default async function computeFields(data: {[key: string]: any}, form: IForm, elem: any = null, checkAllFieldsUnique = false ,withNotStoredFields = false): IComputedForm {
-    const computedData = await checkModels(data, form.fields)
+export default async function computeFields<M extends Model,IData = any>(data: {[key: string]: any}, form: IForm<M, IData>, elem: null|M&{id: number} = null, checkAllFieldsUnique = false ,withNotStoredFields = false): IComputedForm<M,IData> {
+    const computedData = await checkModels<IData>(data, form.fields)
 
-    const violations = await validate(computedData, form, elem, checkAllFieldsUnique);
-    if (violations.length > 0)
-        return {violations, computedData: null};
+    const {validatedData, violations} = await validate<M,IData>(computedData, form, checkAllFieldsUnique, elem);
 
-    return {computedData: await getFields(computedData,form, withNotStoredFields), violations: null};
+    if (violations)
+        return {violations, computedData: null, validatedData: null};
+
+    return {computedData: await getFields<M,IData>(validatedData,form, withNotStoredFields), validatedData, violations: null};
 }

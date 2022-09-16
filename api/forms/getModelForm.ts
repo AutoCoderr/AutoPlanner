@@ -4,11 +4,11 @@ import {Op} from "sequelize";
 import TodoModel from "../models/TodoModel";
 import canModelBePublished from "../libs/canModelBePublished";
 
-const getModelForm: IFormGetter = function (reqData, method, elem: TodoModel) {
+const getModelForm: IFormGetter<TodoModel> = function (reqData, method, elem) {
     return {
         model: TodoModel,
         fields: {
-            ...(method !== "post" ? {
+            ...((method !== "post" && elem !== null) ? {
                 published: {
                     msg: "Vous devez rentrer un booléen",
                     valid: boolean,

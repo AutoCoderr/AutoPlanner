@@ -5,7 +5,7 @@ import confirm_password from "../asserts/confirm_password";
 import IFormGetter from "../interfaces/form/IFormGetter";
 import User from "../models/User";
 
-const getRegisterForm: IFormGetter = () => ({
+const getRegisterForm: IFormGetter<User> = () => ({
     model: User,
     fields: {
         email: {

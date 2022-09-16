@@ -83,8 +83,8 @@ Step.init(
     }
 );
 
-Step.belongsTo(Node, { foreignKey: "node_id", as: "node" });
-Step.belongsTo(Todo, { foreignKey: "todo_id", as: "todo" });
+Step.belongsTo(Node, { foreignKey: "node_id", as: "node", onDelete: 'CASCADE' });
+Step.belongsTo(Todo, { foreignKey: "todo_id", as: "todo", onDelete: 'CASCADE' });
 Todo.hasMany(Step, { foreignKey: "todo_id", as: "steps" });
 
 Step.belongsToMany(Todo, { through: RelationStepTodo, foreignKey: "step_id", as: "associatedTodos"})

@@ -7,7 +7,7 @@ import {findNodes} from "../repositories/NodeRepository";
 import isNumber from "../libs/isNumber";
 import getAndCheckExistingResource from "../libs/crud/getAndCheckExistingResource";
 import nodeAccessCheck from "../security/accessChecks/nodeAccessCheck";
-import {nodeIncludeModel, nodeIncludeModelAndChildren} from "../includeConfigs/node";
+import {nodeIncludeModel} from "../includeConfigs/node";
 import {NodeWithChildren, NodeWithModel, NodeWithParents} from "../interfaces/models/Node";
 import deleteOne from "../libs/crud/requests/deleteOne";
 import getReqData from "../libs/crud/getReqData";
@@ -18,15 +18,7 @@ import childCanBeAddedToParent from "../libs/childCanBeAddedToParent";
 export default function getSubNodeRoute(subResourceType: null|'children'|'parents' = null) {
     const router = Router();
 
-    router.post("/", post(Node, getNodeForm, nodeCreateAccessCheck(subResourceType), {
-        finished: (reqData,node: Node) => {
-            if (subResourceType === null || reqData.node === undefined)
-                return;
-            if (subResourceType === "children")
-                return reqData.node.addChild(node);
-            return reqData.node.addParent(node);
-        }
-    }))
+    router.post("/", post(Node, getNodeForm(subResourceType), nodeCreateAccessCheck(subResourceType)))
 
     router.post("/:id", async (req, res) => {
         const reqData = getReqData(req);

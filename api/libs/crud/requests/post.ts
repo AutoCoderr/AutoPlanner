@@ -5,14 +5,18 @@ import getReqData from "../getReqData";
 import {ICreateAccessCheck} from "../../../interfaces/crud/security/ICreateAccessCheck";
 import IFormGetter from "../../../interfaces/form/IFormGetter";
 import IGetAndCheckExistingResourceParams from "../../../interfaces/crud/IGetAndCheckExistingResourceParams";
+import {Model} from "sequelize";
+import {ModelStatic} from "sequelize/types/model";
+import IForm from "../../../interfaces/form/IForm";
 
-export default function post(model, formGetter: IFormGetter, createAccessCheck: null|ICreateAccessCheck = null, params: ICrudParams&IGetAndCheckExistingResourceParams = {}) {
+export default function post<M extends Model,IData = any>(model: ModelStatic<M>, formGetter: IFormGetter<M,IData>, createAccessCheck: null|ICreateAccessCheck = null, params: ICrudParams&IGetAndCheckExistingResourceParams = {}) {
     return async function (req,res) {
         const reqData: IReqData = getReqData(req);
         if (createAccessCheck && !(await createAccessCheck(reqData)))
             return res.sendStatus(params.forbiddenCode??403);
 
-        const {computedData, violations} = await computeForm(req.body, formGetter(reqData,req.method.toLowerCase(), null));
+        const form: IForm<M,  IData> = formGetter(reqData,req.method.toLowerCase(), null);
+        const {computedData, validatedData, violations} = await computeForm<M,IData>(req.body, form);
         if (violations)
             return res.status(422).json({violations});
 
@@ -20,6 +24,9 @@ export default function post(model, formGetter: IFormGetter, createAccessCheck: 
             .then(async (elem) => {
                 if (params.finished)
                     await params.finished(reqData, elem);
+                if (form.onCreated)
+                    await form.onCreated(elem,validatedData)
+
                 res.status(201).json(elem);
             })
             .catch(e => {

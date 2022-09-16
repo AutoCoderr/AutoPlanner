@@ -5,7 +5,7 @@ import {NodeWithModel, NodeWithParents} from "../interfaces/models/Node";
 import nodeAccessCheck from "../security/accessChecks/nodeAccessCheck";
 import Node from "../models/Node";
 
-const getResponseForm: IFormGetter = function(reqData, mode)  {
+const getResponseForm: IFormGetter<Response> = function(reqData, mode)  {
     return {
         model: Response,
         fields: {

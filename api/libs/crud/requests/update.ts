@@ -2,13 +2,15 @@ import {IAccessCheck} from "../../../interfaces/crud/security/IAccessCheck";
 import getAndCheckExistingResource from "../getAndCheckExistingResource";
 import IGetAndCheckExistingResourceParams from "../../../interfaces/crud/IGetAndCheckExistingResourceParams";
 import isNumber from "../../isNumber";
-import IForm from "../../../interfaces/form/IForm";
 import computeForm from "../../form/computeFields";
 import getReqData from "../getReqData";
 import IFormGetter from "../../../interfaces/form/IFormGetter";
 import IUpdateParams from "../../../interfaces/crud/IUpdateParams";
+import {Model} from "sequelize";
+import {ModelStatic} from "sequelize/types/model";
+import IForm from "../../../interfaces/form/IForm";
 
-export default function update(model, formGetter: IFormGetter, accessCheck: IAccessCheck, params: IUpdateParams&IGetAndCheckExistingResourceParams = {}) {
+export default function update<M extends Model, IData = any>(model: ModelStatic<M>, formGetter: IFormGetter<M,IData>, accessCheck: IAccessCheck, params: IUpdateParams&IGetAndCheckExistingResourceParams = {}) {
     return async function (req,res) {
         const {id} = req.params;
 
@@ -22,9 +24,9 @@ export default function update(model, formGetter: IFormGetter, accessCheck: IAcc
 
         const reqData = getReqData(req);
 
-        const form_0 = formGetter(reqData, req.method.toLowerCase(), elem);
-        const form: IForm = params.fieldExtractor ? params.fieldExtractor(form_0) : form_0;
-        const {computedData, violations} = await computeForm(req.body, form, elem, params.checkAllFieldsUnique??false);
+        const form_0: IForm<M, IData> = formGetter(reqData, req.method.toLowerCase(), elem);
+        const form: IForm<M, IData> = params.fieldExtractor ? params.fieldExtractor(form_0) : form_0;
+        const {computedData, validatedData, violations} = await computeForm<M,IData>(req.body, form, elem,params.checkAllFieldsUnique??false);
         if (violations)
             return res.status(422).json({violations});
 
@@ -36,6 +38,8 @@ export default function update(model, formGetter: IFormGetter, accessCheck: IAcc
             .then(async () => {
                 if (params.finished)
                     await params.finished(reqData, elem);
+                if (form.onUpdated)
+                    await form.onUpdated(elem, <IData>validatedData);
 
                 res.status(200).json(elem);
             })

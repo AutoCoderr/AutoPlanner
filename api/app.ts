@@ -12,6 +12,7 @@ import accessAllMiddleWare from "./middleWare/accessAllMiddleWare";
 import all from "./routes/all";
 import node from "./routes/node";
 import response from "./routes/response";
+import step from "./routes/step";
 
 const app = express();
 
@@ -26,6 +27,7 @@ app.use("/folders", folder);
 app.use("/models", model);
 app.use("/nodes", node);
 app.use("/responses", response);
+app.use("/steps", step);
 
 app.use("/users/:specifiedUser_id", getSpecifiedUserMiddleWare(), specifiedUser);
 app.use("/all", accessAllMiddleWare(), all);
