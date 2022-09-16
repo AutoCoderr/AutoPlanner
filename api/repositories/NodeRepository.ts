@@ -9,9 +9,9 @@ import {
     NodeWithResponses
 } from "../interfaces/models/Node";
 import IReqData from "../interfaces/IReqData";
-import sequelize from "../sequelize";
 import RelationNode from "../models/RelationNode";
-import {InferAttributes, Op, QueryTypes} from "sequelize";
+import {Op} from "sequelize";
+import {Includeable} from "sequelize/types/model";
 
 export function findOneNodeByIdWithModel(id: number): Promise<null | NodeWithModel> {
     return <Promise<null | NodeWithModel>>Node.findOne({
@@ -73,20 +73,7 @@ export function findNodes(reqData: IReqData, subResourceType: null | 'children' 
     return subResourceType === "children" ? findNodeChildren(reqData.node.id) : findNodeParents(reqData.node.id);
 }
 
-export function findNodesWithoutParentsByModelId(model_id: number): Promise<InferAttributes<Node>[]> {
-    return sequelize.query(
-        "SELECT N.id, N.text, N.type, N.model_id FROM " + '"' + Node.tableName + '"' + " N " +
-        "WHERE " +
-        "N.model_id = ? AND " +
-        "(SELECT count(*) FROM " + '"' + RelationNode.tableName + '"' + " R WHERE R.child_id = N.id) = 0",
-        {
-            replacements: [model_id],
-            type: QueryTypes.SELECT
-        }
-    )
-}
-
-export function findNodeChildren(node_id: number): Promise<Node[]> {
+export function findNodeChildren(node_id: number, include: Includeable|Includeable[]|undefined = undefined): Promise<Node[]> {
     return <Promise<Node[]>>RelationNode.findAll({
         where: {
             parent_id: node_id
@@ -96,7 +83,8 @@ export function findNodeChildren(node_id: number): Promise<Node[]> {
             Node.findAll({
                 where: {
                     id: {[Op.in]: childIds}
-                }
+                },
+                include
             })
         )
 }

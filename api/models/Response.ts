@@ -41,10 +41,10 @@ Response.init(
     }
 );
 
-Response.belongsTo(Node, { foreignKey: "question_id", as: "question" });
+Response.belongsTo(Node, { foreignKey: "question_id", as: "question", onDelete: 'CASCADE' });
 Node.hasMany(Response, { foreignKey: "question_id", as: "responses" });
 Node.hasMany(Response, { foreignKey: "action_id", as: "related_responses" })
 
-Response.belongsTo(Node, { foreignKey: "action_id", as: "action" });
+Response.belongsTo(Node, { foreignKey: "action_id", as: "action", onDelete: 'CASCADE' });
 
 export default Response;

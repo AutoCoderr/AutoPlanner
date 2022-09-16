@@ -11,7 +11,7 @@ interface IReqData {
     todo?: Todo,
     folder?: Folder,
     model?: TodoModel,
-    node?: NodeWithModel&NodeWithChildren
+    node?: NodeWithModel,
     all?: true,
     query: {[key: string]: string}
 }

@@ -9,7 +9,7 @@ import {Model} from "sequelize";
 import {ModelStatic} from "sequelize/types/model";
 import IForm from "../../../interfaces/form/IForm";
 
-export default function post<M extends Model,IData = any>(model: ModelStatic<M>, formGetter: IFormGetter<M,IData>, createAccessCheck: null|ICreateAccessCheck = null, params: ICrudParams&IGetAndCheckExistingResourceParams = {}) {
+export default function post<M extends Model,IData = any>(model: ModelStatic<M>, formGetter: IFormGetter<M,IData>, createAccessCheck: null|ICreateAccessCheck = null, params: ICrudParams<M>&IGetAndCheckExistingResourceParams = {}) {
     return async function (req,res) {
         const reqData: IReqData = getReqData(req);
         if (createAccessCheck && !(await createAccessCheck(reqData)))

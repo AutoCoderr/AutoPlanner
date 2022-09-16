@@ -4,8 +4,10 @@ import ICrudParams from "../../../interfaces/crud/ICrudParams";
 import isNumber from "../../isNumber";
 import getAndCheckExistingResource from "../getAndCheckExistingResource";
 import IGetAndCheckExistingResourceParams from "../../../interfaces/crud/IGetAndCheckExistingResourceParams";
+import {Model} from "sequelize";
+import {ModelStatic} from "sequelize/types/model";
 
-export default function deleteOne(model, accessCheck: IAccessCheck, params: ICrudParams&IGetAndCheckExistingResourceParams = {}) {
+export default function deleteOne<M extends Model>(model: ModelStatic<M>, accessCheck: IAccessCheck, params: ICrudParams<M>&IGetAndCheckExistingResourceParams = {}) {
     return async function (req,res) {
         const {id} = req.params;
 
@@ -20,7 +22,7 @@ export default function deleteOne(model, accessCheck: IAccessCheck, params: ICru
         elem.destroy()
             .then(async () => {
                 if (params.finished)
-                    await params.finished(getReqData(req));
+                    await params.finished(getReqData(req), elem);
 
                 res.sendStatus(204);
             })
