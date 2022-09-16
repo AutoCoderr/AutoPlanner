@@ -1228,13 +1228,13 @@ describe("Tests delete nodes in tree", () => {
                     code: 204,
                     checkBody: false,
                     getter: () => Promise.all(
-                        [subSubQuestion.id, loopNode.id, firstnode.id].map(id =>
+                        [subSubQuestion.id, loopNode.id, subAction.id, firstnode.id].map(id =>
                             Node.findOne({
                                 where: {id}
                             })
                         )
                     ).then(elems => compileDataValues(elems)),
-                    toCheck: compileDataValues([null, null, firstnode])
+                    toCheck: compileDataValues([null, null, subAction, firstnode])
                 })
             )
     })
