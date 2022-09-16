@@ -22,8 +22,16 @@ export default async function getTreeObject(
 
     if (nodesArray.length === 0)
         return {
-            ...compileDataValues(model),
-            tree
+            model: compileDataValues(model),
+            tree,
+            ...(
+                todo ? {
+                    todo: {
+                        ...compileDataValues(todo),
+                        model: undefined
+                    }
+                } : {}
+            )
         };
 
     const node = nodesArray[0];

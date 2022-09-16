@@ -10,10 +10,10 @@ import deleteOne from "../libs/crud/requests/deleteOne";
 import update from "../libs/crud/requests/update";
 import getTodoMiddleWare from "../middleWare/getTodoMiddleWare";
 import subStepRoute from "./subStepRoute";
-import isNumber from "../libs/isNumber";
-import getAndCheckExistingResource from "../libs/crud/getAndCheckExistingResource";
-import getReqData from "../libs/crud/getReqData";
-import createFirstStepOnTodo from "../libs/createFirstStepOnTodo";
+import {TodoWithModel} from "../interfaces/models/Todo";
+import {todoIncludeModel} from "../includeConfigs/todo";
+import compileDataValues from "../libs/compileDatavalues";
+import getTreeObject from "../libs/getTreeObject";
 
 const router = Router();
 
@@ -31,27 +31,11 @@ router.patch("/:id", update(Todo, getTodoForm, todoAccessCheck));
 
 router.delete("/:id", deleteOne(Todo, todoAccessCheck));
 
-router.post("/:id/first_step", async (req, res) => {
-    const {id} = req.params;
+router.use("/:todo_id/steps", getTodoMiddleWare(), subStepRoute);
 
-    if (!isNumber(id))
-        return res.sendStatus(400);
-
-    const reqData = getReqData(req)
-
-    const {elem, code} = await getAndCheckExistingResource(Todo, parseInt(id), "update", todoAccessCheck, reqData.user)
-
-    if (!elem)
-        return res.sendStatus(code)
-
-    const step = await createFirstStepOnTodo(elem)
-
-    if (step)
-        return res.status(201).json(step)
-
-    res.sendStatus(409)
-})
-
-router.use("/:todo_id/steps", getTodoMiddleWare(), subStepRoute)
+router.get("/:id/tree", get<Todo, TodoWithModel>(Todo, todoAccessCheck, {
+    getter: (todo) => todo.model ? getTreeObject(todo.model, todo) : null,
+    include: todoIncludeModel
+}));
 
 export default router;

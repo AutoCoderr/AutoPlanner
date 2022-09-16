@@ -10,6 +10,7 @@ import Response from "../models/Response";
 import {nodeIncludeResponses} from "../includeConfigs/node";
 import {Op} from "sequelize";
 import {findNodeChildren} from "../repositories/NodeRepository";
+import testTree from "../libs/tests/testTree";
 
 let user: User;
 let user2: User;
@@ -950,7 +951,7 @@ describe("Tests generate tree", () => {
             [questionResponseQuestion.id]: [childQuestion.id],
             [subChildQuestion.id]: [childQuestion.id]
         }
-        const responsesByChildAndActionId = {
+        const responsesByQuestionAndActionId = {
             [childQuestion.id]: {
                 [betweenChildQuestion.id]: {
                     ...compileDataValues(response1),
@@ -963,41 +964,26 @@ describe("Tests generate tree", () => {
             .get("/models/" + model.id + "/tree")
             .set('Authorization', 'Bearer ' + jwt)
             .then(res =>
-                expectElem({
+                testTree(
                     res,
-                    code: 200,
-                    checkDbElem: false,
-                    toCheck: {
-                        ...compileDataValues(model),
-                        createdAt: model.createdAt.toISOString(),
-                        updatedAt: model.updatedAt.toISOString(),
-                        tree: [
-                            firstnode,
-                            betweenChildAction,
-                            childAction,
-                            subChildAction,
-                            thirdChildNode,
-                            thirdParent,
-                            childQuestion,
-                            subChildQuestion,
-                            betweenChildQuestion,
-                            questionResponseAction,
-                            questionResponseQuestion
-                        ].reduce((acc, node) => ({
-                            ...acc,
-                            [node.id]: {
-                                ...compileDataValues(node),
-                                children: childrenByParentId[node.id]??[],
-                                parents: parentsByChildId[node.id]??[],
-                                ...(responsesByChildAndActionId[node.id] ?
-                                        {
-                                            responsesByActionId: responsesByChildAndActionId[node.id]
-                                        } : {}
-                                )
-                            },
-                        }), {}),
-                    }
-                })
+                    model,
+                    [
+                        firstnode,
+                        betweenChildAction,
+                        childAction,
+                        subChildAction,
+                        thirdChildNode,
+                        thirdParent,
+                        childQuestion,
+                        subChildQuestion,
+                        betweenChildQuestion,
+                        questionResponseAction,
+                        questionResponseQuestion
+                    ],
+                    childrenByParentId,
+                    parentsByChildId,
+                    responsesByQuestionAndActionId,
+                )
             )
     })
 })

@@ -7,7 +7,7 @@ import IGetAndCheckExistingResourceParams from "../../../interfaces/crud/IGetAnd
 import {Model} from "sequelize";
 import {ModelStatic} from "sequelize/types/model";
 
-export default function deleteOne<M extends Model>(model: ModelStatic<M>, accessCheck: IAccessCheck, params: ICrudParams<M>&IGetAndCheckExistingResourceParams = {}) {
+export default function deleteOne<M extends Model>(model: ModelStatic<M>, accessCheck: IAccessCheck, params: ICrudParams<M>&IGetAndCheckExistingResourceParams<M> = {}) {
     return async function (req,res) {
         const {id} = req.params;
 
