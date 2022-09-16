@@ -6,6 +6,7 @@ import {
 import Node from "../../models/Node";
 import TodoModel from "../../models/TodoModel";
 import Response from "../../models/Response";
+import Step from "../../models/Step";
 
 export interface INode {
     id: number;
@@ -39,4 +40,7 @@ export interface NodeWithResponses extends Node {
 }
 export interface NodeWithRelatedResponses extends Node {
     related_responses: Response[]
+}
+export interface NodeWithSteps extends Node {
+    steps: Step[]
 }

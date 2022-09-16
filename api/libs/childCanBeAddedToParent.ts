@@ -1,7 +1,8 @@
-import {NodeWithChildren, NodeWithModel} from "../interfaces/models/Node";
+import {NodeWithModel} from "../interfaces/models/Node";
+import Node from "../models/Node";
 
-const childCanBeAddedToParent = (parent: NodeWithModel&NodeWithChildren) =>
-    (parent.children && parent.children.length === 0) ||
+const childCanBeAddedToParent = (parent: NodeWithModel, children: Node[]) =>
+    children.length === 0 ||
     parent.type === "question"
 
 export default childCanBeAddedToParent;

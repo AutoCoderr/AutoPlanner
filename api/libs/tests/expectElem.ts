@@ -1,18 +1,19 @@
 import compileDataValues from "../compileDatavalues";
 import allModelsTypes from "../../interfaces/allModelsType";
 import {Includeable} from "sequelize/types/model";
+import {Model} from "sequelize";
 
 type obj = {[key: string]: any};
 type objs = object[];
 
 interface IExpectElemParam {
     res: {statusCode: number, text: string};
-    toCheck: obj|objs|null|((jsonRes: boolean) => obj|objs|null);
+    toCheck: obj|objs|null|((jsonRes: boolean,body: any) => obj|objs|null);
     code: number;
     checkBody?: boolean;
     checkDbElem?: boolean;
     id?: number;
-    getter?: (() => Promise<any>);
+    getter?: (body: any) => any|Promise<any>;
     model?: allModelsTypes;
     include?: Includeable|Includeable[];
 }
@@ -39,7 +40,7 @@ export default async function expectElem(params: IExpectElemParam) {
         throw new Error("Bad body");
 
     if (body)
-        expect(body).toEqual(typeof(toCheck) == "function" ? toCheck(true) : toCheck);
+        expect(body).toEqual(typeof(toCheck) == "function" ? toCheck(true, body) : toCheck);
 
     if (!checkDbElem)
         return false;
@@ -51,13 +52,13 @@ export default async function expectElem(params: IExpectElemParam) {
         throw new Error("You need to mention an id");
 
     const elem = getter ?
-        await getter() :
+        await getter(body) :
         await (<any>model).findOne({
             where: { id: id??body.id },
             include: params.include
         })
 
-    expect(compileDataValues(elem)).toEqual(typeof(toCheck) == "function" ? toCheck(false) : toCheck);
+    expect(compileDataValues(elem)).toEqual(typeof(toCheck) == "function" ? toCheck(false, body) : toCheck);
 
     return elem;
 }

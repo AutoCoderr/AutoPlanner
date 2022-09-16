@@ -1,14 +1,12 @@
-import {IFCreateAccessCheck} from "../../interfaces/crud/security/ICreateAccessCheck";
+import {ICreateAccessCheck} from "../../interfaces/crud/security/ICreateAccessCheck";
 import childCanBeAddedToParent from "../../libs/childCanBeAddedToParent";
+import {findNodeChildren} from "../../repositories/NodeRepository";
 
-const nodeCreateAccessCheck: IFCreateAccessCheck<null|'children'|'parents'> = (subResourceType) => (reqData) =>
-    reqData.user !== undefined &&
-    (
-        (reqData.node === undefined && reqData.model !== undefined) ||
-        (reqData.node !== undefined && (
-            subResourceType === "parents" ||
-            childCanBeAddedToParent(reqData.node)
-        ))
-    )
+const nodeCreateAccessCheck: ICreateAccessCheck = async (reqData) =>
+    reqData.user !== undefined && reqData.node !== undefined &&
+        childCanBeAddedToParent(
+            reqData.node,
+            await findNodeChildren(reqData.node.id)
+        )
 
 export default nodeCreateAccessCheck;

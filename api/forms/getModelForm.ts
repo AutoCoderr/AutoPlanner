@@ -3,6 +3,7 @@ import boolean from "../asserts/boolean";
 import {Op} from "sequelize";
 import TodoModel from "../models/TodoModel";
 import canModelBePublished from "../libs/canModelBePublished";
+import Node from "../models/Node";
 
 const getModelForm: IFormGetter<TodoModel> = function (reqData, method, elem) {
     return {
@@ -48,7 +49,16 @@ const getModelForm: IFormGetter<TodoModel> = function (reqData, method, elem) {
         },
         additionalFields: method === "post" ? {
             user_id: () => reqData.user?.id
-        } : undefined
+        } : undefined,
+        async onCreated(model) {
+            const firstnode = await Node.create({
+                text: "Premier noeud (n'hésite pas à me modifier !)",
+                type: "action",
+                model_id: model.id
+            });
+            model.firstnode_id = firstnode.id;
+            await model.save();
+        }
     }
 }
 

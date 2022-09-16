@@ -1,68 +1,95 @@
-import {findNodeChildren, findNodesWithoutParentsByModelId} from "../repositories/NodeRepository";
 import TodoModel from "../models/TodoModel";
 import Node from "../models/Node";
-import {InferAttributes} from "sequelize";
 import compileDataValues from "./compileDatavalues";
 import Response from "../models/Response";
+import Todo from "../models/Todo";
+import Step from "../models/Step";
+import RelationNode from "../models/RelationNode";
+import {IModelTree, IModelWithTree} from "../interfaces/IModelTree";
+
 
 export default async function getTreeObject(
     model: TodoModel,
-    children0: null|InferAttributes<Node>[] = null,
-    parent: null|InferAttributes<Node> = null,
-    data: {[id: string]: (InferAttributes<Node>&{parents: number[], children: number[], isFirstNode: boolean, responsesByQuestionId?: {[question_id: string]: Response}})} = {})
+    todo: null|Todo = null,
+    nodes: null|Node[] = null,
+    tree: IModelTree = {}): Promise<IModelWithTree>
 {
-    const children: InferAttributes<Node>[] = children0 === null ? await findNodesWithoutParentsByModelId(model.id) : children0;
-
-    if (children.length === 0)
-        return data;
-
-    const child = children[0];
-
-    const relatedResponse = (parent && parent.type === "question") ? await Response.findOne({
+    const nodesArray = nodes instanceof Array ? nodes : await Node.findAll({
         where: {
-            question_id: parent.id,
-            action_id: child.id
+            model_id: model.id
         }
-    }) : null
+    });
 
-    const newData = {
-        ...data,
-        [child.id]: {
-            ...(data[child.id]??compileDataValues(child)),
-            parents: parent ?
-                [...(data[child.id] ? data[child.id].parents??[] : []), parent.id] :
-                (data[child.id] ? data[child.id].parents : undefined),
-            isFirstNode: child.id === model.firstnode_id,
+    if (nodesArray.length === 0)
+        return {
+            ...compileDataValues(model),
+            tree
+        };
+
+    const node = nodesArray[0];
+
+    const steps = todo !== null ?
+        await Step.findAll({
+            where: {
+                node_id: node.id,
+                todo_id: todo.id
+            },
+            order: [
+                ['nb', 'DESC']
+            ]
+        }) : null
+
+    if (todo !== null && steps && steps.length === 0)
+        return getTreeObject(
+            model,
+            todo,
+            nodesArray.slice(1),
+            tree
+        );
+
+    const responses = (node.type === "question" && tree[node.id] === undefined) ?
+            await Response.findAll({
+                where: {
+                    question_id: node.id,
+                }
+            }) : null;
+
+    const parents = await RelationNode.findAll({
+        where: {
+            child_id: node.id
+        }
+    }).then(relations => relations.map(({parent_id}) => parent_id))
+
+    const children = await RelationNode.findAll({
+        where: {
+            parent_id: node.id
+        }
+    }).then(relations => relations.map(({child_id}) => child_id))
+
+    const newTree = {
+        ...tree,
+        [node.id]: {
+            ...(compileDataValues(node)),
+            parents,
+            children,
             ...(
-                relatedResponse ? {
-                    responsesByQuestionId: {
-                        ...(data[child.id] ? data[child.id].responsesByQuestionId??{} : {}),
-                        [relatedResponse.question_id]: relatedResponse
-                    }
+                (responses && responses.length > 0) ? {
+                    responsesByActionId: responses.reduce((acc,response) => ({
+                        ...acc,
+                        [response.action_id]: response
+                    }), {})
                 } : {}
+            ),
+            ...(
+                steps ? {steps} : {}
             )
-        },
-        ...(
-            parent ? {
-              [parent.id]: {
-                  ...data[parent.id],
-                  children: [...(data[parent.id].children??[]), child.id]
-              }
-            } : {}
-        ),
+        }
     }
-
-    const subChildren = await findNodeChildren(child.id);
 
     return getTreeObject(
         model,
-        children.slice(1),
-        parent,
-        await getTreeObject(
-            model,
-            subChildren,
-            child,
-            newData
-        )
+        todo,
+        nodesArray.slice(1),
+        newTree
     )
 }

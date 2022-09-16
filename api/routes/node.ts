@@ -8,10 +8,15 @@ import getSubNodeRoute from "./getSubNodeRoute";
 import deleteOne from "../libs/crud/requests/deleteOne";
 import update from "../libs/crud/requests/update";
 import getNodeForm from "../forms/getNodeForm";
-import isNumber from "../libs/isNumber";
-import getAndCheckExistingResource from "../libs/crud/getAndCheckExistingResource";
-import {NodeWithModel} from "../interfaces/models/Node";
 import subResponseRoute from "./subResponseRoute";
+import {findNodeChildren, findNodeParents} from "../repositories/NodeRepository";
+import {NodeWithModel} from "../interfaces/models/Node";
+import deleteChildrenRecursively from "../libs/deleteChildrenRecursively";
+import isNumber from "../libs/isNumber";
+import getReqData from "../libs/crud/getReqData";
+import post from "../libs/crud/requests/post";
+import nodeCreateAccessCheck from "../security/createAccessChecks/nodeCreateAccessCheck";
+import Response from "../models/Response";
 
 const router = Router();
 
@@ -20,41 +25,80 @@ router.get("/:id", get(Node, nodeAccessCheck, {
 }));
 
 router.delete("/:id", deleteOne(Node, nodeAccessCheck, {
+    include: nodeIncludeModel,
+    async finished(reqData, deletedNode) {
+        const children = await <Promise<NodeWithModel[]>>findNodeChildren(deletedNode.id, nodeIncludeModel);
+        if (['1','true'].includes(reqData.query.recreate_link) && children.length === 1) {
+            const parents = await findNodeParents(deletedNode.id);
+
+            return Promise.all(parents.map(parent => parent.addChild(children[0])));
+        }
+        return deleteChildrenRecursively(children);
+    }
+}));
+
+router.put("/:id", update(Node, getNodeForm, nodeAccessCheck, {
     include: nodeIncludeModel
 }));
 
-router.put("/:id", update(Node, getNodeForm(null), nodeAccessCheck, {
+router.patch("/:id", update(Node, getNodeForm, nodeAccessCheck, {
     include: nodeIncludeModel
 }));
 
-router.patch("/:id", update(Node, getNodeForm(null), nodeAccessCheck, {
-    include: nodeIncludeModel
-}));
+router.post("/between/:parent_id/:child_id", async (req, res) => {
+    const {parent_id,child_id} = req.params;
+    const reqData = getReqData(req);
 
-router.patch("/:id/set_as_firstnode", async (req, res) => {
-    const {id} = req.params;
-
-    if (!isNumber(id))
+    if (!isNumber(parent_id) || !isNumber(child_id))
         return res.sendStatus(400);
 
-    const {elem,code} = await <Promise<{elem: null|NodeWithModel, code: null|number}>>getAndCheckExistingResource(Node, parseInt(id), "update", nodeAccessCheck, req.user, {
-        include: nodeIncludeModel
-    });
+    const [parent,child] = await Promise.all(
+        [parent_id,child_id].map(id =>
+            Node.findOne({
+                where: {id},
+                include: nodeIncludeModel
+            })
+        )
+    )
 
-    if (!elem)
-        return res.sendStatus(code);
+    if (parent === null || child === null)
+        return res.sendStatus(404);
 
-    elem.model.firstnode_id = elem.id;
+    if (
+        parent.model_id !== child.model_id ||
+        [parent,child].some(node => !nodeAccessCheck(node, "update", reqData.user))
+    )
+        return res.sendStatus(403)
 
-    elem.model.save()
-        .then(() => res.sendStatus(200))
-        .catch((e) => {
-            console.error(e);
-            res.sendStatus(500);
-        })
+    const children = await findNodeChildren(parent.id);
+
+    if (!children.some(existingChild => existingChild.id === child.id))
+        return res.sendStatus(403)
+
+    req.node = parent;
+
+    await post(Node, getNodeForm, nodeCreateAccessCheck, {
+      async finished(_, node) {
+          await parent.removeChild(child);
+
+          const response = await Response.findOne({
+              where: {
+                  question_id: parent.id,
+                  action_id: child.id
+              }
+          })
+
+          if (response) {
+              response.action_id = node.id;
+              await response.save();
+          }
+
+          await node.addChild(child)
+      }
+    })(req,res)
 })
 
-router.use("/:node_id/children", getNodeMiddleWare(nodeIncludeModelAndChildren), getSubNodeRoute("children"));
+router.use("/:node_id/children", getNodeMiddleWare(), getSubNodeRoute("children"));
 router.use("/:node_id/parents", getNodeMiddleWare(), getSubNodeRoute("parents"));
 router.use("/:node_id/responses", getNodeMiddleWare(), subResponseRoute);
 

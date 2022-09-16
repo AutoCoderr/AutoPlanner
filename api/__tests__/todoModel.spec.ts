@@ -7,7 +7,6 @@ import IViolation from "../interfaces/form/IViolations";
 import Node from "../models/Node";
 import Response from "../models/Response";
 import expectElem from "../libs/tests/expectElem";
-import compileDataValues from "../libs/compileDatavalues";
 import getJsonList from "../libs/tests/getJsonList";
 import generateNElements from "../libs/tests/generateNElements";
 
@@ -114,19 +113,32 @@ describe("Test create models", () => {
                 description: "coucou",
                 published: true
             })
-            .then(res => {
-                expect(res.statusCode).toEqual(201);
-                expect(JSON.parse(res.text)).toEqual({
-                    id: expect.any(Number),
-                    name: "test",
-                    description: "coucou",
-                    published: false,
-                    createdAt: expect.any(String),
-                    updatedAt: expect.any(String),
-                    user_id: user.id,
-                    firstnode_id: null
+            .then(res =>
+                expectElem({
+                    res,
+                    code: 201,
+                    getter: (body) => Node.findOne({
+                        where: {
+                            model_id: body.id
+                        }
+                    }),
+                    toCheck: jsonRes => jsonRes ? {
+                        id: expect.any(Number),
+                        name: "test",
+                        description: "coucou",
+                        published: false,
+                        createdAt: expect.any(String),
+                        updatedAt: expect.any(String),
+                        user_id: user.id,
+                        firstnode_id: expect.any(Number)
+                    } : {
+                        id: expect.any(Number),
+                        text: "Premier noeud (n'hésite pas à me modifier !)",
+                        type: "action",
+                        model_id: expect.any(Number)
+                    }
                 })
-            })
+            )
     })
 
     test("Create model with already used name", () => {
@@ -166,7 +178,7 @@ describe("Test create models", () => {
                     createdAt: expect.any(String),
                     updatedAt: expect.any(String),
                     user_id: user.id,
-                    firstnode_id: null
+                    firstnode_id: expect.any(Number)
                 })
             })
     })
@@ -1213,7 +1225,7 @@ describe("Tests get all with pagination", () => {
 
     test("Get first page published model searching 'C'", () => {
         return request(app)
-            .get("/all/models?search=C")
+            .get("/all/models?search=C&asc=name")
             .set('Authorization', 'Bearer ' + jwt)
             .then(res =>
                 expectElem({
@@ -1222,7 +1234,7 @@ describe("Tests get all with pagination", () => {
                     checkDbElem: false,
                     toCheck: {
                         pages: 1,
-                        elements: getModelsListJson(ownPublishedModels[2],otherPublishedModels[2])
+                        elements: getModelsListJson(otherPublishedModels[2],ownPublishedModels[2])
                     }
                 })
             )

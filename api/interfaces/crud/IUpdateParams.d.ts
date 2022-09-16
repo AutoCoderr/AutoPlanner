@@ -1,9 +1,10 @@
 import ICrudParams from "./ICrudParams";
 import IForm from "../form/IForm";
+import {Model} from "sequelize";
 
-interface IUpdateParams extends ICrudParams {
+interface IUpdateParams<M extends Model> extends ICrudParams<M> {
     checkAllFieldsUnique?: boolean,
-    fieldExtractor?: ((form: IForm) => IForm)
+    fieldExtractor?: ((form: IForm<M>) => IForm<M>)
 }
 
 export default IUpdateParams;

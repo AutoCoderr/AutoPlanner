@@ -10,7 +10,7 @@ import {Model} from "sequelize";
 import {ModelStatic} from "sequelize/types/model";
 import IForm from "../../../interfaces/form/IForm";
 
-export default function update<M extends Model, IData = any>(model: ModelStatic<M>, formGetter: IFormGetter<M,IData>, accessCheck: IAccessCheck, params: IUpdateParams&IGetAndCheckExistingResourceParams = {}) {
+export default function update<M extends Model, IData = any>(model: ModelStatic<M>, formGetter: IFormGetter<M,IData>, accessCheck: IAccessCheck, params: IUpdateParams<M>&IGetAndCheckExistingResourceParams = {}) {
     return async function (req,res) {
         const {id} = req.params;
 
