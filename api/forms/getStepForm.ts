@@ -115,27 +115,7 @@ const getStepForm: IFormGetter<Step,IData> = (reqData, method, elem) => ({
     additionalFields: method === "post" ? {
         todo_id: () => reqData.todo?.id,
         node_id: ({response, parent_node}) =>
-            parent_node.type === "action" ? parent_node.children[0].id : response.action.id,
-        nb: async ({parent_node, response}) => {
-            if (reqData.todo === undefined)
-                return 1;
-            const step = await Step.findOne({
-                where: {
-                    node_id: parent_node.id,
-                    todo_id: reqData.todo.id
-                }
-            })
-
-            const nodeId = parent_node.type === "action" ? parent_node.children[0].id : response.action.id;
-            const childStep = await Step.findOne({
-                where: {
-                    node_id: nodeId,
-                    todo_id: reqData.todo.id
-                }
-            })
-
-            return Math.max(step ? step.nb : 1, childStep ? childStep.nb+1 : 1)
-        }
+            parent_node.type === "action" ? parent_node.children[0].id : response.action.id
     } : undefined
 })
 

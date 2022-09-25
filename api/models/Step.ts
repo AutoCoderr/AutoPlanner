@@ -15,7 +15,6 @@ import {IStep, IStepCreation} from "../interfaces/models/Step";
 
 class Step extends Model <InferAttributes<Step>, IStepCreation> implements IStep {
     declare id: number;
-    declare nb: number;
     declare percent: number;
     declare percentSynchronized: boolean;
     declare deadLine: Date;
@@ -50,11 +49,6 @@ Step.init(
             type: DataTypes.BOOLEAN,
             allowNull: false,
             defaultValue: false
-        },
-        nb: {
-            type: DataTypes.INTEGER,
-            allowNull: false,
-            defaultValue: 1
         },
         node_id: {
             type: DataTypes.INTEGER,

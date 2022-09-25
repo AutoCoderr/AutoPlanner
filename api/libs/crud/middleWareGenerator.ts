@@ -11,7 +11,7 @@ export default function middleWareGenerator<M extends Model>(
     model: ModelStatic<M>,
     accessCheck: IAccessCheck,
     resource_name: Exclude<keyof IReqData,'user'>,
-    params:IGetAndCheckExistingResourceParams = {}
+    params:IGetAndCheckExistingResourceParams<M> = {}
 ) {
     return async function (req, res, next) {
         const id = req.params[resource_name + "_id"];

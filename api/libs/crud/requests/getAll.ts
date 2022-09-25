@@ -3,7 +3,7 @@ import IAllGetter from "../../../interfaces/crud/IAllGetter";
 import getReqData from "../getReqData";
 import IGetAndCheckExistingResourceParams from "../../../interfaces/crud/IGetAndCheckExistingResourceParams";
 
-export default function getAll(allGetter: IAllGetter, getAllAccessCheck: null|IGetAllAccessCheck = null, params: IGetAndCheckExistingResourceParams = {}) {
+export default function getAll(allGetter: IAllGetter, getAllAccessCheck: null|IGetAllAccessCheck = null, params: IGetAndCheckExistingResourceParams<any> = {}) {
     return async function (req,res) {
         const reqData = getReqData(req);
 

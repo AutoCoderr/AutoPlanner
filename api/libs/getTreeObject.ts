@@ -22,8 +22,16 @@ export default async function getTreeObject(
 
     if (nodesArray.length === 0)
         return {
-            ...compileDataValues(model),
-            tree
+            model: compileDataValues(model),
+            tree,
+            ...(
+                todo ? {
+                    todo: {
+                        ...compileDataValues(todo),
+                        model: undefined
+                    }
+                } : {}
+            )
         };
 
     const node = nodesArray[0];
@@ -35,9 +43,14 @@ export default async function getTreeObject(
                 todo_id: todo.id
             },
             order: [
-                ['nb', 'DESC']
+                ['createdAt', 'DESC']
             ]
-        }) : null
+        }).then(steps =>
+            steps.map((step,index) => ({
+                ...compileDataValues(step),
+                nb: steps.length-index
+            }))
+        ) : null
 
     if (todo !== null && steps && steps.length === 0)
         return getTreeObject(

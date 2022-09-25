@@ -11,7 +11,7 @@ export default async function todoStepIsTheLastStep(step: Step, todo: Todo, chil
                         node_id: child.id
                     },
                     order: [
-                        ['nb', 'desc']
+                        ['createdAt', 'desc']
                     ],
                     limit: 1
                 }).then(steps => steps.length > 0 ? steps[0] : null)

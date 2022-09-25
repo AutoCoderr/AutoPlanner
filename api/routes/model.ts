@@ -28,18 +28,9 @@ router.patch("/:id", update(TodoModel, getModelForm, modelAccessCheck, {
     checkAllFieldsUnique: true
 }));
 
-router.get("/:id/tree", async (req, res) => {
-    const {id} = req.params;
-
-    if (!isNumber(id))
-        return res.sendStatus(400);
-
-    const {elem: model, code} = await <Promise<{elem: TodoModel|null, code: number|null}>>getAndCheckExistingResource(TodoModel, parseInt(id), "get", modelAccessCheck, req.user);
-
-    if (!model)
-        return res.sendStatus(code);
-    res.json(await getTreeObject(model));
-})
+router.get("/:id/tree", get<TodoModel>(TodoModel, modelAccessCheck, {
+    getter: (model) => getTreeObject(model),
+}))
 
 router.delete("/:id", deleteOne(TodoModel, modelAccessCheck));
 

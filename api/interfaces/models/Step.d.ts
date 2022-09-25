@@ -12,7 +12,6 @@ export interface IStep {
     id: number;
     percent: number;
     percentSynchronized: boolean;
-    nb: number;
     deadLine?: Date;
     node_id: number;
     todo_id: number;
@@ -27,7 +26,7 @@ export interface IStep {
     setAssociatedFolders: BelongsToManySetAssociationsMixin<Folder, any>;
     addAssociatedFolder: BelongsToManyAddAssociationMixin<Folder, any>;
 }
-export type IStepCreation = InferAttributes<Optional<IStep, 'id' | 'percent' | 'percentSynchronized' | 'nb' | 'deadLine' | 'createdAt' | 'updatedAt'>>;
+export type IStepCreation = InferAttributes<Optional<IStep, 'id' | 'percent' | 'percentSynchronized' | 'deadLine' | 'createdAt' | 'updatedAt'>>;
 
 export interface StepWithNode extends Step {
     node: Node

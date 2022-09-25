@@ -8,9 +8,8 @@ import Response from "../models/Response";
 import Todo from "../models/Todo";
 import expectElem from "../libs/tests/expectElem";
 import Step from "../models/Step";
-import createFirstStepOnTodo from "../libs/createFirstStepOnTodo";
 import compileDataValues from "../libs/compileDatavalues";
-import subStepRoute from "../routes/subStepRoute";
+import testTree from "../libs/tests/testTree";
 
 let user: User;
 let user2: User;
@@ -46,10 +45,18 @@ afterAll(async () => {
     await sequelize.close();
 })
 
+function getStepsWithNbField(...steps: Step[]) {
+    return steps.map((step,index) => ({
+        ...compileDataValues(step),
+        nb: steps.length-index
+    }))
+}
+
 describe("Tests progress steps in todo", () => {
     let t;
 
     let todo: Todo;
+    let todoWithoutModel: Todo;
 
     let otherNonPublishedModel: TodoModel;
     let otherNonPublishedFirstnode: Node;
@@ -63,10 +70,14 @@ describe("Tests progress steps in todo", () => {
 
     let model: TodoModel;
     let firstnode: Node;
+    let stepFirstnode: Step;
+    let stepFirstnode2: Step;
 
     let firstnodeResponse1: Response;
     let action: Node;
+    let stepAction: Step;
     let subAction: Node;
+    let stepSubAction: Step;
 
 
     let firstnodeResponse2: Response;
@@ -82,7 +93,18 @@ describe("Tests progress steps in todo", () => {
             name: "model",
             user_id: user.id
         });
+        firstnode = await Node.create({
+            text: "firstnode",
+            type: "question",
+            model_id: model.id
+        });
+        model.firstnode_id = firstnode.id;
+        await model.save();
 
+        todoWithoutModel = await Todo.create({
+            name: "todo without model",
+            user_id: user.id
+        });
 
         otherNonPublishedModel = await TodoModel.create({
             name: "other non published model",
@@ -221,95 +243,23 @@ describe("Tests progress steps in todo", () => {
                     })
                 })
 
-                const step = await Step.findOne({
-                    where: {
-                        todo_id: todo.id
-                    }
-                });
-                expect(step).toBe(null)
-            })
-    })
-
-    test("recreate first step on todo without firstnode on model", () => {
-        return request(app)
-            .post("/todos/" + todo.id + "/first_step")
-            .set('Authorization', 'Bearer ' + jwt)
-            .then(res => {
-                expect(res.statusCode).toEqual(409)
-            })
-    })
-
-    test("Add first node, and recreate first step on todo", async () => {
-        firstnode = await Node.create({
-            text: "firstnode",
-            type: "question",
-            model_id: model.id
-        })
-
-        model.firstnode_id = firstnode.id;
-        await model.save();
-
-        return request(app)
-            .post("/todos/" + todo.id + "/first_step")
-            .set('Authorization', 'Bearer ' + jwt)
-            .then(async res => {
-                await expectElem({
-                    res,
-                    code: 201,
-                    model: Step,
-                    toCheck: jsonRes => ({
-                        id: expect.any(Number),
-                        percent: 0,
-                        percentSynchronized: false,
-                        nb: 1,
-                        node_id: firstnode.id,
-                        todo_id: todo.id,
-                        deadLine: null,
-                        createdAt: expect.any(jsonRes ? String : Date),
-                        updatedAt: expect.any(jsonRes ? String : Date)
-                    })
-                })
-
-                return todo.destroy();
-            })
-    })
-
-    test("Recreate todo", () => {
-        return request(app)
-            .post("/todos")
-            .set('Authorization', 'Bearer ' + jwt)
-            .send({
-                name: "toto",
-                model_id: model.id
-            })
-            .then(async res => {
-                todo = await expectElem({
-                    res,
-                    code: 201,
-                    model: Todo,
-                    toCheck: (jsonRes) => ({
-                        id: expect.any(Number),
-                        name: "toto",
-                        description: null,
-                        percent: 0,
-                        priority: 1,
-                        deadLine: null,
-                        createdAt: expect.any(jsonRes ? String : Date),
-                        updatedAt: expect.any(jsonRes ? String : Date),
-                        user_id: user.id,
-                        model_id: model.id,
-                        parent_id: null
-                    })
-                })
-
-                const step = await Step.findOne({
+                stepFirstnode = await <Promise<Step>>Step.findOne({
                     where: {
                         todo_id: todo.id,
                         node_id: firstnode.id
                     }
                 });
-                expect(step).not.toBe(null)
+                expect(stepFirstnode).not.toBe(null);
             })
+    })
+
+    test("Create step on a todo which has nothing model", () => {
+        return request(app)
+            .post("/todos/"+todoWithoutModel.id+"/steps")
+            .set('Authorization', 'Bearer ' + jwt)
+            .then(res =>
+                expect(res.statusCode).toEqual(404)
+            )
     })
 
     test("Create step as response of other non published user node", () => {
@@ -549,24 +499,23 @@ describe("Tests progress steps in todo", () => {
                 response: firstnodeResponse1.id
             })
             .set('Authorization', 'Bearer ' + jwt)
-            .then(res =>
-                expectElem({
-                    res,
-                    code: 201,
-                    model: Step,
-                    toCheck: jsonRes => ({
-                        id: expect.any(Number),
-                        percent: 0,
-                        percentSynchronized: false,
-                        nb: 1,
-                        node_id: action.id,
-                        todo_id: todo.id,
-                        deadLine: null,
-                        createdAt: expect.any(jsonRes ? String : Date),
-                        updatedAt: expect.any(jsonRes ? String : Date)
+            .then(async res => {
+                stepAction = await expectElem({
+                        res,
+                        code: 201,
+                        model: Step,
+                        toCheck: jsonRes => ({
+                            id: expect.any(Number),
+                            percent: 0,
+                            percentSynchronized: false,
+                            node_id: action.id,
+                            todo_id: todo.id,
+                            deadLine: null,
+                            createdAt: expect.any(jsonRes ? String : Date),
+                            updatedAt: expect.any(jsonRes ? String : Date)
+                        })
                     })
-                })
-            )
+            })
     })
 
     test("Create step as response of action, without child on action", () => {
@@ -634,24 +583,23 @@ describe("Tests progress steps in todo", () => {
                 parent_node: action.id
             })
             .set('Authorization', 'Bearer ' + jwt)
-            .then(res =>
-                expectElem({
-                    res,
-                    code: 201,
-                    model: Step,
-                    toCheck: jsonRes => ({
-                        id: expect.any(Number),
-                        percent: 0,
-                        percentSynchronized: false,
-                        nb: 1,
-                        node_id: subAction.id,
-                        todo_id: todo.id,
-                        deadLine: null,
-                        createdAt: expect.any(jsonRes ? String : Date),
-                        updatedAt: expect.any(jsonRes ? String : Date)
+            .then(async res => {
+                stepSubAction = await expectElem({
+                        res,
+                        code: 201,
+                        model: Step,
+                        toCheck: jsonRes => ({
+                            id: expect.any(Number),
+                            percent: 0,
+                            percentSynchronized: false,
+                            node_id: subAction.id,
+                            todo_id: todo.id,
+                            deadLine: null,
+                            createdAt: expect.any(jsonRes ? String : Date),
+                            updatedAt: expect.any(jsonRes ? String : Date)
+                        })
                     })
-                })
-            )
+            })
     })
 
     test("Create another step as response of action", () => {
@@ -685,28 +633,84 @@ describe("Tests progress steps in todo", () => {
                 parent_node: subAction.id
             })
             .set('Authorization', 'Bearer ' + jwt)
-            .then(res =>
-                expectElem({
-                    res,
-                    code: 201,
-                    model: Step,
-                    toCheck: jsonRes => ({
-                        id: expect.any(Number),
-                        percent: 0,
-                        percentSynchronized: false,
-                        nb: 2,
-                        node_id: firstnode.id,
-                        todo_id: todo.id,
-                        deadLine: null,
-                        createdAt: expect.any(jsonRes ? String : Date),
-                        updatedAt: expect.any(jsonRes ? String : Date)
+            .then(async res => {
+                    stepFirstnode2 = await expectElem({
+                        res,
+                        code: 201,
+                        model: Step,
+                        toCheck: jsonRes => ({
+                            id: expect.any(Number),
+                            percent: 0,
+                            percentSynchronized: false,
+                            node_id: firstnode.id,
+                            todo_id: todo.id,
+                            deadLine: null,
+                            createdAt: expect.any(jsonRes ? String : Date),
+                            updatedAt: expect.any(jsonRes ? String : Date)
+                        })
                     })
-                })
+                }
+            )
+    })
+
+    test("Get todo without model steps tree", () => {
+        return request(app)
+            .get("/todos/"+todoWithoutModel.id+"/tree")
+            .set('Authorization', 'Bearer ' + jwt)
+            .then(res =>
+                expect(res.statusCode).toEqual(404)
+            )
+    })
+
+    test("Get todo steps tree", () => {
+        const childrenByParentId = {
+            [firstnode.id]: [question.id,action.id],
+            [action.id]: [subAction.id],
+            [subAction.id]: [firstnode.id],
+            [question.id]: [questionResponseAction.id]
+        };
+        const parentsByChildId = {
+            [action.id]: [firstnode.id],
+            [question.id]: [action.id],
+            [subAction.id]: [action.id],
+            [firstnode.id]: [subAction.id],
+            [questionResponseAction.id]: [question.id]
+        };
+        const responsesByQuestionAndActionId = {
+            [firstnode.id]: {
+                [action.id]: compileDataValues(firstnodeResponse1),
+                [question.id]: compileDataValues(firstnodeResponse2)
+            }
+        }
+        const stepsByNodeId = {
+            [firstnode.id]: getStepsWithNbField(stepFirstnode2,stepFirstnode),
+            [action.id]: getStepsWithNbField(stepAction),
+            [subAction.id]: getStepsWithNbField(stepSubAction)
+        }
+
+        return request(app)
+            .get("/todos/"+todo.id+"/tree")
+            .set('Authorization', 'Bearer ' + jwt)
+            .then(res =>
+                testTree(
+                    res,
+                    model,
+                    [
+                        firstnode,
+                        action,
+                        subAction
+                    ],
+                    childrenByParentId,
+                    parentsByChildId,
+                    responsesByQuestionAndActionId,
+                    stepsByNodeId,
+                    todo
+                )
             )
     })
 })
 
-describe("Tests create, update, and delete steps", () => {
+/*describe("Tests create, update, and delete steps", () => {
     let t;
 
     let model: TodoModel;
@@ -842,7 +846,6 @@ describe("Tests create, update, and delete steps", () => {
                         id: expect.any(Number),
                         percent: 50,
                         percentSynchronized: false,
-                        nb: 1,
                         node_id: action.id,
                         todo_id: todo.id,
                         deadLine: jsonRes ? new Date("2022-12-12").toISOString() : new Date("2022-12-12"),
@@ -1049,4 +1052,4 @@ describe("Tests create, update, and delete steps", () => {
                 })
             )
     })
-})
+})*/

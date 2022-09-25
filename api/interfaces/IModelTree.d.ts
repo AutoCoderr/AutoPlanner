@@ -3,9 +3,11 @@ import TodoModel from "../models/TodoModel";
 import Node from "../models/Node";
 import Response from "../models/Response";
 import Step from "../models/Step";
+import Todo from "../models/Todo";
 
 export interface IModelWithTree {
     model: InferAttributes<TodoModel>;
+    todo?: InferAttributes<Todo>;
     tree: IModelTree;
 }
 

@@ -4,15 +4,15 @@ import {IAccessCheck} from "../../interfaces/crud/security/IAccessCheck";
 import {IUserConnected} from "../../interfaces/models/User";
 import IGetAndCheckExistingResourceParams from "../../interfaces/crud/IGetAndCheckExistingResourceParams";
 
-export default async function getAndCheckExistingResource<M extends Model>(
+export default async function getAndCheckExistingResource<M extends Model, IM = M>(
     model: ModelStatic<M>,
     id: number,
     mode: 'get'|'update'|'delete',
     accessCheck: IAccessCheck,
     connectedUser: undefined|IUserConnected = undefined,
-    params: IGetAndCheckExistingResourceParams = {}
+    params: IGetAndCheckExistingResourceParams<IM> = {}
 ) {
-    const elem = await model.findOne({
+    const elem = await <Promise<IM|null>>model.findOne({
         where: <M['_creationAttributes']>{ id },
         include: params.include
     })
@@ -26,10 +26,10 @@ export default async function getAndCheckExistingResource<M extends Model>(
     if (!params.getter)
         return {elem, code: null};
 
-    const getted = params.getter(elem);
+    const getted = await params.getter(elem);
 
     if (!getted)
-        return {code: params.notFoundCode??404, elem: null};
+        return {code: params.notFoundFromGetterCode??404, elem: null};
 
     if (params.gettedAccessCheck && !(await params.gettedAccessCheck(getted, mode, connectedUser)))
         return {code: params.forbiddenCode??403, elem: null};
