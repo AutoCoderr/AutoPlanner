@@ -43,9 +43,14 @@ export default async function getTreeObject(
                 todo_id: todo.id
             },
             order: [
-                ['nb', 'DESC']
+                ['createdAt', 'DESC']
             ]
-        }) : null
+        }).then(steps =>
+            steps.map((step,index) => ({
+                ...compileDataValues(step),
+                nb: steps.length-index
+            }))
+        ) : null
 
     if (todo !== null && steps && steps.length === 0)
         return getTreeObject(

@@ -410,7 +410,6 @@ describe("Test models to check database coherence", () => {
             id: step.id,
             percent: 0,
             percentSynchronized: false,
-            nb: 1,
             createdAt: expect.any(Date),
             updatedAt: expect.any(Date),
             deadLine: step.deadLine,
