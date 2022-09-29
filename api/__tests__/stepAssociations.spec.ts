@@ -63,6 +63,12 @@ describe("Tests create delete and list steps associations", () => {
     let todo: Todo;
     let step: Step;
 
+    let model2: TodoModel;
+    let node2: Node;
+    let folder2: Folder;
+    let todo2: Todo;
+    let step2: Step;
+
     let todoToAssociate: Todo;
     let todoToAssociate2: Todo;
     let folderToAssociate: Folder;
@@ -108,6 +114,31 @@ describe("Tests create delete and list steps associations", () => {
             node_id: node.id,
             todo_id: todo.id
         });
+
+        model2 = await TodoModel.create({
+           name: "model 2",
+           user_id: user.id
+        });
+        node2 = await Node.create({
+            text: "node 2",
+            type: "action",
+            model_id: model2.id
+        });
+        folder2 = await Folder.create({
+            name: "folder 2",
+            user_id: user.id
+        });
+        todo2 = await Todo.create({
+            name: "todo 2",
+            user_id: user.id,
+            parent_id: folder2.id,
+            model_id: model2.id
+        })
+        step2 = await Step.create({
+            node_id: node2.id,
+            todo_id: todo2.id
+        })
+
         todoToAssociate = await Todo.create({
             name: "todo to associate",
             deadLine: new Date('2022-11-10'),
@@ -318,6 +349,57 @@ describe("Tests create delete and list steps associations", () => {
                 expect(res.statusCode).toEqual(201);
             })
     });
+
+    // Infinite loop : todo2 -> step -> todo -> folder -> step2 -> todo2
+    test("add folder into step2, and add todo2 in step", async () => {
+        await folder.addAssociatedStep(step2)
+
+        return request(app)
+            .post("/steps/"+step.id+"/todos/"+todo2.id)
+            .set('Authorization', 'Bearer ' + jwt)
+            .then(res => {
+                expect(res.statusCode).toEqual(409)
+            })
+    })
+
+    // Infinite loop : folder2 -> step -> todo -> folder -> step2 -> todo2 -> folder2
+    test("Add folder2 to step", () => {
+        return request(app)
+            .post("/steps/"+step.id+"/folders/"+folder2.id)
+            .set('Authorization', 'Bearer ' + jwt)
+            .then(res => {
+                expect(res.statusCode).toEqual(409)
+            })
+    })
+
+    // Infinite loop : folder2 -> step -> todo -> folder -> folder2
+    test("Remove folder from step2, add folder to folder2, and add folder2 to step", async () => {
+        await folder.removeAssociatedStep(step2);
+        folder.parent_id = folder2.id;
+        await folder.save();
+
+        return request(app)
+            .post("/steps/"+step.id+"/folders/"+folder2.id)
+            .set('Authorization', 'Bearer ' + jwt)
+            .then(res => {
+                expect(res.statusCode).toEqual(409)
+            })
+    })
+
+    // No infinite loop : todo2 -> step -> todo -> folder -> folder2
+    test("Add todo2 to step", () => {
+        return request(app)
+            .post("/steps/"+step.id+"/todos/"+todo2.id)
+            .set('Authorization', 'Bearer ' + jwt)
+            .then(res => {
+                expect(res.statusCode).toEqual(201)
+            })
+            .then(async () => {
+                await todo2.removeAssociatedStep(step);
+                folder.parent_id = null;
+                await folder.save();
+            })
+    })
 
     test("Get associated todos", () => {
         return request(app)

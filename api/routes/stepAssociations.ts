@@ -10,6 +10,8 @@ import todoAccessCheck from "../security/accessChecks/todoAccessCheck";
 import getAll from "../libs/crud/requests/getAll";
 import {findAssociatedFoldersByStep} from "../repositories/FolderRepository";
 import {findAssociatedTodosByStep} from "../repositories/TodoRepository";
+import Step from "../models/Step";
+import {findAssociatedStepsByFolder, findAssociatedStepsByTodo} from "../repositories/StepRepository";
 
 async function getElement(reqData: IReqData, req, type: 'folder'|'todo'): Promise<{ elem: Folder | Todo | null, code: number | null }> {
     if (reqData.step === undefined)
@@ -23,6 +25,39 @@ async function getElement(reqData: IReqData, req, type: 'folder'|'todo'): Promis
             reqData.user);
 }
 
+
+async function detectAssociationLoop(initialTodoOrFolder: Todo|Folder, currentNode: Todo|Folder|Step) {
+    if (initialTodoOrFolder.constructor.name === currentNode.constructor.name && initialTodoOrFolder.id === currentNode.id)
+        return true;
+
+    const parent = ((currentNode instanceof Folder || currentNode instanceof Todo) && currentNode.parent_id !== null) ?
+        await Folder.findOne({
+            where: {id: currentNode.parent_id}
+        }) :
+        currentNode instanceof Step ?
+            await Todo.findOne({
+                where: {
+                    id: currentNode.todo_id
+                }
+            }) : null
+
+    const associatedParents = currentNode instanceof Todo ?
+        await findAssociatedStepsByTodo(currentNode) :
+        currentNode instanceof Folder ?
+            await findAssociatedStepsByFolder(currentNode) :
+            null
+
+    if (parent !== null && await detectAssociationLoop(initialTodoOrFolder, parent))
+        return true;
+
+    if (associatedParents !== null)
+        for (const associatedParent of associatedParents)
+            if (await detectAssociationLoop(initialTodoOrFolder, associatedParent))
+                return true;
+
+    return false;
+}
+
 async function addAssociation(reqData: IReqData, req, type: 'folder'|'todo'): Promise<number> {
     if (reqData.step === undefined)
         return 400;
@@ -33,14 +68,7 @@ async function addAssociation(reqData: IReqData, req, type: 'folder'|'todo'): Pr
         return <number>code;
 
     if (
-        (
-            elem instanceof Folder &&
-            await folderChildrenSome(elem, (todo) => reqData.step === undefined || todo.id === reqData.step.todo_id, 'todo')
-        ) ||
-        (
-            elem instanceof Todo &&
-            elem.id === reqData.step.todo_id
-        ) ||
+        await detectAssociationLoop(elem, reqData.step) ||
         reqData.step[type === 'folder' ? 'associatedFolders' : 'associatedTodos'].some(todoOrFolder => todoOrFolder.id === elem.id)
     )
         return 409;
