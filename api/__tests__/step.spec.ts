@@ -10,6 +10,7 @@ import expectElem from "../libs/tests/expectElem";
 import Step from "../models/Step";
 import compileDataValues from "../libs/compileDatavalues";
 import testTree from "../libs/tests/testTree";
+import createFirstStepOnTodo from "../libs/createFirstStepOnTodo";
 
 let user: User;
 let user2: User;
@@ -710,7 +711,7 @@ describe("Tests progress steps in todo", () => {
     })
 })
 
-/*describe("Tests create, update, and delete steps", () => {
+describe("Tests create, update, and delete steps", () => {
     let t;
 
     let model: TodoModel;
@@ -1052,4 +1053,4 @@ describe("Tests progress steps in todo", () => {
                 })
             )
     })
-})*/
+})
