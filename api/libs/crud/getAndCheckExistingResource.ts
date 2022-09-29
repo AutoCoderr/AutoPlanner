@@ -3,17 +3,23 @@ import {ModelStatic} from "sequelize/types/model";
 import {IAccessCheck} from "../../interfaces/crud/security/IAccessCheck";
 import {IUserConnected} from "../../interfaces/models/User";
 import IGetAndCheckExistingResourceParams from "../../interfaces/crud/IGetAndCheckExistingResourceParams";
+import isNumber from "../isNumber";
 
 export default async function getAndCheckExistingResource<M extends Model, IM = M>(
     model: ModelStatic<M>,
-    id: number,
+    req,
     mode: 'get'|'update'|'delete',
     accessCheck: IAccessCheck,
     connectedUser: undefined|IUserConnected = undefined,
     params: IGetAndCheckExistingResourceParams<IM> = {}
 ) {
+    const idParamName = params.idParamName ?? "id";
+    const id = req.params[idParamName];
+    if (!isNumber(id))
+        return {code: 400, elem: null};
+
     const elem = await <Promise<IM|null>>model.findOne({
-        where: <M['_creationAttributes']>{ id },
+        where: <M['_creationAttributes']>{ id: parseInt(id) },
         include: params.include
     })
 

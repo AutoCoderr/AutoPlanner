@@ -6,7 +6,7 @@ import {
     BelongsToManyAddAssociationMixin,
     HasManySetAssociationsMixin,
     HasManyAddAssociationMixin,
-    BelongsToSetAssociationMixin
+    BelongsToSetAssociationMixin, BelongsToManyRemoveAssociationMixin
 } from "sequelize";
 import sequelize from "../sequelize";
 import TodoModel from "./TodoModel";
@@ -32,6 +32,7 @@ class Todo extends Model<InferAttributes<Todo>, ITodoCreation> implements ITodo 
 
     declare setAssociatedSteps: BelongsToManySetAssociationsMixin<Step, any>;
     declare addAssociatedStep: BelongsToManyAddAssociationMixin<Step, any>;
+    declare removeAssociatedStep: BelongsToManyRemoveAssociationMixin<Step, any>;
     declare setSteps: HasManySetAssociationsMixin<Step, any>;
     declare addStep: HasManyAddAssociationMixin<Step, any>;
     declare setParent: BelongsToSetAssociationMixin<Folder, any>;

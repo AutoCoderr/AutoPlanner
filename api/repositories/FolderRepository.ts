@@ -3,9 +3,8 @@ import Todo from "../models/Todo";
 import {FolderWithFolders, FolderWithParent, FolderWithTodos} from "../interfaces/models/Folder";
 import IReqData from "../interfaces/IReqData";
 import {Op} from "sequelize";
-import getQuerySearch from "../libs/getQuerySearch";
-import getQuerySort from "../libs/getQuerySort";
 import {getTodoQuerySearch, getTodoQuerySort} from "./TodoRepository";
+import RelationStepFolder from "../models/RelationStepFolder";
 
 export function findOneFolderByIdWithFolders(id: number): Promise<null|FolderWithFolders> {
     return <Promise<null|FolderWithFolders>>Folder.findOne({
@@ -35,6 +34,32 @@ export function findOneFolderByIdWithTodos(id: number): Promise<null|FolderWithT
             as: 'todos'
         }
     })
+}
+
+export function findFoldersByParentId(parent_id: number): Promise<Folder[]> {
+    return Folder.findAll({
+        where: {
+            parent_id
+        }
+    })
+}
+
+export function findAssociatedFoldersByStep(reqData: IReqData): Promise<Folder[]> | Folder[] {
+    return reqData.step !== undefined ? RelationStepFolder.findAll({
+        where: {
+            step_id: reqData.step.id
+        }
+    })
+        .then(relations => relations.map(({folder_id}) => folder_id))
+        .then(folderIds =>
+            Folder.findAll({
+                where: {
+                    id: {[Op.in]: folderIds},
+                    ...getFolderQuerySearch(reqData)
+                },
+                order: getFolderQuerySort(reqData)
+            })
+        ): []
 }
 
 function getFolderQuerySearch(reqData: IReqData) {

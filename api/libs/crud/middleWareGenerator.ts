@@ -14,17 +14,15 @@ export default function middleWareGenerator<M extends Model>(
     params:IGetAndCheckExistingResourceParams<M> = {}
 ) {
     return async function (req, res, next) {
-        const id = req.params[resource_name + "_id"];
-
-        if (!isNumber(id))
-            return res.sendStatus(400);
-
         const mode: 'get' | 'update' = req.method === "GET" ? 'get' : 'update';
 
         const {
             elem,
             code
-        } = await getAndCheckExistingResource(model, parseInt(id), mode, accessCheck, req.user, params);
+        } = await getAndCheckExistingResource(model, req, mode, accessCheck, req.user, {
+            ...params,
+            idParamName: resource_name + "_id"
+        });
 
         if (!elem)
             return res.sendStatus(code);

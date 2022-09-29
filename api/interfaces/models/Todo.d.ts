@@ -1,5 +1,5 @@
 import {
-    BelongsToManyAddAssociationMixin,
+    BelongsToManyAddAssociationMixin, BelongsToManyRemoveAssociationMixin,
     BelongsToManySetAssociationsMixin, BelongsToSetAssociationMixin, HasManyAddAssociationMixin,
     HasManySetAssociationsMixin, InferAttributes, Optional
 } from "sequelize";
@@ -26,6 +26,7 @@ export interface ITodo {
 
     setAssociatedSteps: BelongsToManySetAssociationsMixin<Step, any>;
     addAssociatedStep: BelongsToManyAddAssociationMixin<Step, any>;
+    removeAssociatedStep: BelongsToManyRemoveAssociationMixin<Step, any>;
     setSteps: HasManySetAssociationsMixin<Step, any>;
     addStep: HasManyAddAssociationMixin<Step, any>;
     setParent: BelongsToSetAssociationMixin<Folder, any>;

@@ -1,5 +1,5 @@
 import {
-    BelongsToManyAddAssociationMixin,
+    BelongsToManyAddAssociationMixin, BelongsToManyRemoveAssociationMixin,
     BelongsToManySetAssociationsMixin,
     BelongsToSetAssociationMixin,
     HasManyAddAssociationMixin, InferAttributes, Optional
@@ -28,6 +28,7 @@ export interface IFolder {
     addTodo: HasManyAddAssociationMixin<Todo, any>;
     setAssociatedSteps: BelongsToManySetAssociationsMixin<Step, any>;
     addAssociatedStep: BelongsToManyAddAssociationMixin<Step, any>;
+    removeAssociatedStep: BelongsToManyRemoveAssociationMixin<Step, any>;
     setUser: BelongsToSetAssociationMixin<User, any>;
 }
 export type IFolderCreation = InferAttributes<Optional<IFolder, 'id' | 'description' | 'percent' | 'percentSynchronized' | 'priority' | 'parent_id' | 'deadLine' | 'createdAt' | 'updatedAt'>>;

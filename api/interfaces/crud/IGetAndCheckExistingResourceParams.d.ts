@@ -2,6 +2,7 @@ import {Includeable} from "sequelize/types/model";
 import IAccessCheck from "./security/IAccessCheck";
 
 interface IGetAndCheckExistingResourceParams<IM> {
+    idParamName?: string;
     notFoundCode?: number;
     notFoundFromGetterCode?: number;
     forbiddenCode?: number;
