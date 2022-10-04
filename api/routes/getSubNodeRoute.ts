@@ -9,7 +9,6 @@ import getAndCheckExistingResource from "../libs/crud/getAndCheckExistingResourc
 import nodeAccessCheck from "../security/accessChecks/nodeAccessCheck";
 import {nodeIncludeModel} from "../includeConfigs/node";
 import {NodeWithChildren, NodeWithModel, NodeWithParents} from "../interfaces/models/Node";
-import deleteOne from "../libs/crud/requests/deleteOne";
 import getReqData from "../libs/crud/getReqData";
 import Response from "../models/Response";
 import nodeCreateAccessCheck from "../security/createAccessChecks/nodeCreateAccessCheck";
@@ -27,12 +26,7 @@ export default function getSubNodeRoute(subResourceType: null|'children'|'parent
             if (subResourceType === null || reqData.node === undefined)
                 return res.sendStatus(404);
 
-            const {id} = req.params;
-
-            if (!isNumber(id))
-                return res.sendStatus(400);
-
-            const {elem, code} = await <Promise<{ elem: (NodeWithModel & NodeWithChildren) | null, code: number | null }>>getAndCheckExistingResource(Node, parseInt(id), "update", nodeAccessCheck, reqData.user, {
+            const {elem, code} = await <Promise<{ elem: (NodeWithModel & NodeWithChildren) | null, code: number | null }>>getAndCheckExistingResource(Node, req, "update", nodeAccessCheck, reqData.user, {
                 include: nodeIncludeModel
             });
 
@@ -63,11 +57,7 @@ export default function getSubNodeRoute(subResourceType: null|'children'|'parent
             if (reqData.node === undefined)
                 return res.sendStatus(400);
 
-            const {id} = req.params;
-            if (!isNumber(id))
-                return res.sendStatus(400);
-
-            const {elem,code} = await <Promise<{elem: null|(NodeWithModel&NodeWithChildren&NodeWithParents), code: null|number}>>getAndCheckExistingResource(Node, parseInt(id), "update", nodeAccessCheck, req.user, {
+            const {elem,code} = await <Promise<{elem: null|(NodeWithModel&NodeWithChildren&NodeWithParents), code: null|number}>>getAndCheckExistingResource(Node, req, "update", nodeAccessCheck, req.user, {
                 include: nodeIncludeModel
             });
 

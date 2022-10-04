@@ -9,6 +9,7 @@ import paginate from "../libs/paginate";
 import IPaginatedResult from "../interfaces/crud/IPaginatedResult";
 import compileDataValues from "../libs/compileDatavalues";
 import {IFolder} from "../interfaces/models/Folder";
+import RelationStepTodo from "../models/RelationStepTodo";
 
 export function findOneTodoByIdWithParent(id: number): Promise<null|TodoWithParent> {
     return <Promise<null|TodoWithParent>>Todo.findOne({
@@ -45,6 +46,32 @@ export function getTodoQuerySearch(reqData: IReqData) {
 export function getTodoQuerySort(reqData: IReqData) {
     return getQuerySort(reqData.query, {
         asc: ['name','percent','priority','deadLine']
+    })
+}
+
+export function findAssociatedTodosByStep(reqData: IReqData): Promise<Todo[]> | Todo[] {
+    return reqData.step !== undefined ? RelationStepTodo.findAll({
+        where: {
+            step_id: reqData.step.id
+        }
+    })
+        .then(relations => relations.map(({todo_id}) => todo_id))
+        .then(todoIds =>
+            Todo.findAll({
+                where: {
+                    id: {[Op.in]: todoIds},
+                    ...getTodoQuerySearch(reqData)
+                },
+                order: getTodoQuerySort(reqData)
+            })
+        ): []
+}
+
+export function findTodosByParentId(parent_id: number): Promise<Todo[]> {
+    return Todo.findAll({
+        where: {
+            parent_id
+        }
     })
 }
 

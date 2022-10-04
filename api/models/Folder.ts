@@ -4,7 +4,7 @@ import {
     InferAttributes,
     BelongsToSetAssociationMixin,
     HasManyAddAssociationMixin,
-    BelongsToManySetAssociationsMixin, BelongsToManyAddAssociationMixin
+    BelongsToManySetAssociationsMixin, BelongsToManyAddAssociationMixin, BelongsToManyRemoveAssociationMixin
 } from "sequelize";
 import sequelize from "../sequelize";
 import Todo from "./Todo";
@@ -31,6 +31,7 @@ class Folder extends Model<InferAttributes<Folder>, IFolderCreation> implements 
     declare addTodo: HasManyAddAssociationMixin<Todo, any>;
     declare setAssociatedSteps: BelongsToManySetAssociationsMixin<Step, any>;
     declare addAssociatedStep: BelongsToManyAddAssociationMixin<Step, any>;
+    declare removeAssociatedStep: BelongsToManyRemoveAssociationMixin<Step, any>;
     declare setUser: BelongsToSetAssociationMixin<User, any>;
 }
 

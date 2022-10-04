@@ -12,12 +12,7 @@ import IForm from "../../../interfaces/form/IForm";
 
 export default function update<M extends Model, IData = any>(model: ModelStatic<M>, formGetter: IFormGetter<M,IData>, accessCheck: IAccessCheck, params: IUpdateParams<M>&IGetAndCheckExistingResourceParams<M> = {}) {
     return async function (req,res) {
-        const {id} = req.params;
-
-        if (!isNumber(id))
-            return res.sendStatus(400);
-
-        const {elem, code} = await getAndCheckExistingResource(model, parseInt(id), "update", accessCheck, req.user, params);
+        const {elem, code} = await getAndCheckExistingResource(model, req, "update", accessCheck, req.user, params);
 
         if (!elem)
             return res.sendStatus(code);
