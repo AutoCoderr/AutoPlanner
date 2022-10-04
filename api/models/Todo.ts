@@ -21,6 +21,7 @@ class Todo extends Model<InferAttributes<Todo>, ITodoCreation> implements ITodo 
     declare description: string;
     declare name: string;
     declare percent: number;
+    declare percentSynchronized: boolean;
     declare priority: number;
     declare deadLine?: Date;
     declare user_id: number;
@@ -60,6 +61,11 @@ Todo.init(
             type: DataTypes.FLOAT,
             allowNull: false,
             defaultValue: 0
+        },
+        percentSynchronized: {
+            type: DataTypes.BOOLEAN,
+            allowNull: false,
+            defaultValue: false
         },
         priority: {
             type: DataTypes.INTEGER,

@@ -10,11 +10,11 @@ import folderAccessCheck from "../security/accessChecks/folderAccessCheck";
 import Todo from "../models/Todo";
 import TodoModel from "../models/TodoModel";
 import modelAccessCheck from "../security/accessChecks/modelAccessCheck";
-import Node from "../models/Node";
-import Step from "../models/Step";
 import createFirstStepOnTodo from "../libs/createFirstStepOnTodo";
+import boolean from "../asserts/boolean";
+import {ITodoCreation} from "../interfaces/models/Todo";
 
-const getTodoForm: IFormGetter<Todo> = (reqData, method) => ({
+const getTodoForm: IFormGetter<Todo,ITodoCreation> = (reqData, method, todo) => ({
     model: Todo,
     fields: {
         name: {
@@ -58,12 +58,44 @@ const getTodoForm: IFormGetter<Todo> = (reqData, method) => ({
             valid: (model: TodoModel) => modelAccessCheck(model, "get", reqData.user),
             format: (model: TodoModel) => model.id,
             required: false
+        },
+        percentSynchronized: {
+            msg: "Vous devez rentrer un booléen",
+            valid: boolean,
+            otherValidates: [
+                {
+                    msg: "Vous ne pouvez pas en même temps synchroniser les pourcentages et en définir un vous même",
+                    valid: (percentSynchronized: boolean, data) =>
+                        !percentSynchronized ||
+                        data.percent === undefined
+                },
+                {
+                    msg: "Vous ne pouvez pas synchroniser les pourcentages d'une todo sans modèle",
+                    valid: (percentSynchronized: boolean, data) =>
+                        !percentSynchronized ||
+                        ( data.model_id !== undefined && data.model_id !== null ) ||
+                        ( data.model_id === undefined && todo !== null && todo.model_id !== null)
+
+                }
+            ],
+            required: false,
         }
     },
-    additionalFields: method === "post" ? {
-        user_id: () => reqData.user?.id,
-        parent_id: () => reqData.folder?.id
-    } : undefined,
+    additionalFields: {
+        percentSynchronized: (data) =>
+            data.percentSynchronized ?? ((
+                data.model_id === null ||
+                (data.model_id === undefined && (todo === null || todo.model_id === null)) ||
+                data.percent !== undefined ||
+                todo === null
+            ) ? false : todo.percentSynchronized ),
+        ...(
+            method === "post" ? {
+                user_id: () => reqData.user?.id,
+                parent_id: () => reqData.folder?.id
+            } : {}
+        )
+    },
 
 
     onCreated: createFirstStepOnTodo

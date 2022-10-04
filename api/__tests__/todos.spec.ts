@@ -8,6 +8,7 @@ import getJsonList from "../libs/tests/getJsonList";
 import compileDataValues from "../libs/compileDatavalues";
 import expectElem from "../libs/tests/expectElem";
 import generateNElements from "../libs/tests/generateNElements";
+import TodoModel from "../models/TodoModel";
 
 let user: User;
 let user2: User;
@@ -361,6 +362,7 @@ describe("Test get all todos in folder", () => {
                     name,
                     description: null,
                     percent: 0,
+                    percentSynchronized: false,
                     priority: 1,
                     deadLine: null,
                     createdAt: expect.any(String),
@@ -383,6 +385,7 @@ describe("Test get all todos in folder", () => {
                     name,
                     description: null,
                     percent: 0,
+                    percentSynchronized: false,
                     priority: 1,
                     deadLine: null,
                     createdAt: expect.any(String),
@@ -407,10 +410,17 @@ describe("Test get all todos in folder", () => {
 describe("Test todos create", () => {
     let t;
 
+    let model: TodoModel;
+
     beforeAll(async () => {
         t = await sequelize.transaction();
         sequelize.constructor['_cls'] = new Map();
         sequelize.constructor['_cls'].set('transaction', t);
+
+        model = await TodoModel.create({
+            name: "model",
+            user_id: user.id
+        });
     })
 
     afterAll(() => t.rollback());
@@ -483,6 +493,7 @@ describe("Test todos create", () => {
                     name: "Manger des bananes",
                     description: null,
                     percent: 0,
+                    percentSynchronized: false,
                     priority: 1,
                     deadLine: null,
                     createdAt: expect.any(String),
@@ -510,6 +521,7 @@ describe("Test todos create", () => {
                     name: "Manger des bananes",
                     description: "C'est plein de potatium",
                     percent: 0,
+                    percentSynchronized: false,
                     priority: 2,
                     deadLine: new Date("2022/09/10").toISOString(),
                     createdAt: expect.any(String),
@@ -519,6 +531,115 @@ describe("Test todos create", () => {
                     model_id: null
                 })
             })
+    })
+
+    test("Create todo with percentSynchronized to true, and percent specified", () => {
+        return request(app)
+            .post("/todos")
+            .set('Authorization', 'Bearer ' + jwt)
+            .send({
+                name: "todo",
+                percent: 12,
+                percentSynchronized: true
+            })
+            .then(res =>
+                expectElem({
+                    res,
+                    code: 422,
+                    checkDbElem: false,
+                    toCheck: {
+                        "violations": [
+                            {
+                                "propertyPath": "percentSynchronized",
+                                "message": "Vous ne pouvez pas en même temps synchroniser les pourcentages et en définir un vous même"
+                            }
+                        ]
+                    }
+                })
+            )
+    })
+
+    test("Create todo with percentSynchronized to true, and model_id to null", () => {
+        return request(app)
+            .post("/todos")
+            .set('Authorization', 'Bearer ' + jwt)
+            .send({
+                name: "todo",
+                model_id: null,
+                percentSynchronized: true
+            })
+            .then(res =>
+                expectElem({
+                    res,
+                    code: 422,
+                    checkDbElem: false,
+                    toCheck: {
+                        "violations": [
+                            {
+                                "propertyPath": "percentSynchronized",
+                                "message": "Vous ne pouvez pas synchroniser les pourcentages d'une todo sans modèle"
+                            }
+                        ]
+                    }
+                })
+            )
+    })
+
+    test("Create todo with percentSynchronized to true, without model_id", () => {
+        return request(app)
+            .post("/todos")
+            .set('Authorization', 'Bearer ' + jwt)
+            .send({
+                name: "todo",
+                percentSynchronized: true
+            })
+            .then(res =>
+                expectElem({
+                    res,
+                    code: 422,
+                    checkDbElem: false,
+                    toCheck: {
+                        "violations": [
+                            {
+                                "propertyPath": "percentSynchronized",
+                                "message": "Vous ne pouvez pas synchroniser les pourcentages d'une todo sans modèle"
+                            }
+                        ]
+                    }
+                })
+            )
+    })
+
+    test("Create todo with percentSynchronized to true, and model_id to specified", () => {
+        return request(app)
+            .post("/todos")
+            .set('Authorization', 'Bearer ' + jwt)
+            .send({
+                name: "todo",
+                model_id: model.id,
+                percentSynchronized: true
+            })
+            .then(res =>
+                expectElem({
+                    res,
+                    code: 201,
+                    model: Todo,
+                    toCheck: jsonRes => ({
+                        id: expect.any(Number),
+                        name: "todo",
+                        description: null,
+                        percent: 0,
+                        percentSynchronized: true,
+                        priority: 1,
+                        deadLine: null,
+                        createdAt: expect.any(jsonRes ? String : Date),
+                        updatedAt: expect.any(jsonRes ? String : Date),
+                        user_id: user.id,
+                        parent_id: null,
+                        model_id: model.id
+                    })
+                })
+            )
     })
 });
 
@@ -571,6 +692,7 @@ describe("Tests create todos in folder", () => {
                     name: "test",
                     description: null,
                     percent: 0,
+                    percentSynchronized: false,
                     priority: 1,
                     deadLine: null,
                     createdAt: expect.any(String),
@@ -642,6 +764,7 @@ describe("Tests get todo", () => {
                     name: "Manger des bananes",
                     description: "C'est plein de potatium",
                     percent: 0,
+                    percentSynchronized: false,
                     priority: 2,
                     deadLine: new Date("2022/09/10").toISOString(),
                     createdAt: expect.any(String),
@@ -657,6 +780,7 @@ describe("Tests get todo", () => {
 describe("Test update todo", () => {
     let t;
 
+    let model: TodoModel;
     let todo: Todo;
 
     let folder: Folder;
@@ -674,6 +798,11 @@ describe("Test update todo", () => {
         badFolder = await Folder.create({
             name: "Bad folder",
             user_id: user2.id
+        })
+
+        model = await TodoModel.create({
+            name: "model",
+            user_id: user.id
         })
 
         todo = await Todo.create({
@@ -753,20 +882,25 @@ describe("Test update todo", () => {
                 "deadLine": null,
                 "parent_id": null
             })
-            .then(res => {
-                expect(res.statusCode).toEqual(200);
-                expect(JSON.parse(res.text)).toEqual({
-                    id: todo.id,
-                    name: "Coucou",
-                    description: "C'est plein de potatium",
-                    percent: 0,
-                    priority: 5,
-                    deadLine: null,
-                    createdAt: todo.createdAt.toISOString(),
-                    updatedAt: expect.any(String),
-                    user_id: user.id,
-                    parent_id: null,
-                    model_id: null
+            .then(async res => {
+                todo = await expectElem({
+                    res,
+                    code: 200,
+                    model: Todo,
+                    toCheck: jsonRes => ({
+                        id: todo.id,
+                        name: "Coucou",
+                        description: "C'est plein de potatium",
+                        percent: 0,
+                        percentSynchronized: false,
+                        priority: 5,
+                        deadLine: null,
+                        createdAt: jsonRes ? todo.createdAt.toISOString() : todo.createdAt,
+                        updatedAt: expect.any(jsonRes ? String : Date),
+                        user_id: user.id,
+                        parent_id: null,
+                        model_id: null
+                    })
                 })
             })
     })
@@ -804,6 +938,7 @@ describe("Test update todo", () => {
             name: "Todo to patch",
             description: "coucou",
             percent: expect.any(Number),
+            percentSynchronized: false,
             priority: 4,
             deadLine: null,
             createdAt: expect.any(String),
@@ -839,6 +974,187 @@ describe("Test update todo", () => {
                 })
         ))
     });
+
+    test("Set percentSynchronized to true, and define percent", () => {
+        return request(app)
+            .patch("/todos/"+todo.id)
+            .set('Authorization', 'Bearer ' + jwt)
+            .send({
+                percent: 12,
+                percentSynchronized: true
+            })
+            .then(res =>
+                expectElem({
+                    res,
+                    code: 422,
+                    checkDbElem: false,
+                    toCheck: {
+                        "violations": [
+                            {
+                                "propertyPath": "percentSynchronized",
+                                "message": "Vous ne pouvez pas en même temps synchroniser les pourcentages et en définir un vous même"
+                            }
+                        ]
+                    }
+                })
+            )
+    });
+
+    test("Set percentSynchronized to true, without existing associated model", () => {
+        return request(app)
+            .patch("/todos/"+todo.id)
+            .set('Authorization', 'Bearer ' + jwt)
+            .send({
+                percentSynchronized: true
+            })
+            .then(res =>
+                expectElem({
+                    res,
+                    code: 422,
+                    checkDbElem: false,
+                    toCheck: {
+                        "violations": [
+                            {
+                                "propertyPath": "percentSynchronized",
+                                "message": "Vous ne pouvez pas synchroniser les pourcentages d'une todo sans modèle"
+                            }
+                        ]
+                    }
+                })
+            )
+    })
+
+    test("Set percentSynchronized to true, and define associated model", () => {
+        return request(app)
+            .patch("/todos/"+todo.id)
+            .set('Authorization', 'Bearer ' + jwt)
+            .send({
+                percentSynchronized: true,
+                model_id: model.id
+            })
+            .then(async res => {
+                todo = await expectElem({
+                    res,
+                    code: 200,
+                    model: Todo,
+                    toCheck: jsonRes => ({
+                        ...compileDataValues(todo),
+                        percentSynchronized: true,
+                        model_id: model.id,
+                        createdAt: jsonRes ? todo.createdAt.toISOString() : todo.createdAt,
+                        updatedAt: expect.any(jsonRes ? String : Date)
+                    })
+                })
+            })
+            .then(() => {
+                todo.percentSynchronized = false;
+                return todo.save();
+            })
+    })
+
+    test("Set percentSynchronized to true, with already defined associated model", () => {
+        return request(app)
+            .patch("/todos/"+todo.id)
+            .set('Authorization', 'Bearer ' + jwt)
+            .send({
+                percentSynchronized: true
+            })
+            .then(async res => {
+                todo = await expectElem({
+                    res,
+                    code: 200,
+                    model: Todo,
+                    toCheck: jsonRes => ({
+                        ...compileDataValues(todo),
+                        percentSynchronized: true,
+                        createdAt: jsonRes ? todo.createdAt.toISOString() : todo.createdAt,
+                        updatedAt: expect.any(jsonRes ? String : Date)
+                    })
+                })
+            })
+            .then(() => {
+                todo.percentSynchronized = false;
+                return todo.save();
+            })
+    })
+
+    test("Set percentSynchronized to true, and remove associated model_id", () => {
+        return request(app)
+            .patch("/todos/"+todo.id)
+            .set('Authorization', 'Bearer ' + jwt)
+            .send({
+                percentSynchronized: true,
+                model_id: null
+            })
+            .then(res =>
+                expectElem({
+                    res,
+                    code: 422,
+                    checkDbElem: false,
+                    toCheck: {
+                        "violations": [
+                            {
+                                "propertyPath": "percentSynchronized",
+                                "message": "Vous ne pouvez pas synchroniser les pourcentages d'une todo sans modèle"
+                            }
+                        ]
+                    }
+                })
+            )
+            .then(() => {
+                todo.percentSynchronized = true;
+                return todo.save();
+            })
+    })
+
+    test("Define percent, percentSynchronized need to be set to false", () => {
+        return request(app)
+            .patch("/todos/"+todo.id)
+            .set('Authorization', 'Bearer ' + jwt)
+            .send({
+                percent: 12
+            })
+            .then(async res => {
+                todo = await expectElem({
+                    res,
+                    code: 200,
+                    model: Todo,
+                    toCheck: jsonRes => ({
+                        ...compileDataValues(todo),
+                        percent: 12,
+                        percentSynchronized: false,
+                        createdAt: jsonRes ? todo.createdAt.toISOString() : todo.createdAt,
+                        updatedAt: expect.any(jsonRes ? String : Date)
+                    })
+                })
+
+                todo.percentSynchronized = true;
+                await todo.save();
+            })
+    })
+
+    test("Remove associated model_id, percentSynchronized need to be set to false", () => {
+        return request(app)
+            .patch("/todos/"+todo.id)
+            .set('Authorization', 'Bearer ' + jwt)
+            .send({
+                model_id: null
+            })
+            .then(async res => {
+                todo = await expectElem({
+                    res,
+                    code: 200,
+                    model: Todo,
+                    toCheck: jsonRes => ({
+                        ...compileDataValues(todo),
+                        model_id: null,
+                        percentSynchronized: false,
+                        createdAt: jsonRes ? todo.createdAt.toISOString() : todo.createdAt,
+                        updatedAt: expect.any(jsonRes ? String : Date)
+                    })
+                })
+            })
+    })
 })
 
 describe("Test delete todos", () => {
