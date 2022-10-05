@@ -8,8 +8,8 @@ import IReqData from "../interfaces/IReqData";
 import Todo from "../models/Todo";
 import todoAccessCheck from "../security/accessChecks/todoAccessCheck";
 import getAll from "../libs/crud/requests/getAll";
-import {findAssociatedFoldersByStep} from "../repositories/FolderRepository";
-import {findAssociatedTodosByStep} from "../repositories/TodoRepository";
+import {findAssociatedFoldersByStepWithReqData} from "../repositories/FolderRepository";
+import {findAssociatedTodosByStepWithReqData} from "../repositories/TodoRepository";
 import Step from "../models/Step";
 import {findAssociatedStepsByFolder, findAssociatedStepsByTodo} from "../repositories/StepRepository";
 
@@ -122,7 +122,7 @@ export default function stepAssociations(type: 'folder'|'todo') {
 
     router.post("/:id", (req, res) => addAssociation(getReqData(req), req, type).then(code => res.sendStatus(code)));
     router.delete("/:id", (req, res) => deleteAssociation(getReqData(req), req, type).then(code => res.sendStatus(code)));
-    router.get("/", getAll(type === 'folder' ? findAssociatedFoldersByStep : findAssociatedTodosByStep))
+    router.get("/", getAll(type === 'folder' ? findAssociatedFoldersByStepWithReqData : findAssociatedTodosByStepWithReqData))
 
     return router;
 }

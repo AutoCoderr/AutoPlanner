@@ -2,7 +2,7 @@ import Todo from "../models/Todo";
 import Folder from "../models/Folder";
 import {TodoWithFoldersString, TodoWithParent} from "../interfaces/models/Todo";
 import IReqData from "../interfaces/IReqData";
-import {Op} from "sequelize";
+import {Op, Order, WhereOptions} from "sequelize";
 import getQuerySearch from "../libs/getQuerySearch";
 import getQuerySort from "../libs/getQuerySort";
 import paginate from "../libs/paginate";
@@ -10,6 +10,7 @@ import IPaginatedResult from "../interfaces/crud/IPaginatedResult";
 import compileDataValues from "../libs/compileDatavalues";
 import {IFolder} from "../interfaces/models/Folder";
 import RelationStepTodo from "../models/RelationStepTodo";
+import Step from "../models/Step";
 
 export function findOneTodoByIdWithParent(id: number): Promise<null|TodoWithParent> {
     return <Promise<null|TodoWithParent>>Todo.findOne({
@@ -49,10 +50,10 @@ export function getTodoQuerySort(reqData: IReqData) {
     })
 }
 
-export function findAssociatedTodosByStep(reqData: IReqData): Promise<Todo[]> | Todo[] {
-    return reqData.step !== undefined ? RelationStepTodo.findAll({
+export function findAssociatedTodosByStep(step: Step, todoQuerySearch: WhereOptions = {}, todoQuerySort: null|Order = null) {
+    return RelationStepTodo.findAll({
         where: {
-            step_id: reqData.step.id
+            step_id: step.id
         }
     })
         .then(relations => relations.map(({todo_id}) => todo_id))
@@ -60,11 +61,17 @@ export function findAssociatedTodosByStep(reqData: IReqData): Promise<Todo[]> | 
             Todo.findAll({
                 where: {
                     id: {[Op.in]: todoIds},
-                    ...getTodoQuerySearch(reqData)
+                    ...todoQuerySearch
                 },
-                order: getTodoQuerySort(reqData)
+                order: todoQuerySort ?? undefined
             })
-        ): []
+        )
+}
+
+export function findAssociatedTodosByStepWithReqData(reqData: IReqData): Promise<Todo[]> | Todo[] {
+    return reqData.step !== undefined ?
+        findAssociatedTodosByStep(reqData.step, getTodoQuerySearch(reqData), getTodoQuerySort(reqData)) :
+        [];
 }
 
 export function findTodosByParentId(parent_id: number): Promise<Todo[]> {
