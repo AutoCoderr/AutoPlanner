@@ -22,10 +22,10 @@ export function findOneStepByIdWithAssociatedTodosAndFolders(id: number): Promis
     })
 }
 
-export function findAssociatedStepsByTodo(todo: Todo) {
+export function findAssociatedStepsByTodoId(todo_id: number) {
     return RelationStepTodo.findAll({
         where: {
-            todo_id: todo.id
+            todo_id
         }
     })
         .then(relations => relations.map(({step_id}) => step_id))
@@ -38,10 +38,10 @@ export function findAssociatedStepsByTodo(todo: Todo) {
         )
 }
 
-export function findAssociatedStepsByFolder(folder: Folder) {
+export function findAssociatedStepsByFolderId(folder_id) {
     return RelationStepFolder.findAll({
         where: {
-            folder_id: folder.id
+            folder_id
         }
     })
         .then(relations => relations.map(({step_id}) => step_id))

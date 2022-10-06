@@ -4,6 +4,7 @@ import Step from "../../models/Step";
 import TodoModel from "../../models/TodoModel";
 import Node from "../../models/Node";
 import compileDataValues from "../compileDatavalues";
+import round from "../round";
 
 async function recursivelyGetTodoSteps(todo: Todo, node_id: number, parentStep: Step|null = null, steps: Step[] = []): Promise<Step[]> {
     const step = await Step.findOne({
@@ -100,5 +101,10 @@ export default async function calculSynchronizedTodoPercent(todo: Todo): Promise
 
     const nbTotalSteps = steps.length + nbStepToTheTreeEnd;
 
-    return (steps.reduce((acc,step) => acc+step.percent , 0) / (nbTotalSteps * 100)) * 100;
+    return round(
+            (
+                steps.reduce((acc,step) => acc+step.percent , 0) /
+                        (nbTotalSteps * 100)
+            ) * 100
+        , 3);
 }

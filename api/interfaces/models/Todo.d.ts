@@ -52,6 +52,10 @@ export interface TodoWithUser extends Todo {
     user: User
 }
 
+export interface TodoWithPreviousDataValues extends Todo {
+    _previousDataValues: ITodo
+}
+
 
 export interface TodoWithFoldersString extends Todo {
     folders: Pick<IFolder, 'id' | 'name'>[]
