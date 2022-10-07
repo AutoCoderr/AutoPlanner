@@ -8,10 +8,11 @@ import IReqData from "../interfaces/IReqData";
 import Todo from "../models/Todo";
 import todoAccessCheck from "../security/accessChecks/todoAccessCheck";
 import getAll from "../libs/crud/requests/getAll";
-import {findAssociatedFoldersByStep} from "../repositories/FolderRepository";
-import {findAssociatedTodosByStep} from "../repositories/TodoRepository";
+import {findAssociatedFoldersByStepWithReqData} from "../repositories/FolderRepository";
+import {findAssociatedTodosByStepWithReqData} from "../repositories/TodoRepository";
 import Step from "../models/Step";
-import {findAssociatedStepsByFolder, findAssociatedStepsByTodo} from "../repositories/StepRepository";
+import {findAssociatedStepsByFolderId, findAssociatedStepsByTodoId} from "../repositories/StepRepository";
+import calculSynchronizedStepPercent from "../libs/percentSynchronization/calculSynchronizedStepPercent";
 
 async function getElement(reqData: IReqData, req, type: 'folder'|'todo'): Promise<{ elem: Folder | Todo | null, code: number | null }> {
     if (reqData.step === undefined)
@@ -42,9 +43,9 @@ async function detectAssociationLoop(initialTodoOrFolder: Todo|Folder, currentNo
             }) : null
 
     const associatedParents = currentNode instanceof Todo ?
-        await findAssociatedStepsByTodo(currentNode) :
+        await findAssociatedStepsByTodoId(currentNode.id) :
         currentNode instanceof Folder ?
-            await findAssociatedStepsByFolder(currentNode) :
+            await findAssociatedStepsByFolderId(currentNode.id) :
             null
 
     if (parent !== null && await detectAssociationLoop(initialTodoOrFolder, parent))
@@ -98,6 +99,14 @@ async function addAssociation(reqData: IReqData, req, type: 'folder'|'todo'): Pr
 
     await elem.addAssociatedStep(reqData.step);
 
+    if (reqData.step.percentSynchronized) {
+        const calculatedSynchronizedPercent: null|number = await calculSynchronizedStepPercent(reqData.step);
+        if (calculatedSynchronizedPercent !== null) {
+            reqData.step.percent = calculatedSynchronizedPercent;
+            await reqData.step.save();
+        }
+    }
+
     return 201
 }
 
@@ -114,6 +123,15 @@ async function deleteAssociation(reqData: IReqData, req, type: 'folder'|'todo'):
         return 404;
 
     await elem.removeAssociatedStep(reqData.step);
+
+    if (reqData.step.percentSynchronized) {
+        const calculatedSynchronizedPercent: null|number = await calculSynchronizedStepPercent(reqData.step);
+        if (calculatedSynchronizedPercent !== null) {
+            reqData.step.percent = calculatedSynchronizedPercent;
+            await reqData.step.save();
+        }
+    }
+
     return 204;
 }
 
@@ -122,7 +140,7 @@ export default function stepAssociations(type: 'folder'|'todo') {
 
     router.post("/:id", (req, res) => addAssociation(getReqData(req), req, type).then(code => res.sendStatus(code)));
     router.delete("/:id", (req, res) => deleteAssociation(getReqData(req), req, type).then(code => res.sendStatus(code)));
-    router.get("/", getAll(type === 'folder' ? findAssociatedFoldersByStep : findAssociatedTodosByStep))
+    router.get("/", getAll(type === 'folder' ? findAssociatedFoldersByStepWithReqData : findAssociatedTodosByStepWithReqData))
 
     return router;
 }

@@ -8,8 +8,9 @@ import datetime from "../asserts/datetime";
 import formatDatetime from "../asserts/format/formatDatetime";
 import Folder from "../models/Folder";
 import folderAccessCheck from "../security/accessChecks/folderAccessCheck";
+import {IFolderCreation} from "../interfaces/models/Folder";
 
-const getFolderForm: IFormGetter<Folder> = (reqData, method) => ({
+const getFolderForm: IFormGetter<Folder,IFolderCreation> = (reqData, method, folder) => ({
     model: Folder,
     fields: {
         name: {
@@ -31,6 +32,14 @@ const getFolderForm: IFormGetter<Folder> = (reqData, method) => ({
         percentSynchronized: {
             msg: "Vous devez rentrer un booléen",
             valid: boolean,
+            otherValidates: [
+                {
+                    msg: "Vous ne pouvez pas en même temps synchroniser les pourcentages et en définir un vous même",
+                    valid: (percentSynchronized: boolean, data) =>
+                        !percentSynchronized ||
+                        data.percent === undefined
+                },
+            ],
             required: false
         },
         priority: {
@@ -53,10 +62,19 @@ const getFolderForm: IFormGetter<Folder> = (reqData, method) => ({
             required: false
         }
     },
-    additionalFields: method === "post" ? {
-        user_id: () => reqData.user?.id,
-        parent_id: () => reqData.folder?.id
-    } : undefined
+    additionalFields: {
+        percentSynchronized: (data) =>
+            data.percentSynchronized ?? (
+                (data.percent !== undefined || folder === null) ?
+                    false : folder.percentSynchronized
+            ),
+        ...(
+            method === "post" ? {
+                user_id: () => reqData.user?.id,
+                parent_id: () => reqData.folder?.id
+            } : {}
+        )
+    }
 })
 
 export default getFolderForm;

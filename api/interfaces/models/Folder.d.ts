@@ -48,3 +48,6 @@ export interface FolderWithAssociatedSteps extends Folder {
 export interface FolderWithUser extends Folder {
     user: User
 }
+export interface FolderWithPreviousDataValues extends Folder {
+    _previousDataValues: IFolder
+}

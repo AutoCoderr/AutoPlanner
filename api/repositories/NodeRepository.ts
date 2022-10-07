@@ -59,26 +59,34 @@ export function findOneNodeByIdWithParents(id: number): Promise<null | NodeWithP
     }).then(res => compileDataValues(res))
 }
 
+export function findNodesByModelId(model_id) {
+    return Node.findAll({
+        where: {
+            model_id
+        }
+    })
+}
+
 export function findNodes(reqData: IReqData, subResourceType: null | 'children' | 'parents' = null): Promise<Node[]> | Node[] {
     if (reqData.user === undefined)
         return [];
 
     if (reqData.node === undefined || subResourceType === null)
-        return reqData.model ? Node.findAll({
-            where: {
-                model_id: reqData.model.id
-            }
-        }) : []
+        return reqData.model ? findNodesByModelId(reqData.model.id) : []
 
     return subResourceType === "children" ? findNodeChildren(reqData.node.id) : findNodeParents(reqData.node.id);
 }
 
-export function findNodeChildren(node_id: number, include: Includeable|Includeable[]|undefined = undefined): Promise<Node[]> {
-    return <Promise<Node[]>>RelationNode.findAll({
+export function getNodeChildrenIds(node_id: number): Promise<number[]> {
+    return <Promise<number[]>>RelationNode.findAll({
         where: {
             parent_id: node_id
         }
     }).then(res => res.map(({child_id}) => child_id))
+}
+
+export function findNodeChildren(node_id: number, include: Includeable|Includeable[]|undefined = undefined): Promise<Node[]> {
+    return getNodeChildrenIds(node_id)
         .then(childIds =>
             Node.findAll({
                 where: {

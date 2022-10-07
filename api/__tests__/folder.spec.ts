@@ -134,7 +134,8 @@ describe("Test folder creation", () => {
             })
     })
 
-    test("Create successfully folder with percentSynchronized", () => {
+
+    test("Create successfully folder with percentSynchronized and percent mentionned", () => {
         return request(app)
             .post("/folders")
             .set('Authorization', 'Bearer ' + jwt)
@@ -143,13 +144,39 @@ describe("Test folder creation", () => {
                 percent: 12,
                 percentSynchronized: true,
             })
+            .then(res =>
+                expectElem({
+                    res,
+                    code: 422,
+                    checkDbElem: false,
+                    toCheck: {
+                        "violations": [
+                            {
+                                "propertyPath": "percentSynchronized",
+                                "message": "Vous ne pouvez pas en même temps synchroniser les pourcentages et en définir un vous même"
+                            }
+                        ]
+                    }
+                })
+            )
+    })
+
+
+    test("Create successfully folder with percentSynchronized", () => {
+        return request(app)
+            .post("/folders")
+            .set('Authorization', 'Bearer ' + jwt)
+            .send({
+                name: "Test",
+                percentSynchronized: true,
+            })
             .then(res => {
                 expect(res.statusCode).toEqual(201);
                 expect(JSON.parse(res.text)).toEqual({
                     id: expect.any(Number),
                     name: "Test",
                     description: null,
-                    percent: 12,
+                    percent: null,
                     priority: 1,
                     percentSynchronized: true,
                     deadLine: null,
@@ -415,20 +442,24 @@ describe("Tests update folder", () => {
                 parent_id: parentFolder.id,
                 deadLine: "2050/12/12"
             })
-            .then(res => {
-                expect(res.statusCode).toEqual(200);
-                expect(JSON.parse(res.text)).toEqual({
-                    id: folder.id,
-                    name: "Modified",
-                    description: "coucou",
-                    percent: null,
-                    percentSynchronized: true,
-                    priority: 2,
-                    deadLine: new Date("2050/12/12").toISOString(),
-                    createdAt: expect.any(String),
-                    updatedAt: expect.any(String),
-                    user_id: user.id,
-                    parent_id: parentFolder.id
+            .then(async res => {
+                folder = await expectElem({
+                    res,
+                    code: 200,
+                    model: Folder,
+                    toCheck: jsonRes => ({
+                        id: folder.id,
+                        name: "Modified",
+                        description: "coucou",
+                        percent: null,
+                        percentSynchronized: true,
+                        priority: 2,
+                        deadLine: jsonRes ? new Date("2050/12/12").toISOString() : new Date("2050/12/12"),
+                        createdAt: expect.any(jsonRes ? String : Date),
+                        updatedAt: expect.any(jsonRes ? String : Date),
+                        user_id: user.id,
+                        parent_id: parentFolder.id
+                    })
                 })
             })
     })
@@ -456,7 +487,6 @@ describe("Tests update folder", () => {
     test("Patch folder", async () => {
         const toPatch = {
             description: "Ananas",
-            percent: 52,
             priority: 1,
             percentSynchronized: true,
             parent_id: null,
@@ -506,6 +536,55 @@ describe("Tests update folder", () => {
 
             )
         )
+    })
+
+    test("Patch percent folder, need to set percentSynchronized to false", () => {
+        return request(app)
+            .patch("/folders/"+folder.id)
+            .set('Authorization', 'Bearer ' + jwt)
+            .send({
+                percent: 12
+            })
+            .then(res =>
+                expectElem({
+                    res,
+                    code: 200,
+                    model: Folder,
+                    toCheck: jsonRes => ({
+                        ...compileDataValues(folder),
+                        deadLine: (jsonRes && folder.deadLine) ? folder.deadLine.toISOString() : folder.deadLine,
+                        createdAt: jsonRes ? folder.createdAt.toISOString() : folder.createdAt,
+                        updatedAt: expect.any(jsonRes ? String : Date),
+                        percent: 12,
+                        percentSynchronized: false
+                    })
+                })
+            )
+    })
+
+    test("Patch percentSynchronized to true, and percent", () => {
+        return request(app)
+            .patch("/folders/"+folder.id)
+            .set('Authorization', 'Bearer ' + jwt)
+            .send({
+                percent: 15,
+                percentSynchronized: true,
+            })
+            .then(res =>
+                expectElem({
+                    res,
+                    code: 422,
+                    checkDbElem: false,
+                    toCheck: {
+                        "violations": [
+                            {
+                                "propertyPath": "percentSynchronized",
+                                "message": "Vous ne pouvez pas en même temps synchroniser les pourcentages et en définir un vous même"
+                            }
+                        ]
+                    }
+                })
+            )
     })
 })
 

@@ -2,9 +2,10 @@ import Folder from "../models/Folder";
 import Todo from "../models/Todo";
 import {FolderWithFolders, FolderWithParent, FolderWithTodos} from "../interfaces/models/Folder";
 import IReqData from "../interfaces/IReqData";
-import {Op} from "sequelize";
+import {Op, Order, WhereOptions} from "sequelize";
 import {getTodoQuerySearch, getTodoQuerySort} from "./TodoRepository";
 import RelationStepFolder from "../models/RelationStepFolder";
+import Step from "../models/Step";
 
 export function findOneFolderByIdWithFolders(id: number): Promise<null|FolderWithFolders> {
     return <Promise<null|FolderWithFolders>>Folder.findOne({
@@ -44,10 +45,10 @@ export function findFoldersByParentId(parent_id: number): Promise<Folder[]> {
     })
 }
 
-export function findAssociatedFoldersByStep(reqData: IReqData): Promise<Folder[]> | Folder[] {
-    return reqData.step !== undefined ? RelationStepFolder.findAll({
+export function findAssociatedFoldersByStep(step: Step, todoQuerySearch: WhereOptions = {}, todoQuerySort: null|Order = null): Promise<Folder[]> | Folder[] {
+    return RelationStepFolder.findAll({
         where: {
-            step_id: reqData.step.id
+            step_id: step.id
         }
     })
         .then(relations => relations.map(({folder_id}) => folder_id))
@@ -55,11 +56,17 @@ export function findAssociatedFoldersByStep(reqData: IReqData): Promise<Folder[]
             Folder.findAll({
                 where: {
                     id: {[Op.in]: folderIds},
-                    ...getFolderQuerySearch(reqData)
+                    ...todoQuerySearch
                 },
-                order: getFolderQuerySort(reqData)
+                order: todoQuerySort ?? undefined
             })
-        ): []
+        )
+}
+
+export function findAssociatedFoldersByStepWithReqData(reqData: IReqData): Promise<Folder[]> | Folder[] {
+    return reqData.step !== undefined ?
+        findAssociatedFoldersByStep(reqData.step, getFolderQuerySearch(reqData), getFolderQuerySort(reqData)) :
+        [];
 }
 
 function getFolderQuerySearch(reqData: IReqData) {

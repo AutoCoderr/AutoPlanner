@@ -15,6 +15,7 @@ export interface ITodo {
     name: string;
     description: string;
     percent: number;
+    percentSynchronized: boolean;
     priority: number;
     deadLine?: Date;
     model_id?: number;
@@ -33,7 +34,7 @@ export interface ITodo {
     setModel: BelongsToSetAssociationMixin<TodoModel, any>;
     setUser: BelongsToSetAssociationMixin<User, any>;
 }
-export type ITodoCreation = InferAttributes<Optional<ITodo, 'id' | 'description' | 'percent' | 'priority' | 'deadLine' | 'createdAt' | 'updatedAt'>>;
+export type ITodoCreation = InferAttributes<Optional<ITodo, 'id' | 'description' | 'percent' | 'percentSynchronized' | 'priority' | 'deadLine' | 'createdAt' | 'updatedAt'>>;
 
 export interface TodoWithAssociatedSteps extends Todo {
     associatedSteps: Step[]
@@ -49,6 +50,10 @@ export interface TodoWithModel extends Todo {
 }
 export interface TodoWithUser extends Todo {
     user: User
+}
+
+export interface TodoWithPreviousDataValues extends Todo {
+    _previousDataValues: ITodo
 }
 
 

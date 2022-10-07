@@ -8,7 +8,6 @@ import expectElem from "../libs/tests/expectElem";
 import compileDataValues from "../libs/compileDatavalues";
 import Response from "../models/Response";
 import {nodeIncludeResponses} from "../includeConfigs/node";
-import {Op} from "sequelize";
 import {findNodeChildren} from "../repositories/NodeRepository";
 import testTree from "../libs/tests/testTree";
 
