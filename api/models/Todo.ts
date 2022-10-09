@@ -95,10 +95,10 @@ Todo.init(
     }
 );
 
-Todo.belongsTo(TodoModel, { foreignKey: "model_id", as: "model" });
+Todo.belongsTo(TodoModel, { foreignKey: "model_id", as: "model", onDelete: 'CASCADE'});
 TodoModel.hasMany(Todo, { foreignKey: "model_id", as: "todos" });
 
-Todo.belongsTo(Folder, { foreignKey: "parent_id", as: "parent" });
+Todo.belongsTo(Folder, { foreignKey: "parent_id", as: "parent", onDelete: 'CASCADE' });
 Folder.hasMany(Todo, { foreignKey: "parent_id", as: "todos" });
 
 export default Todo;
