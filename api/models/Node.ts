@@ -62,7 +62,7 @@ Node.init(
 Node.belongsToMany(Node, { through: RelationNode, foreignKey: "child_id", as: "parents" });
 Node.belongsToMany(Node, { through: RelationNode, foreignKey: "parent_id", as: "children" });
 
-Node.belongsTo(TodoModel, { foreignKey: "model_id", as: "model" });
+Node.belongsTo(TodoModel, { foreignKey: "model_id", as: "model", onDelete: 'CASCADE' });
 TodoModel.belongsTo(Node, { foreignKey: "firstnode_id", as: "firstNode" });
 
 export default Node;

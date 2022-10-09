@@ -88,7 +88,7 @@ Folder.init(
     }
 );
 
-Folder.belongsTo(Folder, { foreignKey: "parent_id", as: "parent" });
+Folder.belongsTo(Folder, { foreignKey: "parent_id", as: "parent", onDelete: 'CASCADE' });
 Folder.hasMany(Folder, { foreignKey: "parent_id", as: "folders" });
 
 //@ts-ignore
